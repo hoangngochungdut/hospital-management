@@ -1,12 +1,38 @@
 using Microsoft.AspNetCore.Mvc;
-using QuanLyPhongKham.Web.Models;
+using QuanLyLichKham.Models;
 using System.Diagnostics;
 
-namespace QuanLyPhongKham.Web.Controllers
+namespace QuanLyLichKham.Controllers
 {
     public class HomeController : Controller
     {
+        private readonly ILogger<HomeController> _logger;
+
+        public HomeController(ILogger<HomeController> logger)
+        {
+            _logger = logger;
+        }
+
+        // Trang chủ dành cho khách hàng
         public IActionResult Index()
+        {
+            return View();
+        }
+
+        // Trang Dashboard dành cho Admin (AD)
+        public IActionResult AdminDashboard()
+        {
+            return View();
+        }
+
+        // Trang Dashboard dành cho Bác sĩ (BS)
+        public IActionResult BacSiDashboard()
+        {
+            return View();
+        }
+
+        // Trang Dashboard dành cho Lễ tân (LT)
+        public IActionResult LeTanDashboard()
         {
             return View();
         }

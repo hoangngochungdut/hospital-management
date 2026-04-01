@@ -8,6 +8,10 @@ namespace QuanLyPhongKham.Data
     public class AppDbContext : DbContext
     {
 
+        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
+        {
+        }
+
         // Danh sách các DbSet tương ứng với các file models
         public DbSet<Admin> Admins { get; set; }
         public DbSet<BacSi> BacSis { get; set; }

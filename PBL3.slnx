@@ -2,5 +2,5 @@
   <Project Path="QuanLyPhongKham.Data/QuanLyPhongKham.Data.csproj" />
   <Project Path="QuanLyPhongKham.Models/QuanLyPhongKham.Models.csproj" />
   <Project Path="QuanLyPhongKham.Services/QuanLyPhongKham.Services.csproj" />
-  <Project Path="QuanLyLichKham.Web/QuanLyLichKham.Web.csproj" />
+  <Project Path="QuanLyPhongKham.Web/QuanLyPhongKham.Web.csproj" />
 </Solution>

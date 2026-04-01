@@ -1,47 +1,35 @@
-//var builder = WebApplication.CreateBuilder(args);
+using Microsoft.EntityFrameworkCore;
+using QuanLyPhongKham.Data;
+// Tui xóa bỏ ClinicManagement.Models và chỉ dùng đúng namespace của project này
+using QuanLyPhongKham.Models;
 
-//// Add services to the container.
-//builder.Services.AddControllersWithViews();
+var builder = WebApplication.CreateBuilder(args);
 
-//var app = builder.Build();
+builder.Services.AddDbContext<AppDbContext>(options =>
+   options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddControllersWithViews();
 
-//// Configure the HTTP request pipeline.
-//if (!app.Environment.IsDevelopment())
-//{
-//    app.UseExceptionHandler("/Home/Error");
-//    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-//    app.UseHsts();
-//}
+var app = builder.Build();
 
-//app.UseHttpsRedirection();
-//app.UseRouting();
-
-//app.UseAuthorization();
-
-//app.MapStaticAssets();
-
-//app.MapControllerRoute(
-//    name: "default",
-//    pattern: "{controller=Home}/{action=Index}/{id?}")
-//    .WithStaticAssets();
-
-
-//app.Run();
-
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace QuanLyPhongKham.Data
+// Configure the HTTP request pipeline.
+if (!app.Environment.IsDevelopment())
 {
-    public  class Program
-    {
-        static void Main(string[] args)
-        {
-            AppDbContext context = new AppDbContext();
-            context.Database.EnsureDeleted();
-            context.Database.EnsureCreated();
-        }
-    }
+    app.UseExceptionHandler("/Home/Error");
+    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    app.UseHsts();
 }
 
+app.UseHttpsRedirection();
+app.UseRouting();
+
+app.UseAuthorization();
+
+app.MapStaticAssets();
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}")
+    .WithStaticAssets();
+
+
+app.Run();

@@ -1,4 +1,4 @@
-namespace QuanLyPhongKham.Web.Models
+﻿namespace QuanLyLichKham.Models
 {
     public class ErrorViewModel
     {

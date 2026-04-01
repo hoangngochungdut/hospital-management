@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="../HK4/PBL3/hospital-management/src/QuanLyPhongKham/QuanLyPhongKham.Data/QuanLyPhongKham.Data.csproj" />
+  <Project Path="../HK4/PBL3/hospital-management/src/QuanLyPhongKham/QuanLyPhongKham.Models/QuanLyPhongKham.Models.csproj" />
+  <Project Path="../HK4/PBL3/hospital-management/src/QuanLyPhongKham/QuanLyPhongKham.Services/QuanLyPhongKham.Services.csproj" />
+  <Project Path="QuanLyLichKham.Web.csproj" />
+</Solution>
