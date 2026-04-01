@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace QuanLyPhongKham.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class FixBuoiKhamRelation : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -194,8 +194,7 @@ namespace QuanLyPhongKham.Data.Migrations
                     BacSiId = table.Column<int>(type: "int", nullable: false),
                     PhongKhamId = table.Column<int>(type: "int", nullable: false),
                     KetQuaKhamId = table.Column<int>(type: "int", nullable: false),
-                    HoaDonId = table.Column<int>(type: "int", nullable: true),
-                    BacSiId1 = table.Column<int>(type: "int", nullable: true)
+                    HoaDonId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -205,12 +204,7 @@ namespace QuanLyPhongKham.Data.Migrations
                         column: x => x.BacSiId,
                         principalTable: "BacSis",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_BuoiKhams_BacSis_BacSiId1",
-                        column: x => x.BacSiId1,
-                        principalTable: "BacSis",
-                        principalColumn: "Id");
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_BuoiKhams_BenhNhans_BenhNhanId",
                         column: x => x.BenhNhanId,
@@ -276,11 +270,6 @@ namespace QuanLyPhongKham.Data.Migrations
                 name: "IX_BuoiKhams_BacSiId",
                 table: "BuoiKhams",
                 column: "BacSiId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_BuoiKhams_BacSiId1",
-                table: "BuoiKhams",
-                column: "BacSiId1");
 
             migrationBuilder.CreateIndex(
                 name: "IX_BuoiKhams_BenhNhanId",

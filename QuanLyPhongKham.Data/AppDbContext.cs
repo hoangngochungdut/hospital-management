@@ -82,9 +82,8 @@ namespace QuanLyPhongKham.Data
             // BuoiKham - BacSi (Nhiều buổi khám thực hiện bởi một bác sĩ)
             modelBuilder.Entity<BuoiKham>()
                 .HasOne(b => b.BacSi)
-                .WithMany() // Thêm collection vào class BacSi nếu cần dùng: .WithMany(bs => bs.BuoiKhams)
-                .HasForeignKey(b => b.BacSiId)
-                .OnDelete(DeleteBehavior.Restrict); // Chặn xóa tương tự BenhNhan
+                .WithMany(b => b.BuoiKhams)
+                .HasForeignKey(b => b.BacSiId);
         }
     }
 

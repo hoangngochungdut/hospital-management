@@ -12,8 +12,8 @@ using QuanLyPhongKham.Data;
 namespace QuanLyPhongKham.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260401071455_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260401110134_FixBuoiKhamRelation")]
+    partial class FixBuoiKhamRelation
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -34,9 +34,6 @@ namespace QuanLyPhongKham.Data.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("BacSiId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("BacSiId1")
                         .HasColumnType("int");
 
                     b.Property<int>("BenhNhanId")
@@ -63,8 +60,6 @@ namespace QuanLyPhongKham.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("BacSiId");
-
-                    b.HasIndex("BacSiId1");
 
                     b.HasIndex("BenhNhanId");
 
@@ -253,14 +248,10 @@ namespace QuanLyPhongKham.Data.Migrations
             modelBuilder.Entity("QuanLyPhongKham.Models.BuoiKham", b =>
                 {
                     b.HasOne("QuanLyPhongKham.Models.BacSi", "BacSi")
-                        .WithMany()
-                        .HasForeignKey("BacSiId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("QuanLyPhongKham.Models.BacSi", null)
                         .WithMany("BuoiKhams")
-                        .HasForeignKey("BacSiId1");
+                        .HasForeignKey("BacSiId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("QuanLyPhongKham.Models.BenhNhan", "BenhNhan")
                         .WithMany("BuoiKhams")
