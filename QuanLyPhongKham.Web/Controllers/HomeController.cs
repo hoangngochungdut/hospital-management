@@ -13,30 +13,34 @@ namespace QuanLyLichKham.Controllers
             _logger = logger;
         }
 
-        // Trang chủ dành cho khách hàng
+        
         public IActionResult Index()
         {
             return View();
         }
 
-        // Trang Dashboard dành cho Admin (AD)
+        // trang dành cho Admin (AD)
         public IActionResult AdminDashboard()
         {
             return View();
         }
 
-        // Trang Dashboard dành cho Bác sĩ (BS)
+        // trang dành cho Bác sĩ (BS)
         public IActionResult BacSiDashboard()
         {
             return View();
         }
 
-        // Trang Dashboard dành cho Lễ tân (LT)
+        // trang dành cho Lễ tân (LT)
         public IActionResult LeTanDashboard()
         {
             return View();
         }
-
+        // trang dành cho Bệnh Nhân (BN)
+        public IActionResult BenhNhanDashboard()
+        {
+            return View();
+        }
         public IActionResult Privacy()
         {
             return View();

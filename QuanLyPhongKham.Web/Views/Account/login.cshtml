@@ -4,7 +4,7 @@
 
 <div class="row justify-content-center mt-5">
     <div class="col-md-4">
-        <h2 class="text-center">Đăng Nhập Hệ Thống</h2>
+        <h2 class="text-center mb-4">Đăng Nhập Hệ Thống</h2>
 
         @if (ViewBag.ErrorMessage != null)
         {
@@ -12,18 +12,29 @@
                 @ViewBag.ErrorMessage
             </div>
         }
+        
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success text-center">
+                @TempData["SuccessMessage"]
+            </div>
+        }
 
-        <form asp-controller="Account" asp-action="Login" method="post">
+        <form asp-controller="Account" asp-action="Login" method="post" class="p-4 border rounded shadow-sm bg-white">
             <div class="mb-3">
-                <label class="form-label">Tên đăng nhập</label>
+                <label class="form-label text-muted">Tên đăng nhập</label>
                 <input type="text" name="username" class="form-control" required />
             </div>
-            <div class="mb-3">
-                <label class="form-label">Mật khẩu</label>
+            <div class="mb-4">
+                <label class="form-label text-muted">Mật khẩu</label>
                 <input type="password" name="password" class="form-control" required />
             </div>
-            <div class="d-grid">
-                <button type="submit" class="btn btn-primary">Đăng nhập</button>
+            <button type="submit" class="btn btn-primary w-100 mb-3 py-2">Đăng nhập</button>
+            
+            <!-- chuyển sang đăng kí -->
+            <div class="text-center mt-3 pt-3 border-top">
+                <span class="text-muted">Chưa có tài khoản?</span>
+                <a asp-controller="Account" asp-action="Register" class="text-decoration-none fw-bold"> Tạo ngay</a>
             </div>
         </form>
     </div>
