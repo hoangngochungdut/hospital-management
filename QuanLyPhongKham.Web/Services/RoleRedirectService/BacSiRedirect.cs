@@ -7,7 +7,7 @@ namespace QuanLyPhongKham.Web.Services.RoleRedirectService
     {
         public IActionResult GetRedirectUrl()
         {
-            return new RedirectToActionResult("Index", "BacSiDashboard", null);
+            return new RedirectToActionResult("BacSiDashboard", "BacSiDashboard", null);
         }
     }
 }

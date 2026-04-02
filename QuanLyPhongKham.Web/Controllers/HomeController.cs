@@ -18,29 +18,7 @@ namespace QuanLyLichKham.Controllers
         {
             return View();
         }
-
-        // trang dành cho Admin (AD)
-        public IActionResult AdminDashboard()
-        {
-            return View();
-        }
-
-        // trang dành cho Bác sĩ (BS)
-        public IActionResult BacSiDashboard()
-        {
-            return View();
-        }
-
-        // trang dành cho Lễ tân (LT)
-        public IActionResult LeTanDashboard()
-        {
-            return View();
-        }
-        // trang dành cho Bệnh Nhân (BN)
-        public IActionResult BenhNhanDashboard()
-        {
-            return View();
-        }
+        
         public IActionResult Privacy()
         {
             return View();
