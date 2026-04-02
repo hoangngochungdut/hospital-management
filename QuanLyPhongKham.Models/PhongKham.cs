@@ -13,7 +13,7 @@ namespace QuanLyPhongKham.Models
         public int Tang { get; set; }
         public string? LoaiPhong { get; set; }
         public BacSi? BacSi { get; set; }
-        public ICollection<PhongKham> PhongKhams { get; set; } = new List<PhongKham>();
+        public ICollection<BuoiKham> BuoiKhams { get; set; } = new List<BuoiKham>();
 
     }
 }
