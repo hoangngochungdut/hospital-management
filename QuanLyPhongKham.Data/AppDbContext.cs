@@ -26,10 +26,6 @@ namespace QuanLyPhongKham.Data
         public DbSet<TaiKhoan> TaiKhoans { get; set; }
         public DbSet<TieuSuBenhAn> TieuSuBenhAns { get; set; }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseSqlServer("Server=.;Database=QuanLyPhongKham;Trusted_Connection=True;TrustServerCertificate=True;");
-        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
