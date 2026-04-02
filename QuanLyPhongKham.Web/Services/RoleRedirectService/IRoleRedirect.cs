@@ -4,6 +4,6 @@ namespace QuanLyPhongKham.Web.Services.RoleRoutingStrategy
 {
     public interface IRoleRedirect
     {
-        IActionResult GetRedirectUrl();
+        IActionResult Redirect();
     }
 }

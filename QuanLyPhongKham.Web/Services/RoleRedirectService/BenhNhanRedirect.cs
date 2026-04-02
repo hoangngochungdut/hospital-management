@@ -5,7 +5,7 @@ namespace QuanLyPhongKham.Web.Services.RoleRedirectService
 {
     public class BenhNhanRedirect : IRoleRedirect
     {
-        public IActionResult GetRedirectUrl()
+        public IActionResult Redirect()
         {
             return new RedirectToActionResult("BenhNhanDashboard", "BenhNhanDashboard", null);
         }

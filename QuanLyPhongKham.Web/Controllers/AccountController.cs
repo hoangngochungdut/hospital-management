@@ -40,7 +40,7 @@ namespace QuanLyLichKham.Controllers
 
             return RoleRedirectContext.
                 GetRoleRedirect(role).
-                GetRedirectUrl();
+                Redirect();
         }
 
         [HttpGet]

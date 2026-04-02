@@ -5,7 +5,7 @@ namespace QuanLyPhongKham.Web.Services.RoleRedirectService
 {
     public class LeTanRedirect : IRoleRedirect
     {
-        public IActionResult GetRedirectUrl()
+        public IActionResult Redirect()
         {
             return new RedirectToActionResult("LeTanDashBoard", "LeTanDashboard", null);
         }
