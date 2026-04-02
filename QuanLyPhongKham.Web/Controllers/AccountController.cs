@@ -8,11 +8,11 @@ using System.Linq;
 
 namespace QuanLyLichKham.Controllers
 {
-    public class DangNhapController : Controller
+    public class AccountController : Controller
     {
         private readonly AppDbContext _context;
 
-        public DangNhapController(AppDbContext context)
+        public AccountController(AppDbContext context)
         {
             _context = context;
         }
@@ -65,7 +65,7 @@ namespace QuanLyLichKham.Controllers
                 return View();
             }
 
-            var newNguoiDung = new NguoiDung
+            var newBenhNhan = new BenhNhan
             {
                 HoTen = fullName
 
@@ -76,7 +76,7 @@ namespace QuanLyLichKham.Controllers
                 TenDangNhap = username,
                 MatKhauHash = password,
                 VaiTro = "BN",
-                NguoiDung = newNguoiDung
+                NguoiDung = newBenhNhan
             };
 
             _context.TaiKhoans.Add(newTaiKhoan);
