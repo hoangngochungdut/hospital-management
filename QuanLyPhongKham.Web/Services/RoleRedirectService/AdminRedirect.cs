@@ -6,7 +6,7 @@ namespace QuanLyPhongKham.Web.Services.RoleRedirectService
 {
     public class AdminRedirect : IRoleRedirect
     {
-        public IActionResult GetRedirectUrl()
+        public IActionResult Redirect()
         {
             return new RedirectToActionResult("AdminDashboard", "AdminDashboard", null);
         }
