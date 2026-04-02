@@ -1,0 +1,33 @@
+﻿@{
+    ViewData["Title"] = "Đăng ký tài khoản";
+}
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-4">
+        <h2 class="text-center mb-4">Tạo Tài Khoản</h2>
+
+        <form asp-controller="Account" asp-action="Register" method="post" class="p-4 border rounded shadow-sm bg-white">
+            <div class="mb-3">
+                <label class="form-label text-muted">Tên đăng nhập</label>
+                <input type="text" name="username" class="form-control" required />
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label text-muted">Họ và tên (Để lưu hồ sơ bệnh nhân)</label>
+                <input type="text" name="fullName" class="form-control" required />
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label text-muted">Mật khẩu</label>
+                <input type="password" name="password" class="form-control" required />
+            </div>
+            
+            <button type="submit" class="btn btn-success w-100 mb-3 py-2">Xác nhận đăng ký</button>
+            
+            <div class="text-center mt-3 pt-3 border-top">
+                <span class="text-muted">Đã có tài khoản?</span>
+                <a asp-controller="Account" asp-action="Login" class="text-decoration-none fw-bold"> Đăng nhập</a>
+            </div>
+        </form>
+    </div>
+</div>
