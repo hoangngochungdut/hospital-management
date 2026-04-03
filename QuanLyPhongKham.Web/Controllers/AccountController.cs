@@ -5,7 +5,8 @@ using QuanLyPhongKham.Data;
 using QuanLyPhongKham.Models;
 using QuanLyPhongKham.Web.Services.RoleRedirectService;
 using System.Linq;
-
+using QuanLyPhongKham.LowLevelValidators;
+using Microsoft.AspNetCore.Identity;
 namespace QuanLyLichKham.Controllers
 {
     public class AccountController : Controller
@@ -52,7 +53,8 @@ namespace QuanLyLichKham.Controllers
         [HttpPost]
         public IActionResult Register(string username, string password, string fullName)
         {
-            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password) || string.IsNullOrEmpty(fullName))
+            PasswordValidator passwordValidator = new PasswordValidator(password);
+            if (string.IsNullOrEmpty(username) && !passwordValidator.IsValid() && string.IsNullOrWhiteSpace(fullName))
             {
                 ViewBag.ErrorMessage = "Vui lòng nhập đầy đủ thông tin (Tên đăng nhập, Mật khẩu, Họ tên)!";
                 return View();

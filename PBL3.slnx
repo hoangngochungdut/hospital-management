@@ -3,4 +3,5 @@
   <Project Path="QuanLyPhongKham.Models/QuanLyPhongKham.Models.csproj" />
   <Project Path="QuanLyPhongKham.Services/QuanLyPhongKham.Services.csproj" />
   <Project Path="QuanLyPhongKham.Web/QuanLyPhongKham.Web.csproj" />
+  <Project Path="Repository/QuanLyPhongKham.Validators.csproj" Id="5b1b1f99-5ad3-45a5-9a33-2a17587af78b" />
 </Solution>

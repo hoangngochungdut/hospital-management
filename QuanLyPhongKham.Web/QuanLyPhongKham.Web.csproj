@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\QuanLyPhongKham.Data\QuanLyPhongKham.Data.csproj" />
+    <ProjectReference Include="..\Repository\QuanLyPhongKham.Validators.csproj" />
   </ItemGroup>
 
 </Project>
