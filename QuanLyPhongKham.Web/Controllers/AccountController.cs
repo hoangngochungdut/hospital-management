@@ -1,21 +1,23 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore; // Dùng để gọi .Include()
 using QuanLyLichKham.Models;
 using QuanLyPhongKham.Data;
-using QuanLyPhongKham.Models;
-using QuanLyPhongKham.Web.Services.RoleRedirectService;
-using System.Linq;
 using QuanLyPhongKham.LowLevelValidators;
-using Microsoft.AspNetCore.Identity;
+using QuanLyPhongKham.Models;
+using QuanLyPhongKham.Repositories;
+using QuanLyPhongKham.Services;
+using QuanLyPhongKham.Web.Services.RoleRedirectService;
+using System.Data;
+using System.Linq;
 namespace QuanLyLichKham.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly AppDbContext _context;
-
-        public AccountController(AppDbContext context)
+        private readonly TaiKhoanService _tkservice;
+        public AccountController(TaiKhoanService service)
         {
-            _context = context;
+            _tkservice = service;
         }
 
         // GET: Hiển thị giao diện đăng nhập
@@ -27,21 +29,16 @@ namespace QuanLyLichKham.Controllers
         [HttpPost]
         public IActionResult Login(string username, string password)
         {
-            // 1. Tìm tài khoản và Include bảng NguoiDung để lấy Role
-            // Lưu ý: Tên bảng/biến phải khớp chính xác với Model bạn đã tạo (NguoiDung hay Nguoidung)
-            var user = _context.TaiKhoans
-                .FirstOrDefault(t => t.TenDangNhap == username && t.MatKhauHash == password);
+            TaiKhoan? tk = _tkservice.GetByUsername(username);
 
-            if (user == null)
+            if (tk != null)
             {
-                return View();
-            }
-
-            string role = user.VaiTro?.Trim().ToUpper() ?? "";
-
-            return RoleRedirectContext.
-                GetRoleRedirect(role).
+                return RoleRedirectContext.
+                GetRoleRedirect(tk.VaiTro).
                 Redirect();
+            }
+            return View();
+            
         }
 
         [HttpGet]
@@ -54,23 +51,28 @@ namespace QuanLyLichKham.Controllers
         public IActionResult Register(string username, string password, string fullName)
         {
             PasswordValidator passwordValidator = new PasswordValidator(password);
-            if (string.IsNullOrEmpty(username) && !passwordValidator.IsValid() && string.IsNullOrWhiteSpace(fullName))
+            if (!passwordValidator.IsValid())
             {
                 ViewBag.ErrorMessage = "Vui lòng nhập đầy đủ thông tin (Tên đăng nhập, Mật khẩu, Họ tên)!";
                 return View();
             }
 
-            bool isExist = _context.TaiKhoans.Any(t => t.TenDangNhap == username);
+            bool isExist = _tkservice.ExistedByUsername(username);
             if (isExist)
             {
                 ViewBag.ErrorMessage = "Tên đăng nhập này đã tồn tại. Vui lòng chọn tên khác!";
                 return View();
             }
 
-            var newBenhNhan = new BenhNhan
-            {
-                HoTen = fullName
 
+
+            var benhNhan = new BenhNhan
+            {
+                HoTen = fullName,
+                TieuSuBenhAn = new TieuSuBenhAn
+                {
+                    MoTa = ""
+                }
             };
 
             var newTaiKhoan = new TaiKhoan
@@ -78,11 +80,10 @@ namespace QuanLyLichKham.Controllers
                 TenDangNhap = username,
                 MatKhauHash = password,
                 VaiTro = "BN",
-                NguoiDung = newBenhNhan
+                NguoiDung = benhNhan
             };
 
-            _context.TaiKhoans.Add(newTaiKhoan);
-            _context.SaveChanges();
+            _tkservice.Add(newTaiKhoan);
 
             TempData["SuccessMessage"] = "Tạo tài khoản Bệnh Nhân thành công! Vui lòng đăng nhập để tiếp tục.";
             return RedirectToAction("Login", "Account");

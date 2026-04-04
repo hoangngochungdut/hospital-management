@@ -1,7 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using QuanLyPhongKham.Data;
-// Tui xóa bỏ ClinicManagement.Models và chỉ dùng đúng namespace của project này
 using QuanLyPhongKham.Models;
+using QuanLyPhongKham.Repositories;
+using QuanLyPhongKham.Services;
+using QuanLyPhongKham.Services.BussinessValidationServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,7 +12,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         builder.Configuration.GetConnectionString("DefaultConnection")
     ));
 builder.Services.AddControllersWithViews();
-
+builder.Services.AddScoped<TaiKhoanRepository>();
+builder.Services.AddScoped<AccountValidationService>();
+builder.Services.AddScoped<TaiKhoanService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

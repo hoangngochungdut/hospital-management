@@ -8,9 +8,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\QuanLyPhongKham.Data\QuanLyPhongKham.Data.csproj" />
-    <ProjectReference Include="..\QuanLyPhongKham.LowLevelValidators\QuanLyPhongKham.LowLevelValidators.csproj" />
-    <ProjectReference Include="..\QuanLyPhongKham.Models\QuanLyPhongKham.Models.csproj" />
-    <ProjectReference Include="..\Repositories\QuanLyPhongKham.Repositories.csproj" />
   </ItemGroup>
 
 </Project>

@@ -20,7 +20,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\QuanLyPhongKham.Data\QuanLyPhongKham.Data.csproj" />
-    <ProjectReference Include="..\Repository\QuanLyPhongKham.Validators.csproj" />
+    <ProjectReference Include="..\QuanLyPhongKham.LowLevelValidators\QuanLyPhongKham.LowLevelValidators.csproj" />
+    <ProjectReference Include="..\QuanLyPhongKham.Services\QuanLyPhongKham.Services.csproj" />
+    <ProjectReference Include="..\Repositories\QuanLyPhongKham.Repositories.csproj" />
   </ItemGroup>
 
 </Project>

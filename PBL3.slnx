@@ -1,7 +1,8 @@
 <Solution>
   <Project Path="QuanLyPhongKham.Data/QuanLyPhongKham.Data.csproj" />
+  <Project Path="QuanLyPhongKham.LowLevelValidators/QuanLyPhongKham.LowLevelValidators.csproj" Id="0ac56856-ee94-4eed-8d01-cc2835decb63" />
   <Project Path="QuanLyPhongKham.Models/QuanLyPhongKham.Models.csproj" />
   <Project Path="QuanLyPhongKham.Services/QuanLyPhongKham.Services.csproj" />
   <Project Path="QuanLyPhongKham.Web/QuanLyPhongKham.Web.csproj" />
-  <Project Path="Repository/QuanLyPhongKham.Validators.csproj" Id="5b1b1f99-5ad3-45a5-9a33-2a17587af78b" />
+  <Project Path="Repositories/QuanLyPhongKham.Repositories.csproj" Id="67fe2361-0ca8-42be-813e-12ef47c65f8f" />
 </Solution>

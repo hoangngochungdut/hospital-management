@@ -15,8 +15,6 @@ namespace QuanLyPhongKham.LowLevelValidators
         public bool IsNullOrWhiteSpace() => string.IsNullOrWhiteSpace(_password);
         public bool IsEnoughCharacters() => _password.Length >= 8;
         public bool ContainsDigits() => _password.Any(char.IsDigit);
-        
-
-        public bool IsValid() => IsNullOrWhiteSpace() && ContainsDigits() && IsEnoughCharacters();
+        public bool IsValid() => !IsNullOrWhiteSpace() && ContainsDigits() && IsEnoughCharacters();
     }
 }
