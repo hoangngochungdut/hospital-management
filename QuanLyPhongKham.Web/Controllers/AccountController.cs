@@ -31,14 +31,17 @@ namespace QuanLyLichKham.Controllers
         {
             TaiKhoan? tk = _tkservice.GetByUsername(username);
 
-            if (tk != null)
+            // Kiểm tra tài khoản + mật khẩu
+            if (tk == null || tk.MatKhauHash != password)
             {
-                return RoleRedirectContext.
-                GetRoleRedirect(tk.VaiTro).
-                Redirect();
+                ViewBag.ErrorMessage = "Sai tài khoản hoặc mật khẩu!";
+                return View();
             }
-            return View();
-            
+
+            return RoleRedirectContext
+                .GetRoleRedirect(tk.VaiTro)
+                .Redirect();
+
         }
 
         [HttpGet]
