@@ -2,8 +2,12 @@ using Microsoft.EntityFrameworkCore;
 using QuanLyPhongKham.Data;
 using QuanLyPhongKham.Models;
 using QuanLyPhongKham.Repositories;
+using QuanLyPhongKham.Repositories.Implementations;
+using QuanLyPhongKham.Repositories.Interfaces;
 using QuanLyPhongKham.Services;
 using QuanLyPhongKham.Services.BussinessValidationServices;
+using QuanLyPhongKham.Services.Implementations;
+using QuanLyPhongKham.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +19,8 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<TaiKhoanRepository>();
 builder.Services.AddScoped<AccountValidationService>();
 builder.Services.AddScoped<TaiKhoanService>();
+builder.Services.AddScoped<IBuoiKhamRepository, BuoiKhamRepository>();
+builder.Services.AddScoped<IBuoiKhamService, BuoiKhamService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

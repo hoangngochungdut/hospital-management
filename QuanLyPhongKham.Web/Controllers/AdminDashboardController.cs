@@ -9,5 +9,9 @@ namespace QuanLyPhongKham.Web.Controllers
         {
             return View();
         }
+        public IActionResult LichKham()
+        {
+            return View();
+        }
     }
 }

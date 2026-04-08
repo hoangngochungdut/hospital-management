@@ -1,7 +1,8 @@
-﻿using System;
+﻿using QuanLyPhongKham.Models.Enums;
+using System;
 using System.Collections.Generic;
-using System.Text;
 using System.ComponentModel.DataAnnotations;
+using System.Text;
 namespace QuanLyPhongKham.Models
 {
     public class BuoiKham
@@ -10,7 +11,7 @@ namespace QuanLyPhongKham.Models
         public int Id { get; set; }
         public DateOnly Ngay { get; set; }
         public TimeOnly Gio { get; set; }
-        public string? TrangThai { get; set; }
+        public TrangThaiBuoiKham TrangThai { get; set; }
         public int BenhNhanId { get; set; }
         public BenhNhan? BenhNhan { get; set; }
         public int BacSiId { get; set; }
