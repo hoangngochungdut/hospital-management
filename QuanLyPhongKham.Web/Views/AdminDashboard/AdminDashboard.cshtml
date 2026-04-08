@@ -12,11 +12,11 @@
         .sidebar-item { transition: all 0.2s ease; }
         .sidebar-item:hover { background-color: #f1f5f9; color: #2563eb; }
         .sidebar-active { background-color: #eff6ff; color: #2563eb; border-right: 4px solid #2563eb; font-weight: 600; }
-        .glass-header { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); }
     </style>
 </head>
 <body class="bg-[#f8fafc] text-slate-800 antialiased">
 
+    <!-- Wrapper chính -->
     <div class="flex min-h-screen">
         
         <!-- SIDEBAR (Fixed Left) -->
@@ -32,7 +32,6 @@
 
             <nav class="flex-1 px-4 space-y-1">
                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-4 mb-2">Chính</p>
-                <!-- Đã xóa Tổng Quan, set Lịch Khám làm Active -->
                 <a href="#" class="sidebar-active flex items-center space-x-3 px-4 py-3 rounded-lg sidebar-item">
                     <i class="fas fa-calendar-alt w-5"></i>
                     <span>Lịch Khám</span>
@@ -58,185 +57,58 @@
             </nav>
 
             <div class="p-4 border-t border-slate-100">
-                <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-red-500 hover:bg-red-50 transition">
+                <!-- ĐÃ THÊM ONCLICK Ở ĐÂY -->
+                <a href="#" onclick="handleLogout(event)" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-red-500 hover:bg-red-50 transition cursor-pointer">
                     <i class="fas fa-sign-out-alt w-5"></i>
                     <span class="font-semibold">Đăng Xuất</span>
                 </a>
             </div>
         </aside>
 
-        <!-- MAIN CONTENT AREA -->
-        <main class="flex-1 flex flex-col">
+        <!-- MAIN CONTENT AREA (Khu vực bên phải) -->
+        <main class="flex-1 flex flex-col relative">
             
-            <!-- HEADER -->
-            <header class="glass-header sticky top-0 z-30 border-b border-slate-200 px-8 py-4 flex justify-between items-center">
-                <div>
-                    <h1 class="text-lg font-bold text-slate-800">Lịch Khám Bệnh</h1>
-                    <p class="text-xs text-slate-500">Hôm nay: Thứ Ba, 07 tháng 04, 2026</p>
-                </div>
-                <div class="flex items-center space-x-5">
-                    <div class="flex items-center space-x-3">
-                        <div class="text-right">
-                            <p class="text-sm font-bold text-slate-800 leading-none">Võ Thành Nhân</p>
-                            <p class="text-[10px] text-blue-600 font-bold uppercase mt-1">Quản Trị Viên</p>
-                        </div>
-                        <img src="https://ui-avatars.com/api/?name=Admin+PBL3&background=2563eb&color=fff" class="w-10 h-10 rounded-xl object-cover shadow-sm" alt="Avatar">
+            <!-- TOP HEADER: Chứa thông tin Admin ở góc trên bên phải -->
+            <header class="w-full px-8 py-6 flex justify-end items-center bg-transparent">
+                
+                <!-- PROFILE INFO -->
+                <div class="flex items-center space-x-4 cursor-pointer hover:opacity-80 transition group">
+                    <div class="text-right">
+                        <h2 class="text-sm font-bold text-slate-800 leading-none">Admin</h2>
+                        <p class="text-[10px] text-blue-600 font-bold uppercase mt-1.5 tracking-wider">Quản Trị Viên</p>
+                    </div>
+                    
+                    <!-- Avatar -->
+                    <div class="relative">
+                        <img src="https://ui-avatars.com/api/?name=Admin&background=2563eb&color=fff" class="w-10 h-10 rounded-xl object-cover shadow-sm border border-slate-200 transition-all group-hover:border-blue-400" alt="Avatar">
+                        <div class="absolute bottom-[-2px] right-[-2px] w-3.5 h-3.5 bg-green-500 border-2 border-[#f8fafc] rounded-full"></div>
                     </div>
                 </div>
+
             </header>
 
-            <!-- LỊCH KHÁM BODY -->
-            <div class="p-8 max-w-[1400px] mx-auto w-full">
+            <!-- VÙNG NỘI DUNG (Trắng bóc hoàn toàn) -->
+            <!-- ID "main-app-content" là nơi bạn sẽ dùng JS/Backend để gọi dữ liệu hiển thị vào đây -->
+            <div id="main-app-content" class="flex-1 w-full h-full p-8">
                 
-                <!-- Toolbar: Tự thiết kế tối giản -->
-                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-                    <!-- Thanh tìm kiếm & Lọc ngày -->
-                    <div class="flex flex-1 items-center space-x-4">
-                        <div class="relative w-full max-w-md">
-                            <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
-                            <input type="text" placeholder="Tìm tên bệnh nhân hoặc SĐT..." class="w-full pl-11 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition shadow-sm">
-                        </div>
-                        <div class="bg-white border border-slate-200 px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-600 flex items-center shadow-sm cursor-pointer hover:bg-slate-50 transition">
-                            <i class="fas fa-calendar-day mr-2 text-blue-600"></i> Hôm nay
-                        </div>
-                    </div>
-
-                    <!-- Nút thao tác chính -->
-                    <button class="bg-blue-600 text-white px-6 py-2.5 rounded-xl font-bold hover:bg-blue-700 transition flex items-center shadow-lg shadow-blue-200">
-                        <i class="fas fa-plus mr-2"></i> Tạo Lịch Hẹn
-                    </button>
-                </div>
-
-                <!-- Status Filters (Tabs) -->
-                <div class="flex space-x-6 border-b border-slate-200 mb-6">
-                    <button class="pb-3 text-sm font-bold text-blue-600 border-b-2 border-blue-600">Tất cả (24)</button>
-                    <button class="pb-3 text-sm font-bold text-slate-400 hover:text-slate-700 transition">Chờ khám (10)</button>
-                    <button class="pb-3 text-sm font-bold text-slate-400 hover:text-slate-700 transition">Đang khám (2)</button>
-                    <button class="pb-3 text-sm font-bold text-slate-400 hover:text-slate-700 transition">Hoàn thành (12)</button>
-                </div>
-
-                <!-- Bảng Danh Sách Lịch Khám (Dạng Thẻ Row) -->
-                <div class="bg-white rounded-3xl border border-slate-100 shadow-sm divide-y divide-slate-50">
-                    
-                    <!-- Dòng 1: Chờ khám -->
-                    <div class="p-5 flex flex-col md:flex-row md:items-center justify-between hover:bg-slate-50 transition first:rounded-t-3xl last:rounded-b-3xl gap-4">
-                        <div class="flex items-center space-x-4 min-w-[250px]">
-                            <div class="relative">
-                                <img src="https://i.pravatar.cc/100?img=12" class="w-12 h-12 rounded-2xl object-cover">
-                            </div>
-                            <div>
-                                <h4 class="font-bold text-sm text-slate-800">Lê Minh Quân</h4>
-                                <p class="text-xs text-slate-400 font-medium mt-0.5"><i class="fas fa-phone-alt text-[10px] mr-1"></i> 0905 123 456</p>
-                            </div>
-                        </div>
-                        
-                        <div class="flex-1 grid grid-cols-2 gap-4">
-                            <div>
-                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Dịch vụ</p>
-                                <p class="text-sm font-bold text-slate-700">Khám Răng Hàm Mặt</p>
-                            </div>
-                            <div>
-                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Bác sĩ phụ trách</p>
-                                <p class="text-sm font-bold text-slate-700">BS. Võ Thành Nhân</p>
-                            </div>
-                        </div>
-
-                        <div class="flex items-center justify-between min-w-[200px]">
-                            <div class="text-right mr-6">
-                                <p class="text-sm font-black text-slate-800">08:45 AM</p>
-                                <span class="inline-block px-3 py-1 bg-orange-100 text-orange-600 text-[10px] font-black rounded-lg mt-1 uppercase">Chờ khám</span>
-                            </div>
-                            <button class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-blue-600 hover:text-white transition">
-                                <i class="fas fa-ellipsis-v text-sm"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Dòng 2: Đang khám -->
-                    <div class="p-5 flex flex-col md:flex-row md:items-center justify-between hover:bg-slate-50 transition gap-4">
-                        <div class="flex items-center space-x-4 min-w-[250px]">
-                            <div class="relative">
-                                <img src="https://i.pravatar.cc/100?img=5" class="w-12 h-12 rounded-2xl object-cover">
-                                <div class="absolute bottom-[-2px] right-[-2px] w-4 h-4 bg-green-500 border-2 border-white rounded-full"></div>
-                            </div>
-                            <div>
-                                <h4 class="font-bold text-sm text-slate-800">Nguyễn Bảo Nhi</h4>
-                                <p class="text-xs text-slate-400 font-medium mt-0.5"><i class="fas fa-phone-alt text-[10px] mr-1"></i> 0857 157 006</p>
-                            </div>
-                        </div>
-                        
-                        <div class="flex-1 grid grid-cols-2 gap-4">
-                            <div>
-                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Dịch vụ</p>
-                                <p class="text-sm font-bold text-slate-700">Khám Dinh Dưỡng Nhi</p>
-                            </div>
-                            <div>
-                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Bác sĩ phụ trách</p>
-                                <p class="text-sm font-bold text-slate-700">BS. Nguyễn Thu Cúc</p>
-                            </div>
-                        </div>
-
-                        <div class="flex items-center justify-between min-w-[200px]">
-                            <div class="text-right mr-6">
-                                <p class="text-sm font-black text-slate-800">09:15 AM</p>
-                                <span class="inline-block px-3 py-1 bg-blue-100 text-blue-600 text-[10px] font-black rounded-lg mt-1 uppercase">Đang khám</span>
-                            </div>
-                            <button class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-blue-600 hover:text-white transition">
-                                <i class="fas fa-ellipsis-v text-sm"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Dòng 3: Hoàn thành -->
-                    <div class="p-5 flex flex-col md:flex-row md:items-center justify-between hover:bg-slate-50 transition gap-4 opacity-75">
-                        <div class="flex items-center space-x-4 min-w-[250px]">
-                            <div class="w-12 h-12 bg-slate-200 text-slate-600 font-bold text-lg rounded-2xl flex items-center justify-center">
-                                TH
-                            </div>
-                            <div>
-                                <h4 class="font-bold text-sm text-slate-800">Trần Huy Hoàng</h4>
-                                <p class="text-xs text-slate-400 font-medium mt-0.5"><i class="fas fa-phone-alt text-[10px] mr-1"></i> 0935 999 888</p>
-                            </div>
-                        </div>
-                        
-                        <div class="flex-1 grid grid-cols-2 gap-4">
-                            <div>
-                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Dịch vụ</p>
-                                <p class="text-sm font-bold text-slate-700">Xét nghiệm Sinh hóa</p>
-                            </div>
-                            <div>
-                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Bác sĩ phụ trách</p>
-                                <p class="text-sm font-bold text-slate-700">BS. Lê Văn Cường</p>
-                            </div>
-                        </div>
-
-                        <div class="flex items-center justify-between min-w-[200px]">
-                            <div class="text-right mr-6">
-                                <p class="text-sm font-black text-slate-800">07:30 AM</p>
-                                <span class="inline-block px-3 py-1 bg-green-100 text-green-700 text-[10px] font-black rounded-lg mt-1 uppercase"><i class="fas fa-check mr-1"></i> Hoàn thành</span>
-                            </div>
-                            <button class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-blue-600 hover:text-white transition">
-                                <i class="fas fa-ellipsis-v text-sm"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                </div>
-                
-                <!-- Pagination (Tùy chọn) -->
-                <div class="mt-6 flex justify-between items-center text-sm">
-                    <p class="text-slate-500">Hiển thị <span class="font-bold text-slate-800">1 - 3</span> trong số <span class="font-bold text-slate-800">24</span> lịch hẹn</p>
-                    <div class="flex space-x-2">
-                        <button class="px-3 py-1.5 border border-slate-200 rounded-lg text-slate-400 hover:bg-slate-50"><i class="fas fa-chevron-left"></i></button>
-                        <button class="px-3 py-1.5 border border-slate-200 rounded-lg bg-blue-50 text-blue-600 font-bold">1</button>
-                        <button class="px-3 py-1.5 border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50">2</button>
-                        <button class="px-3 py-1.5 border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50"><i class="fas fa-chevron-right"></i></button>
-                    </div>
-                </div>
-
             </div>
-        </main>
-    </div>
 
+        </main>
+        
+    </div>
+    
+    <!-- SCRIPT XỬ LÝ ĐĂNG XUẤT (Đã chuyển xuống cuối body) -->
+    <script>
+        function handleLogout(event) {
+            event.preventDefault(); 
+            
+            const isConfirmed = confirm("Bạn có chắc chắn muốn đăng xuất?");
+            
+            if (isConfirmed) {
+                // Đảm bảo đường dẫn này đúng với route MVC của bạn
+                window.location.href = "/Account/login"; 
+            }
+        }
+    </script>
 </body>
 </html>
