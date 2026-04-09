@@ -1,6 +1,7 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Http; // Thêm thư viện này để dùng được Session
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore; // Dùng để gọi .Include()
+using Microsoft.EntityFrameworkCore;
 using QuanLyLichKham.Models;
 using QuanLyPhongKham.Data;
 using QuanLyPhongKham.LowLevelValidators;
@@ -10,6 +11,7 @@ using QuanLyPhongKham.Services;
 using QuanLyPhongKham.Web.Services.RoleRedirectService;
 using System.Data;
 using System.Linq;
+
 namespace QuanLyLichKham.Controllers
 {
     public class AccountController : Controller
@@ -26,6 +28,7 @@ namespace QuanLyLichKham.Controllers
         {
             return View();
         }
+
         [HttpPost]
         public IActionResult Login(string username, string password)
         {
@@ -37,6 +40,11 @@ namespace QuanLyLichKham.Controllers
                 ViewBag.ErrorMessage = "Sai tài khoản hoặc mật khẩu!";
                 return View();
             }
+
+            // ===================================================================
+            // BƯỚC 2: LƯU SESSION - Cất ID của người dùng vào túi để xài cho Đặt lịch
+            // ===================================================================
+            HttpContext.Session.SetInt32("UserId", tk.NguoiDungId);
 
             return RoleRedirectContext
                 .GetRoleRedirect(tk.VaiTro)
@@ -66,8 +74,6 @@ namespace QuanLyLichKham.Controllers
                 ViewBag.ErrorMessage = "Tên đăng nhập này đã tồn tại. Vui lòng chọn tên khác!";
                 return View();
             }
-
-
 
             var benhNhan = new BenhNhan
             {

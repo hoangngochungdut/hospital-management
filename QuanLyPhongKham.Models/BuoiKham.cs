@@ -18,7 +18,7 @@ namespace QuanLyPhongKham.Models
         public BacSi? BacSi { get; set; }
         public int PhongKhamId { get; set; }
         public PhongKham? PhongKham { get; set; }
-        public int KetQuaKhamId { get; set; }
+        public int? KetQuaKhamId { get; set; }
         public KetQuaKham? KetQuaKham { get; set; }
         public int? HoaDonId { get; set; }
         public HoaDon? HoaDon { get; set; }

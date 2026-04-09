@@ -14,7 +14,6 @@ namespace QuanLyPhongKham.Models
         public string? LoaiPhong { get; set; }
         public BacSi? BacSi { get; set; }
         public ICollection<BuoiKham> BuoiKhams { get; set; } = new List<BuoiKham>();
-
     }
 }
 
