@@ -46,9 +46,25 @@ namespace QuanLyLichKham.Controllers
             // ===================================================================
             HttpContext.Session.SetInt32("UserId", tk.NguoiDungId);
 
-            return RoleRedirectContext
-                .GetRoleRedirect(tk.VaiTro)
-                .Redirect();
+            // Ánh xạ vai trò từ viết tắt sang tên đầy đủ
+            string mappedRole = tk.VaiTro switch
+            {
+                "BS" => "BacSi",
+                "BN" => "BenhNhan",
+                "LT" => "LeTan",
+                "AD" => "Admin",
+                _ => tk.VaiTro
+            };
+
+            // Chuyển hướng dựa trên vai trò
+            return mappedRole switch
+            {
+                "Admin" => RedirectToAction("AdminDashboard", "AdminDashboard"),
+                "BacSi" => RedirectToAction("BacSiDashboard", "BacSiDashboard"),
+                "BenhNhan" => RedirectToAction("BenhNhanDashboard", "BenhNhanDashboard"),
+                "LeTan" => RedirectToAction("LeTanDashboard", "LeTanDashboard"),
+                _ => RedirectToAction("Login", "Account")
+            };
 
         }
 

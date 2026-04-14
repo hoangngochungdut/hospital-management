@@ -2,27 +2,39 @@
 using Microsoft.EntityFrameworkCore;
 using QuanLyPhongKham.Data;
 using QuanLyPhongKham.Models;
+using QuanLyPhongKham.Models.DTOs;
 using QuanLyPhongKham.Models.Enums;
+using QuanLyPhongKham.Services.Interfaces;
 
 namespace QuanLyPhongKham.Web.Controllers
 {
     public class LeTanDashboardController : Controller
     {
         private readonly AppDbContext _context;
-        public LeTanDashboardController(AppDbContext context) { _context = context; }
+        private readonly ILeTanService _leTanService;
 
-        public IActionResult LeTanDashboard() 
+        public LeTanDashboardController(AppDbContext context, ILeTanService leTanService)
         {
-            ViewBag.DsBenhNhan = _context.BenhNhans.ToList();
-            ViewBag.DsBacSi = _context.BacSis.ToList();
-            ViewBag.DsPhongKham = _context.PhongKhams.ToList();
-            return View(); 
+            _context = context;
+            _leTanService = leTanService;
         }
+
+        //   public IActionResult LeTanDashboard()
+        //{
+        //    ViewBag.DsBenhNhan = _context.BenhNhans.ToList();
+        //    ViewBag.DsBacSi = _context.BacSis.ToList();
+        //    ViewBag.DsPhongKham = _context.PhongKhams.ToList();
+        //    return View();
+        //}
+        public IActionResult LeTanDashboard()
+        {
+            return View();
+        }
+
 
         [HttpGet]
         public IActionResult LichKham()
         {
-            // XÓA cái .Include(b => b.NguoiDung) đi, chỉ cần lấy ToList() là đủ
             ViewBag.DsBacSi = _context.BacSis.ToList();
             ViewBag.DsBenhNhan = _context.BenhNhans.ToList();
             ViewBag.DsPhongKham = _context.PhongKhams.ToList();
@@ -30,7 +42,7 @@ namespace QuanLyPhongKham.Web.Controllers
         }
 
         [HttpPost]
-        public IActionResult DatLich(int BenhNhanId,DateOnly Ngay, TimeOnly Gio, int BacSiId, int PhongKhamId)
+        public IActionResult DatLich(int BenhNhanId, DateOnly Ngay, TimeOnly Gio, int BacSiId, int PhongKhamId)
         {
             var lichMoi = new BuoiKham
             {
@@ -39,7 +51,7 @@ namespace QuanLyPhongKham.Web.Controllers
                 Gio = Gio,
                 BacSiId = BacSiId,
                 PhongKhamId = PhongKhamId,
-                TrangThai = TrangThaiBuoiKham.XacNhan // Lễ tân đặt thì chuyển thẳng sang "Đã xác nhận" (1)
+                TrangThai = TrangThaiBuoiKham.XacNhan
             };
 
             _context.BuoiKhams.Add(lichMoi);
@@ -47,6 +59,90 @@ namespace QuanLyPhongKham.Web.Controllers
 
             TempData["ThongBao"] = "Lễ tân đặt lịch hộ thành công!";
             return RedirectToAction("LichKham");
+        }
+
+        // ==================== CODE MỚI ====================
+
+        // ❌ ĐÃ XÓA action Index (không cần)
+
+        // GET: Thông tin cá nhân (xem)
+        [HttpGet]
+        public IActionResult ThongTinCaNhan()
+        {
+            int? userId = HttpContext.Session.GetInt32("UserId");
+            if (userId == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var result = _leTanService.GetHoSo(userId.Value);
+            if (result == null)
+            {
+                TempData["Error"] = "Không tìm thấy thông tin";
+                return RedirectToAction("LeTanDashboard");
+            }
+
+            return View(result);
+        }
+
+        // GET: Chỉnh sửa hồ sơ
+        [HttpGet]
+        public IActionResult HoSo()
+        {
+            int? userId = HttpContext.Session.GetInt32("UserId");
+            if (userId == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var result = _leTanService.GetHoSo(userId.Value);
+            return View(result);
+        }
+
+        // POST: Cập nhật hồ sơ
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult CapNhatHoSo(CapNhatHoSoLeTanRequest request)
+        {
+            int? userId = HttpContext.Session.GetInt32("UserId");
+            if (userId == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var (success, message) = _leTanService.CapNhatHoSo(userId.Value, request);
+            if (success)
+                TempData["Success"] = message;
+            else
+                TempData["Error"] = message;
+
+            return RedirectToAction(nameof(ThongTinCaNhan));
+        }
+
+        // POST: Đổi mật khẩu
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DoiMatKhau(DoiMatKhauRequest request)
+        {
+            int? userId = HttpContext.Session.GetInt32("UserId");
+            if (userId == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            if (request.MatKhauMoi != request.XacNhanMatKhauMoi)
+            {
+                TempData["Error"] = "Mật khẩu mới và xác nhận không khớp";
+                return RedirectToAction(nameof(HoSo));
+            }
+
+            var (success, message) = await _leTanService.DoiMatKhau(userId.Value, request);
+            if (success)
+                TempData["Success"] = message;
+            else
+                TempData["Error"] = message;
+
+            return RedirectToAction(nameof(HoSo));
         }
     }
 }

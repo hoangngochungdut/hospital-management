@@ -32,7 +32,15 @@ builder.Services.AddScoped<TaiKhoanRepository>();
 builder.Services.AddScoped<AccountValidationService>();
 builder.Services.AddScoped<TaiKhoanService>();
 builder.Services.AddScoped<IBuoiKhamRepository, BuoiKhamRepository>();
+builder.Services.AddScoped<INguoiDungRepository, NguoiDungRepository>();// new
+builder.Services.AddScoped<ILeTanRepository, LeTanRepository>();// new
+builder.Services.AddScoped<IBacSiRepository, BacSiRepository>();// new
 builder.Services.AddScoped<IBuoiKhamService, BuoiKhamService>();
+builder.Services.AddScoped<IBenhNhanService, BenhNhanService>();// new
+builder.Services.AddScoped<ILeTanService, LeTanService>();// new
+builder.Services.AddScoped<IBacSiService, BacSiService>();// new
+
+
 
 var app = builder.Build();
 

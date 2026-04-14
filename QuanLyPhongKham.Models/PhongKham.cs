@@ -7,6 +7,8 @@ namespace QuanLyPhongKham.Models
 {
     public class PhongKham
     {
+        public string soPhong;
+
         [Key]
         public int Id { get; set; }
         public int SoPhong { get; set; }

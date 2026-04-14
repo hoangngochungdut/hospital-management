@@ -51,6 +51,9 @@ namespace QuanLyPhongKham.Repositories
             return _context.TaiKhoans.Any(t => t.TenDangNhap == username);
         }
 
-
+        public BacSi? GetByNguoiDungId(int nguoiDungId)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

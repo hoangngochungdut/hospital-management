@@ -1,0 +1,95 @@
+﻿@model QuanLyPhongKham.Models.DTOs.XemHoSoBacSiResponse
+@{
+    ViewData["Title"] = "Thông tin cá nhân";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-id-card me-2"></i>Thông tin cá nhân
+                    </h4>
+                </div>
+
+                <div class="card-body">
+                    @if (TempData["Success"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show">
+                            @TempData["Success"]
+                        </div>
+                    }
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show">
+                            @TempData["Error"]
+                        </div>
+                    }
+
+                    <!-- THÔNG TIN -->
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Họ tên:</div>
+                        <div class="col-md-8">@Model?.HoTen</div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Giới tính:</div>
+                        <div class="col-md-8">
+                            @if (Model?.GioiTinh == "Nam")
+                            {
+                                <span>👨 Nam</span>
+                            }
+                            else if (Model?.GioiTinh == "Nữ")
+                            {
+                                <span>👩 Nữ</span>
+                            }
+                            else
+                            {
+                                <span>⚪ Khác</span>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Số điện thoại:</div>
+                        <div class="col-md-8">@Model?.SoDienThoai</div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Địa chỉ:</div>
+                        <div class="col-md-8">@Model?.DiaChi</div>
+                    </div>
+
+                    <!-- 🔥 THÊM Ở ĐÂY -->
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Chuyên khoa:</div>
+                        <div class="col-md-8">
+                            @Model?.TenChuyenKhoa 
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Phòng làm việc:</div>
+                        <div class="col-md-8">
+                            @Model?.TenPhong 
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <!-- BUTTON -->
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="@Url.Action("BacSiDashboard", "BacSiDashboard")" class="btn btn-secondary">
+                            Quay lại
+                        </a>
+                        <a href="@Url.Action("HoSo", "BacSiDashboard")" class="btn btn-primary">
+                            Chỉnh sửa
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

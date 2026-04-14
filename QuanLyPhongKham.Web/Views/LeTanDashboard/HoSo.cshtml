@@ -1,0 +1,106 @@
+﻿@model QuanLyPhongKham.Models.DTOs.XemHoSoLeTanResponse
+@{
+    ViewData["Title"] = "Hồ sơ của tôi";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-user-circle me-2"></i>Hồ sơ bệnh nhân
+                    </h4>
+                </div>
+                <div class="card-body">
+                    @if (TempData["Success"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle me-2"></i>@TempData["Success"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-circle me-2"></i>@TempData["Error"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <form method="post" id="mainForm">
+                        @Html.AntiForgeryToken()
+
+                        <!-- ========== PHẦN THÔNG TIN CÁ NHÂN ========== -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Họ tên <span class="text-danger">*</span></label>
+                            <input type="text" name="HoTen" class="form-control"
+                                   value="@Model?.HoTen" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Giới tính</label>
+                            <select name="GioiTinh" class="form-select">
+                                <option value="">-- Chọn --</option>
+                                <option value="Nam" selected="@(Model?.GioiTinh == "Nam")">Nam</option>
+                                <option value="Nữ" selected="@(Model?.GioiTinh == "Nữ")">Nữ</option>
+                                <option value="Khác" selected="@(Model?.GioiTinh == "Khác")">Khác</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Số điện thoại</label>
+                            <input type="tel" name="SoDienThoai" class="form-control"
+                                   value="@Model?.SoDienThoai" placeholder="0123456789" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Địa chỉ</label>
+                            <textarea name="DiaChi" class="form-control" rows="3"
+                                      placeholder="Nhập địa chỉ chi tiết">@Model?.DiaChi</textarea>
+                        </div>
+
+                        <!-- ========== PHẦN ĐỔI MẬT KHẨU (THÊM VÀO ĐÂY) ========== -->
+                        <div class="mt-4">
+                            <hr />
+                            <h5 class="mb-3 text-warning">
+                                <i class="fas fa-key me-2"></i>Đổi mật khẩu
+                            </h5>
+                            
+                            <div class="row">
+                                <div class="col-md-12 mb-3">
+                                    <label class="form-label fw-bold">Mật khẩu cũ</label>
+                                    <input type="password" name="MatKhauCu" class="form-control" placeholder="Nhập mật khẩu hiện tại" />
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Mật khẩu mới</label>
+                                    <input type="password" name="MatKhauMoi" class="form-control" placeholder="Nhập mật khẩu mới" />
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Xác nhận mật khẩu mới</label>
+                                    <input type="password" name="XacNhanMatKhauMoi" class="form-control" placeholder="Nhập lại mật khẩu mới" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr />
+
+                        <!-- ========== NÚT BẤM ========== -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="javascript:history.back()" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>Quay lại
+                            </a>
+                            <button type="submit" class="btn btn-primary" formaction="@Url.Action("CapNhatHoSo", "LeTanDashboard")">
+                                <i class="fas fa-save me-1"></i>Lưu thông tin
+                            </button>
+                            <button type="submit" class="btn btn-warning" formaction="@Url.Action("DoiMatKhau", "LeTanDashboard")">
+                                <i class="fas fa-key me-1"></i>Đổi mật khẩu
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,135 @@
+﻿@model QuanLyPhongKham.Models.DTOs.XemHoSoBacSiResponse
+@{
+    ViewData["Title"] = "Hồ sơ của tôi";
+    Layout = "~/Views/Shared/_Layout.cshtml"; // 🔥 giống bệnh nhân
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-user-circle me-2"></i>Hồ sơ bác sĩ
+                    </h4>
+                </div>
+
+                <div class="card-body">
+                    @if (TempData["Success"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show">
+                            @TempData["Success"]
+                        </div>
+                    }
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show">
+                            @TempData["Error"]
+                        </div>
+                    }
+
+                    <form method="post">
+                        @Html.AntiForgeryToken()
+
+                        <!-- THÔNG TIN CÁ NHÂN -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Họ tên <span class="text-danger">*</span></label>
+                            <input type="text" name="HoTen" class="form-control"
+                                   value="@Model?.HoTen" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Giới tính</label>
+                            <select name="GioiTinh" class="form-select">
+                                <option value="">-- Chọn --</option>
+                                <option value="Nam" selected="@(Model?.GioiTinh == "Nam")">Nam</option>
+                                <option value="Nữ" selected="@(Model?.GioiTinh == "Nữ")">Nữ</option>
+                                <option value="Khác" selected="@(Model?.GioiTinh == "Khác")">Khác</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Số điện thoại</label>
+                            <input type="tel" name="SoDienThoai" class="form-control"
+                                   value="@Model?.SoDienThoai" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Địa chỉ</label>
+                            <textarea name="DiaChi" class="form-control" rows="3">@Model?.DiaChi</textarea>
+                        </div>
+
+                        <!-- 🔥 CHỈ THÊM NHẸ 2 FIELD -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Chuyên khoa</label>
+                            <select name="ChuyenKhoaId" class="form-select">
+                                <option value="">-- Chọn chuyên khoa --</option>
+                                @foreach (var ck in ViewBag.DanhSachChuyenKhoa)
+                                {
+                                    <option value="@ck.Id" selected="@(ck.Id == Model?.ChuyenKhoaId)">
+                                        @ck.TenKhoa
+                                    </option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Phòng làm việc</label>
+                            <select name="PhongLamViecId" class="form-select">
+                                <option value="">-- Chọn phòng --</option>
+                                @foreach (var pk in ViewBag.DanhSachPhongKham)
+                                {
+                                    <option value="@pk.Id" selected="@(pk.Id == Model?.PhongLamViecId)">
+                                        Phòng @pk.SoPhong - Tầng @pk.Tang
+                                    </option>
+                                }
+                            </select>
+                        </div>
+
+                        <!-- ĐỔI MẬT KHẨU -->
+                        <div class="mt-4">
+                            <hr />
+                            <h5 class="mb-3 text-warning">
+                                <i class="fas fa-key me-2"></i>Đổi mật khẩu
+                            </h5>
+
+                            <div class="row">
+                                <div class="col-md-12 mb-3">
+                                    <input type="password" name="MatKhauCu" class="form-control"
+                                           placeholder="Mật khẩu cũ" />
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <input type="password" name="MatKhauMoi" class="form-control"
+                                           placeholder="Mật khẩu mới" />
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <input type="password" name="XacNhanMatKhauMoi" class="form-control"
+                                           placeholder="Xác nhận mật khẩu" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr />
+
+                        <!-- BUTTON -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="javascript:history.back()" class="btn btn-secondary">
+                                Quay lại
+                            </a>
+
+                            <button type="submit" class="btn btn-primary"
+                                    formaction="@Url.Action("CapNhatHoSo", "BacSiDashboard")">
+                                Lưu thông tin
+                            </button>
+
+                            <button type="submit" class="btn btn-warning"
+                                    formaction="@Url.Action("DoiMatKhau", "BacSiDashboard")">
+                                Đổi mật khẩu
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
