@@ -52,9 +52,5 @@ namespace QuanLyPhongKham.Repositories.Implementations
                 .FirstOrDefault(n => n.TaiKhoan != null && n.TaiKhoan.Id == taiKhoanId);
         }
 
-        public BacSi? GetByNguoiDungId(int nguoiDungId)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

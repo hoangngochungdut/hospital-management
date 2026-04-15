@@ -1,13 +1,14 @@
 ﻿using QuanLyPhongKham.Data;
 using QuanLyPhongKham.Models;
+using QuanLyPhongKham.Repositories.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Text;
 
-namespace QuanLyPhongKham.Repositories
+namespace QuanLyPhongKham.Repositories.Implementations
 {
-    public class TaiKhoanRepository : IRepository<TaiKhoan>
+    public class TaiKhoanRepository : ITaiKhoanRepository
     {
         private readonly AppDbContext _context;
         public TaiKhoanRepository(AppDbContext context)
@@ -51,9 +52,5 @@ namespace QuanLyPhongKham.Repositories
             return _context.TaiKhoans.Any(t => t.TenDangNhap == username);
         }
 
-        public BacSi? GetByNguoiDungId(int nguoiDungId)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

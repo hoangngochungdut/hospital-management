@@ -21,7 +21,7 @@
             <tr class="border-b hover:bg-slate-50">
                 <td class="py-3 px-2">@item.Ngay.ToString("dd/MM/yyyy") - @item.Gio</td>
                 <td class="py-3 px-2 font-bold">@item.BenhNhan?.HoTen</td>
-                <td class="py-3 px-2">BS. @item.BacSi?.NguoiDung.HoTen</td>// new
+                <td class="py-3 px-2">BS. @item.BacSi?.HoTen</td>// new
                 <td class="py-3 px-2">P.@item.PhongKham?.SoPhong</td>
                 <td class="py-3 px-2">
                     @if ((int)item.TrangThai == 0)

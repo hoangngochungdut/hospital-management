@@ -1,6 +1,7 @@
 ﻿using QuanLyPhongKham.Data;
 using QuanLyPhongKham.Models;
-using QuanLyPhongKham.Repositories;
+using QuanLyPhongKham.Repositories.Implementations;
+using QuanLyPhongKham.Repositories.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -9,8 +10,8 @@ namespace QuanLyPhongKham.Services.BussinessValidationServices
 {
     public class AccountValidationService
     {
-        private readonly TaiKhoanRepository _repo;
-        public AccountValidationService(TaiKhoanRepository repo)
+        private readonly ITaiKhoanRepository _repo;
+        public AccountValidationService(ITaiKhoanRepository repo)
         {
             _repo = repo;
         }

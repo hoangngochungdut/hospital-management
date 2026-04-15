@@ -2,13 +2,24 @@
 using Microsoft.EntityFrameworkCore;
 using QuanLyPhongKham.Data;
 using QuanLyPhongKham.Models.Enums;
+using QuanLyPhongKham.Services.Implementations;
+using QuanLyPhongKham.Services.Interfaces;
 
 namespace QuanLyPhongKham.Web.Controllers
 {
     public class AdminDashboardController : Controller
     {
+        private readonly IBacSiService _bacSiService;
+        private readonly IBuoiKhamService _buoiKhamService;
         private readonly AppDbContext _context;
-        public AdminDashboardController(AppDbContext context) { _context = context; }
+        //public AdminDashboardController(AppDbContext context) { _context = context; }
+
+        public AdminDashboardController(IBuoiKhamService buoiKhamService, AppDbContext context, IBacSiService bacSiService)
+        {
+            _buoiKhamService = buoiKhamService;
+            _context = context;
+            _bacSiService = bacSiService;
+        }
 
         public IActionResult AdminDashboard() 
         {
@@ -19,28 +30,34 @@ namespace QuanLyPhongKham.Web.Controllers
         [HttpGet]
         public IActionResult LichKham()
         {
-            // Lấy TẤT CẢ không dùng Where
-            // CHỈ CẦN Include BacSi và BenhNhan là xong, XÓA sạch đoạn .ThenInclude(...) đi
-            var tatCaLich = _context.BuoiKhams
-                .Include(b => b.BacSi)
-                .Include(b => b.BenhNhan)
-                .Include(b => b.PhongKham)
-                .OrderByDescending(b => b.Ngay).ThenBy(b => b.Gio)
-                .ToList();
-
+            var tatCaLich = _buoiKhamService.GetAllLichKham();
             return View(tatCaLich);
         }
 
         [HttpPost]
         public IActionResult DoiTrangThai(int id, int trangThaiMoi)
         {
-            var lich = _context.BuoiKhams.Find(id);
-            if (lich != null)
-            {
-                lich.TrangThai = (TrangThaiBuoiKham)trangThaiMoi;
-                _context.SaveChanges();
-            }
+            _buoiKhamService.CapNhatTrangThai(id, (TrangThaiBuoiKham)trangThaiMoi);
             return RedirectToAction("LichKham");
+        }
+
+        [HttpGet]
+        public IActionResult BacSi()
+        {
+            var tatCaBacSi = _bacSiService.GetAll();
+            return View(tatCaBacSi);
+        }
+
+        public IActionResult Edit(int id)
+        {
+            var bacSi = _bacSiService.GetById(id);
+
+            if (bacSi == null)
+            {
+                return NotFound();
+            }
+
+            return View(bacSi);
         }
     }
 }

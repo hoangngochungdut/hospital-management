@@ -13,12 +13,13 @@ namespace QuanLyPhongKham.Services.Implementations
     public  class BenhNhanService : IBenhNhanService
     {
         private readonly INguoiDungRepository _nguoiDungRepo;
-        private readonly AppDbContext _context;  // 👈 THÊM DÒNG NÀY
+        private readonly AppDbContext _context;  
 
         public BenhNhanService(INguoiDungRepository nguoiDungRepo, AppDbContext context)
         {
             _nguoiDungRepo = nguoiDungRepo;
-            _context = context;        }
+            _context = context;
+        }
 
         public XemHoSoBenhNhanResponse? GetHoSo(int nguoiDungId)
         {

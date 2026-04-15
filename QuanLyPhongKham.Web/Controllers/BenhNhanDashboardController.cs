@@ -12,15 +12,24 @@ namespace QuanLyPhongKham.Web.Controllers
     public class BenhNhanDashboardController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly IBacSiService _bacSiService;
         private readonly IBenhNhanService _benhNhanService;  // 👈 THÊM DÒNG NÀY
-        public BenhNhanDashboardController(AppDbContext context, IBenhNhanService? benhNhanService) {
+        //public BenhNhanDashboardController(AppDbContext context, IBenhNhanService benhNhanService)
+        //{
+        //    _context = context;
+        //    _benhNhanService = benhNhanService;  // 👈 THÊM DÒNG NÀY
+        //}
+        public BenhNhanDashboardController(AppDbContext context, IBacSiService bacSiService, IBenhNhanService benhNhanService)
+        {
             _context = context;
+            _bacSiService = bacSiService;
             _benhNhanService = benhNhanService;  // 👈 THÊM DÒNG NÀY
         }
 
         public IActionResult BenhNhanDashboard() 
         {
-            ViewBag.DsBacSi = _context.BacSis.ToList();
+            //ViewBag.DsBacSi = _context.BacSis.ToList();
+            ViewBag.DsBacSi = _bacSiService.GetAll();
             ViewBag.DsPhongKham = _context.PhongKhams.ToList();
             return View(); 
         }
@@ -38,29 +47,63 @@ namespace QuanLyPhongKham.Web.Controllers
         [HttpPost]
         public IActionResult DatLich(DateOnly Ngay, TimeOnly Gio, int BacSiId, int PhongKhamId)
         {
-            // Giả lập ID bệnh nhân là 1 (Thực tế lấy từ User đang đăng nhập)
             int? currentBenhNhanId = HttpContext.Session.GetInt32("UserId");
 
             if (currentBenhNhanId == null)
             {
                 return RedirectToAction("Login", "Account");
             }
+
+            var gioBatDau = Gio;
+            var gioKetThuc = Gio.AddMinutes(30);
+
+            bool biTrung = _context.BuoiKhams.Any(x =>
+                x.BacSiId == BacSiId &&
+                x.Ngay == Ngay &&
+                x.TrangThai != TrangThaiBuoiKham.Huy &&
+                (
+                    // overlap time
+                    x.Gio < gioKetThuc &&
+                    x.Gio.AddMinutes(30) > gioBatDau
+                )
+            );
+
+            // 🔥 CHECK TRÙNG LỊCH
+            //bool biTrung = _context.BuoiKhams.Any(x =>
+            //    x.Ngay == Ngay &&
+            //    x.Gio == Gio &&
+            //    (
+            //        x.BacSiId == BacSiId ||        // trùng bác sĩ
+            //        x.PhongKhamId == PhongKhamId || // trùng phòng
+            //        x.BenhNhanId == currentBenhNhanId // trùng bệnh nhân
+            //    )
+            //    && x.TrangThai != TrangThaiBuoiKham.Huy // bỏ qua lịch đã hủy
+            //);
+
+            if (biTrung)
+            {
+                TempData["ThongBao"] = "❌ Lịch bị trùng! Vui lòng chọn thời gian khác.";
+                return RedirectToAction("LichKham");
+            }
+
+            // ✅ Nếu không trùng thì tạo mới
             var lichMoi = new BuoiKham
             {
-                Ngay = Ngay, // Bây giờ DateOnly truyền cho DateOnly -> HẾT ĐỎ
-                Gio = Gio,   // TimeOnly truyền cho TimeOnly -> HẾT ĐỎ
+                Ngay = Ngay,
+                Gio = Gio,
                 BacSiId = BacSiId,
                 PhongKhamId = PhongKhamId,
                 BenhNhanId = currentBenhNhanId.Value,
                 TrangThai = TrangThaiBuoiKham.ChuaXacNhan
             };
+
             _context.BuoiKhams.Add(lichMoi);
             _context.SaveChanges();
 
-            TempData["ThongBao"] = "Đặt lịch thành công!";
+            TempData["ThongBao"] = "✅ Đặt lịch thành công!";
             return RedirectToAction("LichKham");
         }
-        // ==================== CODE MỚI THÊM ====================
+
         // GET: Thông tin cá nhân (chế độ xem)
         [HttpGet]
         public IActionResult ThongTinCaNhan()

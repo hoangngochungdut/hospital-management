@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace QuanLyPhongKham.Repositories
+namespace QuanLyPhongKham.Repositories.Interfaces
 {
     public interface IRepository<T>
     {
@@ -15,6 +15,6 @@ namespace QuanLyPhongKham.Repositories
         void Update(T entity);
 
         void Delete(T entity);
-        BacSi? GetByNguoiDungId(int nguoiDungId);
+        //T? GetByNguoiDungId(int nguoiDungId);
     }
 }

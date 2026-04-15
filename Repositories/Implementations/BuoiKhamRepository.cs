@@ -22,7 +22,7 @@ namespace QuanLyPhongKham.Repositories.Implementations
             return result > 0;
         }
 
-        public async Task<BuoiKham> GetByIdAsync(int id)
+        public async Task<BuoiKham?> GetByIdAsync(int id)
         {
             return await _context.BuoiKhams.FirstOrDefaultAsync(x => x.Id == id);
         }
@@ -32,6 +32,35 @@ namespace QuanLyPhongKham.Repositories.Implementations
             _context.BuoiKhams.Update(buoiKham);
             var result = await _context.SaveChangesAsync();
             return result > 0;
+        }
+
+        public List<BuoiKham> GetByBacSiId(int bacSiId)
+        {
+            return _context.BuoiKhams
+                .Include(b => b.BacSi)
+                .Include(b => b.BenhNhan)
+                .Include(b => b.PhongKham)
+                .Where(b => b.BacSiId == bacSiId)
+                .OrderByDescending(b => b.Ngay)
+                .ThenBy(b => b.Gio)
+                .ToList();
+        }
+
+        public List<BuoiKham> GetAll()
+        {
+            return _context.BuoiKhams
+                .Include(b => b.BacSi)
+                .Include(b => b.BenhNhan)
+                .Include(b => b.PhongKham)
+                .OrderByDescending(b => b.Ngay)
+                .ThenBy(b => b.Gio)
+                .ToList();
+        }
+
+        public BuoiKham? GetById(int id)
+        {
+            return _context.BuoiKhams.Find(id);
+            
         }
     }
 }

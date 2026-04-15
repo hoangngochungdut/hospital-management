@@ -7,7 +7,7 @@ using QuanLyPhongKham.Data;
 using QuanLyPhongKham.LowLevelValidators;
 using QuanLyPhongKham.Models;
 using QuanLyPhongKham.Repositories;
-using QuanLyPhongKham.Services;
+using QuanLyPhongKham.Services.Implementations;
 using QuanLyPhongKham.Web.Services.RoleRedirectService;
 using System.Data;
 using System.Linq;

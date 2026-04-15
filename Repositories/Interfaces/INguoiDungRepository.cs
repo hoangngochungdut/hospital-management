@@ -7,6 +7,6 @@ namespace QuanLyPhongKham.Repositories.Interfaces
 {
     public  interface INguoiDungRepository : IRepository<NguoiDung>
     {
-        NguoiDung? GetByTaiKhoanId(int taiKhoanId);
+        //NguoiDung? GetByTaiKhoanId(int taiKhoanId);
     }
 }

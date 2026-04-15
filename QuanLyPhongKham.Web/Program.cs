@@ -1,20 +1,28 @@
 using Microsoft.EntityFrameworkCore;
 using QuanLyPhongKham.Data;
 using QuanLyPhongKham.Models;
-using QuanLyPhongKham.Repositories;
 using QuanLyPhongKham.Repositories.Implementations;
 using QuanLyPhongKham.Repositories.Interfaces;
-using QuanLyPhongKham.Services;
 using QuanLyPhongKham.Services.BussinessValidationServices;
 using QuanLyPhongKham.Services.Implementations;
 using QuanLyPhongKham.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var conn = builder.Configuration.GetConnectionString("DefaultConnection");
+if (string.IsNullOrEmpty(conn))
+{
+    throw new Exception("Connection string is NULL");
+}
+
+Console.WriteLine("CONN = " + conn);
+
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection")
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        b => b.MigrationsAssembly("QuanLyPhongKham.Data")
     ));
+//Console.WriteLine("CONNECTION = " + conn);
 
 builder.Services.AddControllersWithViews();
 
@@ -28,17 +36,20 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
-builder.Services.AddScoped<TaiKhoanRepository>();
-builder.Services.AddScoped<AccountValidationService>();
-builder.Services.AddScoped<TaiKhoanService>();
+builder.Services.AddScoped<IBacSiRepository, BacSiRepository>();
+builder.Services.AddScoped<ITaiKhoanRepository, TaiKhoanRepository>();
+builder.Services.AddScoped<INguoiDungRepository, NguoiDungRepository>();
+builder.Services.AddScoped<ILeTanRepository, LeTanRepository>();
 builder.Services.AddScoped<IBuoiKhamRepository, BuoiKhamRepository>();
-builder.Services.AddScoped<INguoiDungRepository, NguoiDungRepository>();// new
-builder.Services.AddScoped<ILeTanRepository, LeTanRepository>();// new
-builder.Services.AddScoped<IBacSiRepository, BacSiRepository>();// new
+
+builder.Services.AddScoped<IBacSiService, BacSiService>();
+builder.Services.AddScoped<IBenhNhanService, BenhNhanService>();
+builder.Services.AddScoped<ILeTanService, LeTanService>();
 builder.Services.AddScoped<IBuoiKhamService, BuoiKhamService>();
-builder.Services.AddScoped<IBenhNhanService, BenhNhanService>();// new
-builder.Services.AddScoped<ILeTanService, LeTanService>();// new
-builder.Services.AddScoped<IBacSiService, BacSiService>();// new
+
+builder.Services.AddScoped<TaiKhoanService>();
+builder.Services.AddScoped<AccountValidationService>();
+//builder.Services.AddScoped<BacSiService>();
 
 
 
@@ -54,6 +65,8 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseRouting();
+
+
 
 // =======================================================
 // BƯỚC 2: KHÍCH HOẠT SESSION (Vị trí bắt buộc phải ở đây)

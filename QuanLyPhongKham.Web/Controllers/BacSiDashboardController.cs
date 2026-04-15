@@ -11,9 +11,12 @@ namespace QuanLyPhongKham.Web.Controllers
     {
         private readonly AppDbContext _context;
         private readonly IBacSiService _bacSiService;
-        public BacSiDashboardController(AppDbContext context, IBacSiService bacSiService) {
+        private readonly IBuoiKhamService _buoiKhamService;
+       
+        public BacSiDashboardController(AppDbContext context, IBacSiService bacSiService, IBuoiKhamService buoiKhamService) {
             _context = context;
             _bacSiService = bacSiService;
+            _buoiKhamService = buoiKhamService;
         }
 
         public IActionResult BacSiDashboard() { return View(); }
@@ -23,21 +26,11 @@ namespace QuanLyPhongKham.Web.Controllers
         {
             int? currentBacSiId = HttpContext.Session.GetInt32("UserId");
 
-            // Nếu chưa đăng nhập thì đuổi về
             if (currentBacSiId == null)
-            {
                 return RedirectToAction("Login", "Account");
-            }
-            // 1. Đặt lại tên biến cho chuẩn
-            var lichCuaToi = _context.BuoiKhams
-                .Include(b => b.BacSi)
-                .Include(b => b.BenhNhan)
-                .Include(b => b.PhongKham)
-                .Where(b => b.BacSiId == currentBacSiId) // 2. QUAN TRỌNG: Lọc đúng lịch của bác sĩ này
-                .OrderByDescending(b => b.Ngay).ThenBy(b => b.Gio)
-                .ToList();
 
-            // 3. Trả về đúng tên biến
+            var lichCuaToi = _buoiKhamService.GetByBacSiId(currentBacSiId.Value);
+
             return View(lichCuaToi);
         }
 

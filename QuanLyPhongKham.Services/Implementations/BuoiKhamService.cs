@@ -1,20 +1,24 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using Microsoft.EntityFrameworkCore;
+using QuanLyPhongKham.Data;
 using QuanLyPhongKham.Models; // Chứa class BuoiKham
 using QuanLyPhongKham.Models.DTOs; // Chứa DatLichRequest
 using QuanLyPhongKham.Models.Enums; // Chứa Enum TrangThai
 using QuanLyPhongKham.Repositories.Interfaces; // Chứa IBuoiKhamRepository
 using QuanLyPhongKham.Services.Interfaces;
+using System;
+using System.Threading.Tasks;
 
 namespace QuanLyPhongKham.Services.Implementations
 {
     public class BuoiKhamService : IBuoiKhamService
     {
-        private readonly IBuoiKhamRepository _repo;
+        private readonly IBuoiKhamRepository _buoiKhamRepo;
+        private readonly AppDbContext _context;
 
-        public BuoiKhamService(IBuoiKhamRepository repo)
+        public BuoiKhamService(IBuoiKhamRepository buoiKhamRepo, AppDbContext context)
         {
-            _repo = repo;
+            _buoiKhamRepo = buoiKhamRepo;
+            _context = context;
         }
 
         public async Task<bool> DatLichKhamAsync(DatLichRequest request, int currentUserId, string role)
@@ -50,12 +54,12 @@ namespace QuanLyPhongKham.Services.Implementations
                 throw new UnauthorizedAccessException("Bạn không có quyền thực hiện chức năng này.");
             }
 
-            return await _repo.AddAsync(buoiKham);
+            return await _buoiKhamRepo.AddAsync(buoiKham);
         }
 
         public async Task<bool> CapNhatTrangThaiAsync(int buoiKhamId, TrangThaiBuoiKham trangThaiMoi, int currentUserId, string role)
         {
-            var buoiKham = await _repo.GetByIdAsync(buoiKhamId);
+            var buoiKham = await _buoiKhamRepo.GetByIdAsync(buoiKhamId);
             if (buoiKham == null)
                 throw new Exception("Không tìm thấy buổi khám.");
 
@@ -79,7 +83,43 @@ namespace QuanLyPhongKham.Services.Implementations
             // Admin & Lễ tân đi qua hết các if trên -> có toàn quyền sửa
 
             buoiKham.TrangThai = trangThaiMoi;
-            return await _repo.UpdateAsync(buoiKham);
+            return await _buoiKhamRepo.UpdateAsync(buoiKham);
         }
+
+        public List<BuoiKham> GetByBacSiId(int bacSiId)
+        {
+            return _buoiKhamRepo.GetByBacSiId(bacSiId);
+        }
+
+        public List<BuoiKham> GetAllLichKham()
+        {
+            return _buoiKhamRepo.GetAll();
+        }
+
+        public BuoiKham GetById(int id)
+        {
+            var lich = _buoiKhamRepo.GetById(id);
+
+            if (lich == null)
+                throw new Exception("Không tìm thấy lịch");
+
+            return lich;
+
+        }
+        public bool CapNhatTrangThai(int id, TrangThaiBuoiKham trangThaiMoi)
+        {
+            var lich = _buoiKhamRepo.GetById(id);
+
+            if (lich == null)
+                return false;
+
+            lich.TrangThai = trangThaiMoi;
+            _context.SaveChanges();
+
+            return true;
+        }
+
+
+
     }
 }

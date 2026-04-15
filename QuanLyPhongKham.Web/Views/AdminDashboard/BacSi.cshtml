@@ -1,0 +1,29 @@
+﻿@using QuanLyPhongKham.Models
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Họ tên</th>
+            <th>Chuyên khoa</th>
+            <th>Số điện thoại</th>
+            <th>Hành động</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @model List<BacSi>
+
+        @foreach (var bs in Model ?? new List<BacSi>())
+        {
+            <tr>
+                <td>@bs.HoTen</td>
+                <td>@bs.ChuyenKhoa?.TenKhoa</td>
+                <td>@bs.Sdt</td>
+
+                <td>
+                    <a href="/Admin/BacSi/Edit/@bs.Id" class="btn btn-warning btn-sm">Sửa</a>
+                    <a href="/Admin/BacSi/Delete/@bs.Id" class="btn btn-danger btn-sm">Xóa</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</tab
