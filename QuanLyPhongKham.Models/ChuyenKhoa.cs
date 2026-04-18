@@ -12,6 +12,6 @@ namespace QuanLyPhongKham.Models
         public string? TenKhoa { get; set; }
         public string? MoTa { get; set; }
         public ICollection<BacSi>? BacSis { get; set; }
-
+        public ICollection<PhongKham>? PhongKhams { get; set; }
     }
 }

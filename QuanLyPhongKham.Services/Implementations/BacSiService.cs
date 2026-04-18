@@ -45,7 +45,7 @@ namespace QuanLyPhongKham.Services.Implementations
                 bacSi.Sdt = request.SoDienThoai;
 
                 bacSi.ChuyenKhoaId = request.ChuyenKhoaId;
-                bacSi.PhongLamViecId = request.PhongLamViecId;
+             //   bacSi.PhongLamViecId = request.PhongLamViecId;
 
                 _bacSiRepo.Update(bacSi);
                 _context.SaveChanges(); // hoặc _context.SaveChanges() nếu chưa có UoW

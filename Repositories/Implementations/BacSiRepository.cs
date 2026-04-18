@@ -25,7 +25,7 @@ namespace QuanLyPhongKham.Repositories.Implementations
         {
             return _context.BacSis
                 .Include(x => x.ChuyenKhoa)
-                .Include(x => x.PhongLamViec)
+                //.Include(x => x.PhongLamViec)
                 .Include(x => x.BuoiKhams)
                 .ToList();
         }

@@ -24,7 +24,13 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     ));
 //Console.WriteLine("CONNECTION = " + conn);
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews()
+    .AddJsonOptions(options =>
+    {
+        // Dòng này giúp bỏ qua các vòng lặp dữ liệu, ae pull về dùng API sẽ không bị lỗi
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+        options.JsonSerializerOptions.WriteIndented = true;
+    });
 
 // =======================================================
 // BƯỚC 1: THÊM DỊCH VỤ SESSION VÀO BUILDER 
@@ -41,7 +47,9 @@ builder.Services.AddScoped<ITaiKhoanRepository, TaiKhoanRepository>();
 builder.Services.AddScoped<INguoiDungRepository, NguoiDungRepository>();
 builder.Services.AddScoped<ILeTanRepository, LeTanRepository>();
 builder.Services.AddScoped<IBuoiKhamRepository, BuoiKhamRepository>();
-
+//builder.Services.AddScoped<IChuyenKhoaRepository, ChuyenKhoaRepository>();
+//builder.Services.AddScoped<IPhongKhamRepository, PhongKhamRepository>();
+// Thêm các dịch vụ khác của Chuyên khoa/Phòng khám nếu có
 builder.Services.AddScoped<IBacSiService, BacSiService>();
 builder.Services.AddScoped<IBenhNhanService, BenhNhanService>();
 builder.Services.AddScoped<ILeTanService, LeTanService>();
