@@ -80,5 +80,18 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
-
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<AppDbContext>();
+        // Lệnh này sẽ tự động kiểm tra thư mục Migrations và chạy cập nhật vào cơ sở dữ liệu
+        context.Database.Migrate();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Có lỗi khi auto-migrate: {ex.Message}");
+    }
+}
 app.Run();

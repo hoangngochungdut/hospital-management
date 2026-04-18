@@ -10,8 +10,8 @@ namespace QuanLyPhongKham.Models
         [Key]
         public int Id { get; set; }
         public string? TenKhoa { get; set; }
+        public string? MoTa { get; set; }
         public ICollection<BacSi>? BacSis { get; set; }
-
 
     }
 }
