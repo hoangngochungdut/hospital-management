@@ -3,6 +3,7 @@ using QuanLyPhongKham.Models;
 using QuanLyPhongKham.Models.DTOs;
 using QuanLyPhongKham.Repositories.Interfaces;
 using QuanLyPhongKham.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace QuanLyPhongKham.Services.Implementations
 {
@@ -16,7 +17,30 @@ namespace QuanLyPhongKham.Services.Implementations
             _nguoiDungRepo = nguoiDungRepo;
             _context = context;
         }
+        //public async Task<IEnumerable<object>> SearchBenhNhanAsync(string term)
+        //{
+        //    if (string.IsNullOrWhiteSpace(term))
+        //    {
+        //        return new List<object>();
+        //    }
 
+        //    var lowerTerm = term.ToLower();
+
+        //    // LƯU Ý: Nếu Bệnh Nhân của ông kế thừa Người Dùng giống như Bác Sĩ, 
+        //    // ông gọi thẳng thuộc tính HoTen và Sdt như bên dưới.
+        //    var benhNhans = await _context.BenhNhans
+        //        .Where(b => b.HoTen.ToLower().Contains(lowerTerm) || b.Sdt.Contains(lowerTerm))
+        //        .Select(b => new
+        //        {
+        //            id = b.Id,
+        //            hoTen = b.HoTen,
+        //            sdt = b.Sdt
+        //        })
+        //        .Take(10) // Giới hạn trả về 10 người cho nhẹ Web
+        //        .ToListAsync();
+
+        //    return benhNhans;
+        //}
         public XemHoSoLeTanResponse? GetHoSo(int nguoiDungId)
         {
             var nguoiDung = _nguoiDungRepo.GetById(nguoiDungId);

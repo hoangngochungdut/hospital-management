@@ -1,55 +1,253 @@
-﻿@{
+﻿@using QuanLyPhongKham.Models
+
+@{
     Layout = "~/Views/Shared/_LeTanLayout.cshtml";
     ViewData["Title"] = "Lễ Tân Đặt Lịch";
 }
 
-<div class="bg-white p-8 rounded-xl shadow-sm border border-slate-200 max-w-2xl">
-    <h2 class="text-2xl font-bold mb-6">Lễ Tân: Đặt Lịch Cho Bệnh Nhân</h2>
+<div class="bg-slate-50 min-h-screen py-10 px-4">
+    <div class="max-w-4xl mx-auto bg-white p-8 rounded-3xl shadow-2xl border border-slate-100">
+        
+        <div class="text-center mb-10 border-b pb-6">
+            <h2 class="text-3xl font-black text-slate-800 uppercase tracking-tight">Đăng Ký Khám (Lễ Tân)</h2>
+            <p class="text-slate-500 mt-2 italic">Chọn bệnh nhân và hoàn thành các bước để đặt lịch hộ</p>
+        </div>
 
-    @if (TempData["ThongBao"] != null)
-    {
-        <div class="bg-green-100 text-green-700 p-3 rounded mb-4">@TempData["ThongBao"]</div>
+        <form asp-controller="LeTanDashboard" asp-action="DatLich" method="POST" id="formDatLich">
+            
+            <div class="mb-10 bg-slate-50 p-6 rounded-2xl border border-slate-200 shadow-inner">
+                <h3 class="font-bold text-xl text-blue-700 mb-4 flex items-center">
+                    <span class="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center mr-3 text-sm">1</span>
+                    Chọn Bệnh nhân
+                </h3>
+                <select id="BenhNhanId" name="BenhNhanId" class="w-full border-2 border-white p-4 rounded-xl outline-none focus:border-blue-500 shadow-sm transition-all text-slate-700 font-medium" required>
+                    <option value="">-- Vui lòng chọn Bệnh nhân --</option>
+                    @if (ViewBag.DsBenhNhan != null)
+                    {
+                        foreach (var bn in ViewBag.DsBenhNhan)
+                        {
+                            <option value="@bn.Id">@bn.HoTen - SĐT: @bn.Sdt</option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <div class="mb-10">
+                <h3 class="font-bold text-xl text-blue-700 mb-4 flex items-center">
+                    <span class="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center mr-3 text-sm">2</span> Xác định chuyên khoa
+                </h3>
+                <div class="bg-blue-50 p-6 rounded-2xl border border-blue-100 shadow-inner">
+                    <label class="block text-sm font-bold text-blue-800 mb-2">Xem gợi ý triệu chứng trong danh sách:</label>
+                    <select id="ChuyenKhoaId" name="ChuyenKhoaId" class="w-full border-2 border-white p-4 rounded-xl outline-none focus:border-blue-500 shadow-sm transition-all text-slate-700 font-medium" required>
+                        <option value="">-- Chọn Chuyên Khoa --</option>
+                        @if (ViewBag.DsChuyenKhoa != null)
+                        {
+                            foreach (var khoa in ViewBag.DsChuyenKhoa)
+                            {
+                                var textHienThi = string.IsNullOrEmpty(khoa.MoTa) ? khoa.TenKhoa : $"{khoa.TenKhoa} (Gợi ý: {khoa.MoTa})";
+                                <option value="@khoa.Id" data-mota="@khoa.MoTa">@textHienThi</option>
+                            }
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+                <div>
+                    <h3 class="font-bold text-lg text-blue-700 mb-3 flex items-center">
+                        <span class="w-7 h-7 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mr-2 text-xs">3</span> Chọn Bác Sĩ
+                    </h3>
+                    <select id="BacSiId" name="BacSiId" class="w-full border-2 border-slate-200 p-3 rounded-xl outline-none focus:border-blue-500 bg-slate-50 text-slate-400 transition-all cursor-not-allowed" disabled required>
+                        <option value="">-- Chọn khoa trước --</option>
+                    </select>
+                </div>
+
+                <div>
+                    <h3 class="font-bold text-lg text-blue-700 mb-3 flex items-center">
+                        <span class="w-7 h-7 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mr-2 text-xs">4</span> Chọn Phòng
+                    </h3>
+                    <select id="PhongKhamId" name="PhongKhamId" class="w-full border-2 border-slate-200 p-3 rounded-xl outline-none focus:border-blue-500 bg-slate-50 text-slate-400 transition-all cursor-not-allowed" disabled required>
+                        <option value="">-- Chọn khoa trước --</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="mb-10 bg-slate-50 p-6 rounded-2xl border border-slate-100 shadow-inner">
+                <div class="mb-8">
+                    <h3 class="font-bold text-lg text-blue-700 mb-4 flex items-center">
+                        <span class="w-7 h-7 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mr-2 text-xs">5</span> Chọn Ngày Khám
+                    </h3>
+                    <input type="date" id="NgayKham" name="Ngay" min="@DateTime.Now.ToString("yyyy-MM-dd")"
+                           class="w-full border-2 border-slate-200 p-3 rounded-xl outline-none focus:border-blue-500 bg-slate-50 text-slate-400 font-bold transition-all cursor-not-allowed" disabled required />
+                </div>
+
+                <div>
+                    <h3 class="font-bold text-lg text-blue-700 mb-5 flex items-center">
+                        <span class="w-7 h-7 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mr-2 text-xs">6</span> Chọn Ca Khám (1 Tiếng/Ca)
+                    </h3>
+                    
+                    <div id="ContainerGio" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                        <p class="col-span-full text-slate-400 text-center py-4 italic">Vui lòng hoàn thành các bước trên để xem lịch...</p>
+                    </div>
+                    
+                    <div class="mt-6 flex items-center justify-center space-x-6 text-sm font-medium">
+                        <div class="flex items-center"><span class="w-4 h-4 bg-white border-2 border-blue-200 rounded-full mr-2"></span> Còn trống</div>
+                        <div class="flex items-center"><span class="w-4 h-4 bg-blue-600 rounded-full mr-2 shadow-sm"></span> Đang chọn</div>
+                        <div class="flex items-center"><span class="w-4 h-4 bg-red-50 border-2 border-red-200 rounded-full mr-2"></span> Đã Kín lịch</div>
+                    </div>
+
+                    <input type="hidden" id="GioKhamValue" name="Gio" required />
+                </div>
+            </div>
+
+            <button type="submit" id="btnSubmit" class="w-full bg-slate-200 text-slate-400 text-xl font-black py-5 rounded-2xl transition-all duration-300 opacity-50 cursor-not-allowed shadow-lg" disabled>
+                HOÀN TẤT ĐẶT LỊCH HỘ
+            </button>
+        </form>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        
+    // --- HÀM KIỂM TRA MỞ KHÓA NÚT SUBMIT ---
+    function checkEnableSubmit() {
+    let coBenhNhan = $('#BenhNhanId').val() !== '';
+    let coGioKham = $('#GioKhamValue').val() !== '';
+
+    if (coBenhNhan && coGioKham) {
+    $('#btnSubmit').prop('disabled', false)
+    .removeClass('bg-slate-200 text-slate-400 opacity-50 cursor-not-allowed')
+    .addClass('bg-blue-600 text-white hover:bg-blue-700 shadow-blue-200 cursor-pointer');
+    } else {
+    $('#btnSubmit').prop('disabled', true)
+    .removeClass('bg-blue-600 text-white hover:bg-blue-700 shadow-blue-200 cursor-pointer')
+    .addClass('bg-slate-200 text-slate-400 opacity-50 cursor-not-allowed');
+    }
     }
 
-    <form asp-controller="LeTanDashboard" asp-action="DatLich" method="POST">
-        <div class="mb-4">
-            <label class="block font-bold mb-2">Chọn Bệnh Nhân</label>
-            <select name="BenhNhanId" class="w-full border p-2 rounded" required>
-                <option value="">-- Chọn Bệnh Nhân --</option>
-                @foreach (var bn in ViewBag.DsBenhNhan)
-                {
-                    <option value="@bn.Id">BN: @bn.HoTen</option>
-                }
-            </select>
-        </div>
+    // --- SỰ KIỆN CHỌN BỆNH NHÂN TỪ COMBOBOX ---
+    $('#BenhNhanId').change(function() {
+    checkEnableSubmit();
+    });
 
-        <div class="grid grid-cols-2 gap-4 mb-4">
-            <div><label class="block font-bold mb-2">Ngày</label><input type="date" name="Ngay" class="w-full border p-2 rounded" required /></div>
-            <div><label class="block font-bold mb-2">Giờ</label><input type="time" name="Gio" class="w-full border p-2 rounded" required /></div>
-        </div>
+    // --- CÁC HÀM XỬ LÝ KHOA, BÁC SĨ, GIỜ NHƯ CŨ ---
+    function setFieldState(elementId, disabled, placeholderText) {
+    let el = $(elementId);
+    el.prop('disabled', disabled);
+    if (disabled) {
+    el.addClass('bg-slate-50 text-slate-400 cursor-not-allowed').removeClass('bg-white text-slate-900 border-blue-200');
+    if (el.is("select")) el.html(`<option value="">${placeholderText}</option>`);
+    } else {
+    el.removeClass('bg-slate-50 text-slate-400 cursor-not-allowed').addClass('bg-white text-slate-900 border-blue-200');
+    if (el.is("select")) el.empty();
+    }
+    }
 
-        <div class="mb-4">
-            <label class="block font-bold mb-2">Bác Sĩ</label>
-            <select name="BacSiId" class="w-full border p-2 rounded" required>
-                <option value="">-- Chọn --</option>
-                @foreach (var bs in ViewBag.DsBacSi)
-                {
-                    <option value="@bs.Id">BS. @bs.HoTen</option>
-                }
-            </select>
-        </div>
+    // 1. SỰ KIỆN CHỌN KHOA -> LOAD BÁC SĨ & PHÒNG
+    $('#ChuyenKhoaId').change(function () {
+    let khoaId = $(this).val();
+    if (!khoaId) {
+    setFieldState('#BacSiId', true, '-- Chọn khoa trước --');
+    setFieldState('#PhongKhamId', true, '-- Chọn khoa trước --');
+    $('#NgayKham').prop('disabled', true).addClass('bg-slate-50 cursor-not-allowed').val('');
+    $('#ContainerGio').html('<p class="col-span-full text-slate-400 text-center py-4 italic">Vui lòng hoàn thành các bước trên để xem lịch...</p>');
+    $('#GioKhamValue').val('');
+    checkEnableSubmit();
+    return;
+    }
 
-        <div class="mb-6">
-            <label class="block font-bold mb-2">Phòng Khám</label>
-            <select name="PhongKhamId" class="w-full border p-2 rounded" required>
-                <option value="">-- Chọn --</option>
-                @foreach (var pk in ViewBag.DsPhongKham)
-                {
-                    <option value="@pk.Id">P.@pk.SoPhong (Tầng @pk.Tang)</option>
-                }
-            </select>
-        </div>
+    setFieldState('#BacSiId', true, '🔎 Đang tải bác sĩ...');
+    setFieldState('#PhongKhamId', true, '🔎 Đang tải phòng...');
 
-        <button type="submit" class="bg-indigo-600 text-white font-bold px-6 py-2 rounded">Xác Nhận</button>
-    </form>
-</div>
+    $.get('/BuoiKham/GetBacSiVaPhong?chuyenKhoaId=' + khoaId, function (res) {
+    if (res.success) {
+    setFieldState('#BacSiId', false);
+    $('#BacSiId').append('<option value="">-- Chọn Bác Sĩ --</option>');
+    res.data.bacSis.forEach(bs => {
+    let tenBS = bs.ten.replace(/^BS\.\s*/i, "");
+    $('#BacSiId').append(`<option value="${bs.id}">BS. ${tenBS}</option>`);
+    });
+                    
+    setFieldState('#PhongKhamId', false);
+    $('#PhongKhamId').append('<option value="">-- Chọn Phòng --</option>');
+    res.data.phongs.forEach(p => {
+    let tenPhong = p.ten.replace(/^Phòng\s*/i, "");
+    let loai = p.loai === "VIP" ? "⭐ VIP" : "Thường";
+    $('#PhongKhamId').append(`<option value="${p.id}">Phòng ${tenPhong} (${loai})</option>`);
+    });
+                    
+    $('#NgayKham').prop('disabled', false).removeClass('bg-slate-50 text-slate-400 cursor-not-allowed').addClass('bg-white text-slate-900');
+    }
+    });
+    });
+
+    // 2. TÌM CA KHÁM (HIỂN THỊ CẢ CA TRỐNG & CA KÍN)
+    $('#NgayKham, #BacSiId, #PhongKhamId').change(function () {
+    let ngay = $('#NgayKham').val();
+    let bsId = $('#BacSiId').val();
+    let pId = $('#PhongKhamId').val();
+
+    if (!ngay || !bsId || !pId) return;
+
+    $('#ContainerGio').html('<div class="col-span-full text-center text-blue-500 animate-pulse py-4 italic font-medium">🔎 Đang đồng bộ lịch từ hệ thống...</div>');
+    $('#GioKhamValue').val('');
+    checkEnableSubmit(); // Tạm khóa nút submit lại khi đổi giờ
+
+    // Gọi API lấy giờ trống
+    $.get(`/BuoiKham/GetGioTrong?bacSiId=${bsId}&phongKhamId=${pId}&ngay=${ngay}`, function (res) {
+    $('#ContainerGio').empty();
+                
+    const tatCaCaKham = [
+    "07:00 - 08:00", "08:00 - 09:00", "09:00 - 10:00", "10:00 - 11:00",
+    "13:00 - 14:00", "14:00 - 15:00", "15:00 - 16:00", "16:00 - 17:00"
+    ];
+
+    if (res.success) {
+    let cacCaTrong = res.gioTrong || [];
+
+    tatCaCaKham.forEach(ca => {
+    let isAvailable = cacCaTrong.includes(ca);
+
+    if (isAvailable) {
+    // NÚT XANH / TRẮNG (CÒN TRỐNG - CHO PHÉP BẤM)
+    $('#ContainerGio').append(`
+    <button type="button" data-time="${ca}"
+    class="btn-gio py-3 px-1 border-2 border-blue-200 bg-white text-blue-700 font-bold rounded-xl hover:bg-blue-50 hover:border-blue-400 transition-all shadow-sm text-sm">
+    ${ca}
+    </button>`);
+    } else {
+    // NÚT ĐỎ (KÍN LỊCH / TRÙNG - KHÔNG CHO BẤM)
+    $('#ContainerGio').append(`
+    <div class="relative group">
+    <button type="button" disabled
+    class="w-full py-3 px-1 border-2 border-red-100 bg-red-50 text-red-400 font-bold rounded-xl cursor-not-allowed line-through text-sm opacity-80">
+    ${ca}
+    </button>
+    </div>`);
+    }
+    });
+    } else {
+    $('#ContainerGio').html('<p class="col-span-full text-red-500 text-center py-4 italic font-bold">❌ Không thể tải lịch, vui lòng thử lại!</p>');
+    }
+    });
+    });
+
+    // 3. XỬ LÝ KHI BỆNH NHÂN BẤM CHỌN 1 CA CÒN TRỐNG
+    $(document).on('click', '.btn-gio', function () {
+    $('.btn-gio').removeClass('bg-blue-600 text-white border-blue-600 scale-105 shadow-md')
+    .addClass('bg-white text-blue-700 border-blue-200');
+            
+    $(this).removeClass('bg-white text-blue-700 border-blue-200')
+    .addClass('bg-blue-600 text-white border-blue-600 scale-105 shadow-md');
+            
+    // Trích xuất "07:00" từ "07:00 - 08:00" để C# nhận diện được TimeOnly
+    let caKham = $(this).data('time');
+    $('#GioKhamValue').val(caKham.split(' - ')[0]);
+            
+    checkEnableSubmit();
+    });
+    });
+</script>

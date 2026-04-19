@@ -1,14 +1,18 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using QuanLyPhongKham.Data; // Import DbContext của bạn
+using QuanLyPhongKham.Data;
 using QuanLyPhongKham.Models;
+using QuanLyPhongKham.Models.Enums;
 using QuanLyPhongKham.Repositories.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace QuanLyPhongKham.Repositories.Implementations
 {
     public class BuoiKhamRepository : IBuoiKhamRepository
     {
-        private readonly AppDbContext _context; // Đổi AppDbContext thành tên context của bạn nếu khác
+        private readonly AppDbContext _context;
 
         public BuoiKhamRepository(AppDbContext context)
         {
@@ -60,7 +64,29 @@ namespace QuanLyPhongKham.Repositories.Implementations
         public BuoiKham? GetById(int id)
         {
             return _context.BuoiKhams.Find(id);
-            
+        }
+
+        // =====================================================================
+        // HÀM ĐÁP ỨNG YÊU CẦU: LẤY CÁC CA ĐÃ ĐẶT ĐỂ CHECK TRÙNG LỊCH
+        // =====================================================================
+        public async Task<List<BuoiKham>> GetCacCaDaDatAsync(DateOnly ngay, TimeOnly gio)
+        {
+            return await _context.BuoiKhams
+                .Where(b => b.Ngay == ngay
+                         && b.Gio == gio
+                         // LƯU Ý Ở ĐÂY: Ông gõ chữ TrangThaiBuoiKham. rồi chọn đúng tên Trạng Thái trong Enum của ông nhé
+                         && (b.TrangThai == TrangThaiBuoiKham.XacNhan || b.TrangThai == TrangThaiBuoiKham.ChuaXacNhan))
+                .ToListAsync();
+        }
+        public async Task<List<BuoiKham>> GetLichDaDatTrongNgayAsync(DateOnly ngay, int bacSiId, int phongKhamId)
+        {
+            // Lấy tất cả các ca đang Active của Bác sĩ HOẶC Phòng đó trong 1 ngày cụ thể
+            return await _context.BuoiKhams
+                .Where(b => b.Ngay == ngay
+                         && (b.BacSiId == bacSiId || b.PhongKhamId == phongKhamId)
+                         && (b.TrangThai == Models.Enums.TrangThaiBuoiKham.XacNhan ||
+                             b.TrangThai == Models.Enums.TrangThaiBuoiKham.ChuaXacNhan))
+                .ToListAsync();
         }
     }
 }

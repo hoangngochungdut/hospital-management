@@ -10,60 +10,102 @@ namespace QuanLyPhongKham.Web.Controllers
 {
     public class LeTanDashboardController : Controller
     {
-        private readonly AppDbContext _context;
         private readonly ILeTanService _leTanService;
+        private readonly IBuoiKhamService _buoiKhamService;
 
-        public LeTanDashboardController(AppDbContext context, ILeTanService leTanService)
+        public LeTanDashboardController(
+            ILeTanService leTanService,
+            IBuoiKhamService buoiKhamService)
         {
-            _context = context;
             _leTanService = leTanService;
+            _buoiKhamService = buoiKhamService;
         }
 
-        //   public IActionResult LeTanDashboard()
-        //{
-        //    ViewBag.DsBenhNhan = _context.BenhNhans.ToList();
-        //    ViewBag.DsBacSi = _context.BacSis.ToList();
-        //    ViewBag.DsPhongKham = _context.PhongKhams.ToList();
-        //    return View();
-        //}
         public IActionResult LeTanDashboard()
         {
             return View();
         }
 
-
-        [HttpGet]
-        public IActionResult LichKham()
+        public async Task<IActionResult> LichKham()
         {
-            ViewBag.DsBacSi = _context.BacSis.ToList();
-            ViewBag.DsBenhNhan = _context.BenhNhans.ToList();
-            ViewBag.DsPhongKham = _context.PhongKhams.ToList();
+            var dsKhoa = await _buoiKhamService.LayTatCaChuyenKhoaAsync();
+            var dsBenhNhan = await _buoiKhamService.LayTatCaBenhNhanAsync();
+            ViewBag.DsChuyenKhoa = dsKhoa;
+            ViewBag.DsBenhNhan = dsBenhNhan;
+
             return View();
         }
 
         [HttpPost]
-        public IActionResult DatLich(int BenhNhanId, DateOnly Ngay, TimeOnly Gio, int BacSiId, int PhongKhamId)
+        public async Task<IActionResult> DatLich(int BenhNhanId, DateOnly Ngay, TimeOnly Gio, int BacSiId, int PhongKhamId)
         {
-            var lichMoi = new BuoiKham
+            int? currentLeTanId = HttpContext.Session.GetInt32("UserId");
+            if (currentLeTanId == null)
             {
-                BenhNhanId = BenhNhanId,
+                return RedirectToAction("Login", "Account");
+            }
+
+            // Gói dữ liệu vào DTO
+            var request = new DatLichRequest
+            {
                 Ngay = Ngay,
                 Gio = Gio,
                 BacSiId = BacSiId,
                 PhongKhamId = PhongKhamId,
-                TrangThai = TrangThaiBuoiKham.XacNhan
+                BenhNhanId = BenhNhanId // Bắt buộc phải có vì Lễ tân đang đặt hộ
             };
 
-            _context.BuoiKhams.Add(lichMoi);
-            _context.SaveChanges();
+            try
+            {
+                // Gọi Service. Truyền role "LeTan" xuống để Service tự động set trạng thái thành "Xác nhận"
+                var result = await _buoiKhamService.DatLichKhamAsync(request, currentLeTanId.Value, "LeTan");
 
-            TempData["ThongBao"] = "Lễ tân đặt lịch hộ thành công!";
+                if (result)
+                {
+                    TempData["ThongBao"] = "✅ Lễ tân đặt lịch hộ thành công (Đã tự động xác nhận)!";
+                }
+            }
+            catch (Exception ex)
+            {
+                // Nếu trùng lịch/trùng phòng, Service sẽ ném lỗi ra đây
+                TempData["ThongBao"] = ex.Message;
+            }
+
             return RedirectToAction("LichKham");
         }
 
-        // ==================== CODE MỚI ====================
+        [HttpGet]
+        public async Task<IActionResult> GetBacSiVaPhong(int chuyenKhoaId)
+        {
+            try
+            {
+                // Gọi Service lấy data (Hàm này ông đã viết ở BuoiKhamService rồi)
+                var data = await _buoiKhamService.LayBacSiVaPhongTheoKhoaAsync(chuyenKhoaId);
 
-        // ❌ ĐÃ XÓA action Index (không cần)
+                // Ném cục data đó ra dưới dạng văn bản JSON
+                return Json(new { success = true, data = data });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetGioTrong(int bacSiId, int phongKhamId, string ngay)
+        {
+            try
+            {
+                var dateObj = DateOnly.Parse(ngay);
+                var gioTrong = await _buoiKhamService.LayCacGioKhamTrongAsync(bacSiId, phongKhamId, dateObj);
+
+                return Json(new { success = true, gioTrong = gioTrong });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
 
         // GET: Thông tin cá nhân (xem)
         [HttpGet]

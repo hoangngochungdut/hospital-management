@@ -9,10 +9,8 @@ using System.Threading.Tasks;
 
 namespace QuanLyPhongKham.Web.Controllers
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    [Authorize] // Bắt buộc đăng nhập
-    public class BuoiKhamController : ControllerBase
+    // Đổi thành Controller (không phải ControllerBase) để dùng trong MVC
+    public class BuoiKhamController : Controller
     {
         private readonly IBuoiKhamService _service;
 
@@ -21,47 +19,58 @@ namespace QuanLyPhongKham.Web.Controllers
             _service = service;
         }
 
-        [HttpPost("dat-lich")]
-        [Authorize(Roles = "BenhNhan,LeTan,Admin")]
-        public async Task<IActionResult> DatLich([FromBody] DatLichRequest request)
+        // 1. AJAX: Lấy Bác sĩ và Phòng khi chọn Chuyên khoa
+        [HttpGet]
+        public async Task<IActionResult> GetBacSiVaPhong(int chuyenKhoaId)
+        {
+            var data = await _service.LayBacSiVaPhongTheoKhoaAsync(chuyenKhoaId);
+            return Json(new { success = true, data = data });
+        }
+
+        // 2. AJAX: Lấy danh sách giờ trống khi chọn Ngày
+        [HttpGet]
+        public async Task<IActionResult> GetGioTrong(int bacSiId, int phongKhamId, string ngay)
         {
             try
             {
-                // Bóc tách Id và Role từ JWT Token
-                int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
-                string role = User.FindFirst(ClaimTypes.Role)?.Value ?? "";
-
-                var result = await _service.DatLichKhamAsync(request, userId, role);
-                if (result) return Ok(new { message = "Đặt lịch thành công!" });
-
-                return BadRequest(new { message = "Lỗi hệ thống khi lưu dữ liệu." });
+                var dateObj = DateOnly.Parse(ngay);
+                var gioTrong = await _service.LayCacGioKhamTrongAsync(bacSiId, phongKhamId, dateObj);
+                return Json(new { success = true, gioTrong = gioTrong });
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return Json(new { success = false, message = ex.Message });
             }
         }
 
-        [HttpPut("{id}/trang-thai")]
-        [Authorize(Roles = "BacSi,Admin,LeTan,BenhNhan")]
-        public async Task<IActionResult> CapNhatTrangThai(int id, [FromBody] int trangThaiMoiId)
+        // 3. POST: Xử lý đặt lịch khi bấm nút "Xác nhận"
+        [HttpPost]
+        public async Task<IActionResult> DatLich(DatLichRequest request)
         {
+            // Lấy ID người dùng từ Session (vì đây là MVC dùng Session)
+            int userId = HttpContext.Session.GetInt32("UserId") ?? 0;
+            string role = HttpContext.Session.GetString("UserRole") ?? "BenhNhan";
+
+            if (userId == 0) return RedirectToAction("Login", "Account");
+
             try
             {
-                int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
-                string role = User.FindFirst(ClaimTypes.Role)?.Value ?? "";
-
-                TrangThaiBuoiKham trangThai = (TrangThaiBuoiKham)trangThaiMoiId;
-
-                var result = await _service.CapNhatTrangThaiAsync(id, trangThai, userId, role);
-                if (result) return Ok(new { message = "Cập nhật trạng thái thành công!" });
-
-                return BadRequest(new { message = "Lỗi hệ thống." });
+                var result = await _service.DatLichKhamAsync(request, userId, role);
+                if (result)
+                {
+                    TempData["ThongBao"] = "✅ Đặt lịch thành công!";
+                }
+                else
+                {
+                    TempData["ThongBao"] = "❌ Lỗi hệ thống, vui lòng thử lại.";
+                }
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                TempData["ThongBao"] = "❌ " + ex.Message;
             }
+
+            return RedirectToAction("LichKham", "BenhNhanDashboard");
         }
     }
 }

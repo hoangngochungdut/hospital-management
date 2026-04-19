@@ -13,9 +13,11 @@ namespace QuanLyPhongKham.Repositories.Interfaces
         Task<BuoiKham?> GetByIdAsync(int id);
         Task<bool> UpdateAsync(BuoiKham buoiKham);
 
-        public List<BuoiKham> GetByBacSiId(int bacSiId);
-        public List<BuoiKham> GetAll();
-        public BuoiKham? GetById(int id);
-
+        List<BuoiKham> GetByBacSiId(int bacSiId);
+        List<BuoiKham> GetAll();
+        BuoiKham? GetById(int id);
+        // Xóa dòng cũ đi và thay bằng dòng này:
+        Task<List<BuoiKham>> GetCacCaDaDatAsync(DateOnly ngay, TimeOnly gio);
+        Task<List<BuoiKham>> GetLichDaDatTrongNgayAsync(DateOnly ngay, int bacSiId, int phongKhamId);
     }
 }

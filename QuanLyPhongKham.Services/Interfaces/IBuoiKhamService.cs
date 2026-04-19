@@ -15,6 +15,9 @@ namespace QuanLyPhongKham.Services.Interfaces
         public BuoiKham GetById(int id);
 
         public bool CapNhatTrangThai(int id, TrangThaiBuoiKham trangThaiMoi);
-
+        Task<object> LayBacSiVaPhongTheoKhoaAsync(int chuyenKhoaId);
+        Task<List<string>> LayCacGioKhamTrongAsync(int bacSiId, int phongKhamId, DateOnly ngay);
+        Task<List<ChuyenKhoa>> LayTatCaChuyenKhoaAsync();
+        Task<List<BenhNhan>> LayTatCaBenhNhanAsync();
     }
 }
