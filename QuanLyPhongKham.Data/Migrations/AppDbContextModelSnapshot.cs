@@ -42,7 +42,7 @@ namespace QuanLyPhongKham.Data.Migrations
                     b.Property<int?>("HoaDonId")
                         .HasColumnType("int");
 
-                    b.Property<int>("KetQuaKhamId")
+                    b.Property<int?>("KetQuaKhamId")
                         .HasColumnType("int");
 
                     b.Property<DateOnly>("Ngay")
@@ -51,8 +51,8 @@ namespace QuanLyPhongKham.Data.Migrations
                     b.Property<int>("PhongKhamId")
                         .HasColumnType("int");
 
-                    b.Property<string>("TrangThai")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("TrangThai")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -72,6 +72,9 @@ namespace QuanLyPhongKham.Data.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("MoTa")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("TenKhoa")
                         .HasColumnType("nvarchar(max)");
@@ -139,6 +142,9 @@ namespace QuanLyPhongKham.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int?>("ChuyenKhoaId")
+                        .HasColumnType("int");
+
                     b.Property<string>("LoaiPhong")
                         .HasColumnType("nvarchar(max)");
 
@@ -149,6 +155,8 @@ namespace QuanLyPhongKham.Data.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ChuyenKhoaId");
 
                     b.ToTable("PhongKhams");
                 });
@@ -162,18 +170,15 @@ namespace QuanLyPhongKham.Data.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("MatKhauHash")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("NguoiDungId")
                         .HasColumnType("int");
 
                     b.Property<string>("TenDangNhap")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("VaiTro")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -211,14 +216,7 @@ namespace QuanLyPhongKham.Data.Migrations
                     b.Property<int?>("ChuyenKhoaId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("PhongLamViecId")
-                        .HasColumnType("int");
-
                     b.HasIndex("ChuyenKhoaId");
-
-                    b.HasIndex("PhongLamViecId")
-                        .IsUnique()
-                        .HasFilter("[PhongLamViecId] IS NOT NULL");
 
                     b.ToTable("BacSis", (string)null);
                 });
@@ -286,6 +284,15 @@ namespace QuanLyPhongKham.Data.Migrations
                     b.Navigation("BuoiKham");
                 });
 
+            modelBuilder.Entity("QuanLyPhongKham.Models.PhongKham", b =>
+                {
+                    b.HasOne("QuanLyPhongKham.Models.ChuyenKhoa", "ChuyenKhoa")
+                        .WithMany("PhongKhams")
+                        .HasForeignKey("ChuyenKhoaId");
+
+                    b.Navigation("ChuyenKhoa");
+                });
+
             modelBuilder.Entity("QuanLyPhongKham.Models.TaiKhoan", b =>
                 {
                     b.HasOne("QuanLyPhongKham.Models.NguoiDung", "NguoiDung")
@@ -329,13 +336,7 @@ namespace QuanLyPhongKham.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("QuanLyPhongKham.Models.PhongKham", "PhongLamViec")
-                        .WithOne("BacSi")
-                        .HasForeignKey("QuanLyPhongKham.Models.BacSi", "PhongLamViecId");
-
                     b.Navigation("ChuyenKhoa");
-
-                    b.Navigation("PhongLamViec");
                 });
 
             modelBuilder.Entity("QuanLyPhongKham.Models.BenhNhan", b =>
@@ -366,6 +367,8 @@ namespace QuanLyPhongKham.Data.Migrations
             modelBuilder.Entity("QuanLyPhongKham.Models.ChuyenKhoa", b =>
                 {
                     b.Navigation("BacSis");
+
+                    b.Navigation("PhongKhams");
                 });
 
             modelBuilder.Entity("QuanLyPhongKham.Models.NguoiDung", b =>
@@ -375,8 +378,6 @@ namespace QuanLyPhongKham.Data.Migrations
 
             modelBuilder.Entity("QuanLyPhongKham.Models.PhongKham", b =>
                 {
-                    b.Navigation("BacSi");
-
                     b.Navigation("BuoiKhams");
                 });
 

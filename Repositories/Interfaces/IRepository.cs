@@ -1,8 +1,9 @@
-﻿using System;
+﻿using QuanLyPhongKham.Models;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace QuanLyPhongKham.Repositories
+namespace QuanLyPhongKham.Repositories.Interfaces
 {
     public interface IRepository<T>
     {
@@ -14,5 +15,6 @@ namespace QuanLyPhongKham.Repositories
         void Update(T entity);
 
         void Delete(T entity);
+        //T? GetByNguoiDungId(int nguoiDungId);
     }
 }

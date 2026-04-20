@@ -1,0 +1,173 @@
+﻿@model QuanLyPhongKham.Models.DTOs.XemHoSoBacSiResponse
+@{
+    ViewData["Title"] = "Hồ sơ của tôi";
+    Layout = "~/Views/Shared/_BacSiLayout.cshtml"; 
+}
+<div class="max-w-3xl mx-auto mt-4 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+    
+    <div class="bg-blue-600 px-6 py-4 border-b border-slate-100 flex items-center">
+        <h2 class="text-lg font-bold text-white flex items-center mb-0">
+            <i class="fas fa-user-md mr-2 text-xl"></i> Chỉnh sửa hồ sơ Bác sĩ
+        </h2>
+    </div>
+
+    <div class="p-6">
+        
+        @if (TempData["Success"] != null)
+        {
+            <div class="mb-5 p-3 bg-green-50 text-green-700 rounded-lg border border-green-100 flex items-center text-sm font-medium">
+                <i class="fas fa-check-circle mr-2 text-lg"></i> @TempData["Success"]
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="mb-5 p-3 bg-red-50 text-red-700 rounded-lg border border-red-100 flex items-center text-sm font-medium">
+                <i class="fas fa-exclamation-circle mr-2 text-lg"></i> @TempData["Error"]
+            </div>
+        }
+
+        <form asp-controller="BacSiDashboard" asp-action="CapNhatHoSo" method="post" id="mainForm" class="space-y-6">
+            @Html.AntiForgeryToken()
+
+            <div class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 items-center">
+                    <label class="text-slate-500 font-medium mb-1 md:mb-0">Họ tên <span class="text-red-500">*</span></label>
+                    <input type="text" name="HoTen" value="@Model?.HoTen" required
+                           class="md:col-span-2 w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition" />
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 items-center">
+                    <label class="text-slate-500 font-medium mb-1 md:mb-0">Giới tính</label>
+                    <select name="GioiTinh" class="md:col-span-2 w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition bg-white">
+                        <option value="">-- Chọn --</option>
+                        @if (Model?.GioiTinh == "Nam")
+                        {
+                            <option value="Nam" selected>Nam</option>
+                        }
+                        else
+                        {
+                            <option value="Nam">Nam</option>
+                        }
+                        @if (Model?.GioiTinh == "Nữ")
+                        {
+                            <option value="Nữ" selected>Nữ</option>
+                        }
+                        else
+                        {
+                            <option value="Nữ">Nữ</option>
+                        }
+                        @if (Model?.GioiTinh == "Khác")
+                        {
+                            <option value="Khác" selected>Khác</option>
+                        }
+                        else
+                        {
+                            <option value="Khác">Khác</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 items-center">
+                    <label class="text-slate-500 font-medium mb-1 md:mb-0">Số điện thoại</label>
+                    <input type="tel" name="SoDienThoai" value="@Model?.SoDienThoai"
+                           class="md:col-span-2 w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition" />
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 items-start mt-2">
+                    <label class="text-slate-500 font-medium mb-1 md:mb-0 pt-2">Địa chỉ</label>
+                    <textarea name="DiaChi" rows="3"
+                              class="md:col-span-2 w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition resize-none">@Model?.DiaChi</textarea>
+                </div>
+            </div>
+
+            <div class="pt-6 border-t border-slate-200 space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 items-center">
+                    <label class="text-cyan-700 font-bold mb-1 md:mb-0 flex items-center">
+                        <i class="fas fa-stethoscope mr-2"></i> Chuyên khoa
+                    </label>
+                    <select name="ChuyenKhoaId" class="md:col-span-2 w-full border border-cyan-300 bg-cyan-50 rounded-lg px-4 py-2 focus:ring-2 focus:ring-cyan-200 focus:border-cyan-500 outline-none transition">
+                        <option value="">-- Chọn chuyên khoa --</option>
+                        @if (ViewBag.DanhSachChuyenKhoa != null)
+                        {
+                            foreach (var ck in ViewBag.DanhSachChuyenKhoa)
+                            {
+                                if (Model != null && ck.Id == Model.ChuyenKhoaId)
+                                {
+                                    <option value="@ck.Id" selected>@ck.TenKhoa</option>
+                                }
+                                else
+                                {
+                                    <option value="@ck.Id">@ck.TenKhoa</option>
+                                }
+                            }
+                        }
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 items-center">
+                    <label class="text-cyan-700 font-bold mb-1 md:mb-0 flex items-center">
+                        <i class="fas fa-clinic-medical mr-2"></i> Phòng làm việc
+                    </label>
+                    <select name="PhongLamViecId" class="md:col-span-2 w-full border border-cyan-300 bg-cyan-50 rounded-lg px-4 py-2 focus:ring-2 focus:ring-cyan-200 focus:border-cyan-500 outline-none transition">
+                        <option value="">-- Chọn phòng --</option>
+                        @if (ViewBag.DanhSachPhongKham != null)
+                        {
+                            foreach (var pk in ViewBag.DanhSachPhongKham)
+                            {
+                                if (Model != null && pk.Id == Model.PhongLamViecId)
+                                {
+                                    <option value="@pk.Id" selected>Phòng @pk.SoPhong - Tầng @pk.Tang</option>
+                                }
+                                else
+                                {
+                                    <option value="@pk.Id">Phòng @pk.SoPhong - Tầng @pk.Tang</option>
+                                }
+                            }
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <div class="pt-6 border-t border-slate-200">
+                <h3 class="text-amber-600 font-bold mb-4 flex items-center text-lg">
+                    <i class="fas fa-key mr-2"></i> Đổi mật khẩu
+                </h3>
+                
+                <div class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 items-center">
+                        <label class="text-slate-500 font-medium mb-1 md:mb-0">Mật khẩu cũ</label>
+                        <input type="password" name="MatKhauCu" placeholder="Mật khẩu cũ"
+                               class="md:col-span-2 w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-amber-100 focus:border-amber-500 outline-none transition" />
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 items-center">
+                        <label class="text-slate-500 font-medium mb-1 md:mb-0">Mật khẩu mới</label>
+                        <input type="password" name="MatKhauMoi" placeholder="Mật khẩu mới"
+                               class="md:col-span-2 w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-amber-100 focus:border-amber-500 outline-none transition" />
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 items-center">
+                        <label class="text-slate-500 font-medium mb-1 md:mb-0">Xác nhận MK mới</label>
+                        <input type="password" name="XacNhanMatKhauMoi" placeholder="Xác nhận mật khẩu"
+                               class="md:col-span-2 w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-amber-100 focus:border-amber-500 outline-none transition" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-6 border-t border-slate-100 flex flex-wrap gap-3 justify-end">
+                <a href="@Url.Action("ThongTinCaNhan", "BacSiDashboard")" class="px-5 py-2.5 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition font-medium flex items-center">
+                    <i class="fas fa-times mr-2"></i> Quay lại
+                </a>
+                
+                <button type="submit" class="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium flex items-center shadow-sm">
+                    <i class="fas fa-save mr-2"></i> Lưu thông tin
+                </button>
+                
+                <button type="submit" formaction="@Url.Action("DoiMatKhau", "BacSiDashboard")" class="px-5 py-2.5 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition font-medium flex items-center shadow-sm">
+                    <i class="fas fa-key mr-2"></i> Đổi mật khẩu
+                </button>
+            </div>
+            
+        </form>
+    </div>
+</div>

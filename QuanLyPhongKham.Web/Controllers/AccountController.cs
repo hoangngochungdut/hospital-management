@@ -1,15 +1,17 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Http; // Thêm thư viện này để dùng được Session
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore; // Dùng để gọi .Include()
+using Microsoft.EntityFrameworkCore;
 using QuanLyLichKham.Models;
 using QuanLyPhongKham.Data;
 using QuanLyPhongKham.LowLevelValidators;
 using QuanLyPhongKham.Models;
 using QuanLyPhongKham.Repositories;
-using QuanLyPhongKham.Services;
+using QuanLyPhongKham.Services.Implementations;
 using QuanLyPhongKham.Web.Services.RoleRedirectService;
 using System.Data;
 using System.Linq;
+
 namespace QuanLyLichKham.Controllers
 {
     public class AccountController : Controller
@@ -26,21 +28,45 @@ namespace QuanLyLichKham.Controllers
         {
             return View();
         }
+
         [HttpPost]
         public IActionResult Login(string username, string password)
         {
             TaiKhoan? tk = _tkservice.GetByUsername(username);
 
-            if (tk != null)
+            // Kiểm tra tài khoản + mật khẩu
+            if (tk == null || tk.MatKhauHash != password)
             {
-                return RoleRedirectContext.
-                GetRoleRedirect(tk.VaiTro).
-                Redirect();
+                ViewBag.ErrorMessage = "Sai tài khoản hoặc mật khẩu!";
+                return View();
             }
-            return View();
-            
-        }
 
+            // ===================================================================
+            // BƯỚC 2: LƯU SESSION - Cất ID của người dùng vào túi để xài cho Đặt lịch
+            // ===================================================================
+            HttpContext.Session.SetInt32("UserId", tk.NguoiDungId);
+
+            // Ánh xạ vai trò từ viết tắt sang tên đầy đủ
+            string mappedRole = tk.VaiTro switch
+            {
+                "BS" => "BacSi",
+                "BN" => "BenhNhan",
+                "LT" => "LeTan",
+                "AD" => "Admin",
+                _ => tk.VaiTro
+            };
+
+            // Chuyển hướng dựa trên vai trò
+            return mappedRole switch
+            {
+                "Admin" => RedirectToAction("AdminDashboard", "AdminDashboard"),
+                "BacSi" => RedirectToAction("BacSiDashboard", "BacSiDashboard"),
+                "BenhNhan" => RedirectToAction("XemLichKham", "BenhNhanDashboard"),
+                "LeTan" => RedirectToAction("LeTanDashboard", "LeTanDashboard"),
+                _ => RedirectToAction("Login", "Account")
+            };
+
+        }
         [HttpGet]
         public IActionResult Register()
         {
@@ -64,8 +90,6 @@ namespace QuanLyLichKham.Controllers
                 return View();
             }
 
-
-
             var benhNhan = new BenhNhan
             {
                 HoTen = fullName,
@@ -86,6 +110,13 @@ namespace QuanLyLichKham.Controllers
             _tkservice.Add(newTaiKhoan);
 
             TempData["SuccessMessage"] = "Tạo tài khoản Bệnh Nhân thành công! Vui lòng đăng nhập để tiếp tục.";
+            return RedirectToAction("Login", "Account");
+        }
+        [HttpGet]
+        public IActionResult Logout()
+        {
+            HttpContext.Session.Clear();
+
             return RedirectToAction("Login", "Account");
         }
     }

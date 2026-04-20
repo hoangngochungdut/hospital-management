@@ -1,17 +1,18 @@
 ﻿using QuanLyPhongKham.Models;
-using QuanLyPhongKham.Repositories;
+using QuanLyPhongKham.Repositories.Implementations;
+using QuanLyPhongKham.Repositories.Interfaces;
 using QuanLyPhongKham.Services.BussinessValidationServices;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace QuanLyPhongKham.Services
+namespace QuanLyPhongKham.Services.Implementations
 {
     public class TaiKhoanService
     {
-        TaiKhoanRepository _repo;
+        ITaiKhoanRepository _repo;
         AccountValidationService _avservice;
-        public TaiKhoanService (TaiKhoanRepository repo, AccountValidationService avservice)
+        public TaiKhoanService (ITaiKhoanRepository repo, AccountValidationService avservice)
         {
             _repo = repo;
             _avservice = avservice;

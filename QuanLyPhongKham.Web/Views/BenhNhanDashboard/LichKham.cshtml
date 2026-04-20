@@ -1,0 +1,230 @@
+﻿@{
+    Layout = "~/Views/Shared/_BenhNhanLayout.cshtml";
+    ViewData["Title"] = "Đặt Lịch Khám";
+}
+
+<div class="bg-slate-50 min-h-screen py-10 px-4">
+    <div class="max-w-4xl mx-auto bg-white p-8 rounded-3xl shadow-2xl border border-slate-100">
+        
+        @if (TempData["ThongBao"] != null)
+        {
+            var msg = TempData["ThongBao"].ToString();
+            var isSuccess = msg.Contains("✅") || msg.Contains("thành công");
+            
+            <div class="mb-6 p-4 rounded-xl border flex items-center transition-all shadow-sm @(isSuccess ? "bg-green-50 border-green-200 text-green-700" : "bg-red-50 border-red-200 text-red-700")">
+                
+                <span class="font-medium text-lg">@msg</span>
+                
+                <button type="button" class="ml-auto text-slate-400 hover:text-slate-600 focus:outline-none" onclick="this.parentElement.style.display='none';">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+        }
+        <div class="text-center mb-10 border-b pb-6">
+            <h2 class="text-3xl font-black text-slate-800 uppercase tracking-tight">Đăng Ký Khám Bệnh</h2>
+            <p class="text-slate-500 mt-2 italic">Chọn chuyên khoa và khung giờ phù hợp</p>
+        </div>
+
+        <form asp-controller="BenhNhanDashboard" asp-action="DatLich" method="POST" id="formDatLich">
+            
+            <div class="mb-10">
+                <h3 class="font-bold text-xl text-blue-700 mb-4 flex items-center">
+                    <span class="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center mr-3 text-sm">1</span> Xác định chuyên khoa
+                </h3>
+                <div class="bg-blue-50 p-6 rounded-2xl border border-blue-100 shadow-inner">
+                    <label class="block text-sm font-bold text-blue-800 mb-2">Xem gợi ý triệu chứng trong danh sách:</label>
+                    <select id="ChuyenKhoaId" name="ChuyenKhoaId" class="w-full border-2 border-white p-4 rounded-xl outline-none focus:border-blue-500 shadow-sm transition-all text-slate-700 font-medium" required>
+                        <option value="">-- Chọn Chuyên Khoa --</option>
+                        @if (ViewBag.DsChuyenKhoa != null)
+                        {
+                            foreach (var khoa in ViewBag.DsChuyenKhoa)
+                            {
+                                var textHienThi = string.IsNullOrEmpty(khoa.MoTa) ? khoa.TenKhoa : $"{khoa.TenKhoa} (Gợi ý: {khoa.MoTa})";
+                                <option value="@khoa.Id" data-mota="@khoa.MoTa">@textHienThi</option>
+                            }
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+                <div>
+                    <h3 class="font-bold text-lg text-blue-700 mb-3 flex items-center">
+                        <span class="w-7 h-7 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mr-2 text-xs">2</span> Chọn Bác Sĩ
+                    </h3>
+                    <select id="BacSiId" name="BacSiId" class="w-full border-2 border-slate-200 p-3 rounded-xl outline-none focus:border-blue-500 bg-slate-50 text-slate-400 transition-all cursor-not-allowed" disabled required>
+                        <option value="">-- Chọn khoa trước --</option>
+                    </select>
+                </div>
+
+                <div>
+                    <h3 class="font-bold text-lg text-blue-700 mb-3 flex items-center">
+                        <span class="w-7 h-7 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mr-2 text-xs">3</span> Chọn Phòng Khám
+                    </h3>
+                    <select id="PhongKhamId" name="PhongKhamId" class="w-full border-2 border-slate-200 p-3 rounded-xl outline-none focus:border-blue-500 bg-slate-50 text-slate-400 transition-all cursor-not-allowed" disabled required>
+                        <option value="">-- Chọn khoa trước --</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="mb-10 bg-slate-50 p-6 rounded-2xl border border-slate-100 shadow-inner">
+                <div class="mb-8">
+                    <h3 class="font-bold text-lg text-blue-700 mb-4 flex items-center">
+                        <span class="w-7 h-7 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mr-2 text-xs">4</span> Chọn Ngày Khám
+                    </h3>
+                    <input type="date" id="NgayKham" name="Ngay" min="@DateTime.Now.ToString("yyyy-MM-dd")"
+                           class="w-full border-2 border-slate-200 p-3 rounded-xl outline-none focus:border-blue-500 bg-slate-50 text-slate-400 font-bold cursor-not-allowed" disabled required />
+                </div>
+
+                <div>
+                    <h3 class="font-bold text-lg text-blue-700 mb-5 flex items-center">
+                        <span class="w-7 h-7 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mr-2 text-xs">5</span> Chọn Ca Khám (1 Tiếng/Ca)
+                    </h3>
+                    
+                    <div id="ContainerGio" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                        <p class="col-span-full text-slate-400 text-center py-4 italic">Vui lòng hoàn thành các bước trên để xem lịch...</p>
+                    </div>
+                    
+                    <div class="mt-4 flex items-center justify-center space-x-6 text-sm font-medium">
+                        <div class="flex items-center"><span class="w-4 h-4 bg-white border-2 border-blue-200 rounded-full mr-2"></span> Còn trống</div>
+                        <div class="flex items-center"><span class="w-4 h-4 bg-blue-600 rounded-full mr-2 shadow-sm"></span> Đang chọn</div>
+                        <div class="flex items-center"><span class="w-4 h-4 bg-red-100 border-2 border-red-300 rounded-full mr-2"></span> Đã Kín lịch</div>
+                    </div>
+
+                    <input type="hidden" id="GioKhamValue" name="Gio" required />
+                </div>
+            </div>
+
+            <button type="submit" id="btnSubmit" class="w-full bg-slate-200 text-slate-400 text-xl font-black py-5 rounded-2xl transition-all duration-300 opacity-50 cursor-not-allowed shadow-lg" disabled>
+                HOÀN TẤT ĐẶT LỊCH
+            </button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            
+            function setFieldState(elementId, disabled, placeholderText) {
+                let el = $(elementId); el.prop('disabled', disabled);
+                if (disabled) {
+                    el.addClass('bg-slate-50 text-slate-400 cursor-not-allowed').removeClass('bg-white text-slate-900 border-blue-200');
+                    if (el.is("select")) el.html(`<option value="">${placeholderText}</option>`);
+                } else {
+                    el.removeClass('bg-slate-50 text-slate-400 cursor-not-allowed').addClass('bg-white text-slate-900 border-blue-200');
+                    if (el.is("select")) el.empty();
+                }
+            }
+
+            // 1. SỰ KIỆN CHỌN KHOA -> LOAD BÁC SĨ & PHÒNG
+            $('#ChuyenKhoaId').change(function () {
+                let khoaId = $(this).val();
+                if (!khoaId) {
+                    setFieldState('#BacSiId', true, '-- Chọn khoa trước --');
+                    setFieldState('#PhongKhamId', true, '-- Chọn khoa trước --');
+                    $('#NgayKham').prop('disabled', true).addClass('bg-slate-50 cursor-not-allowed');
+                    return;
+                }
+
+                setFieldState('#BacSiId', true, '🔎 Đang tải bác sĩ...');
+                setFieldState('#PhongKhamId', true, '🔎 Đang tải phòng...');
+
+                $.get('/BuoiKham/GetBacSiVaPhong?chuyenKhoaId=' + khoaId, function (res) {
+                    if (res.success) {
+                        setFieldState('#BacSiId', false);
+                        $('#BacSiId').append('<option value="">-- Chọn Bác Sĩ --</option>');
+                        res.data.bacSis.forEach(bs => {
+                            let tenBS = bs.ten.replace(/^BS\.\s*/i, "");
+                            $('#BacSiId').append(`<option value="${bs.id}">BS. ${tenBS}</option>`);
+                        });
+                        
+                        setFieldState('#PhongKhamId', false);
+                        $('#PhongKhamId').append('<option value="">-- Chọn Phòng --</option>');
+                        res.data.phongs.forEach(p => {
+                            let tenPhong = p.ten.replace(/^Phòng\s*/i, "");
+                            let loai = p.loai === "VIP" ? "⭐ VIP" : "Thường";
+                            $('#PhongKhamId').append(`<option value="${p.id}">Phòng ${tenPhong} (${loai})</option>`);
+                        });
+                        
+                        $('#NgayKham').prop('disabled', false).removeClass('bg-slate-50 text-slate-400 cursor-not-allowed').addClass('bg-white text-slate-900');
+                    }
+                });
+            });
+
+            // 2. TÌM CA KHÁM (HIỂN THỊ CẢ CA TRỐNG & CA KÍN)
+            $('#NgayKham, #BacSiId, #PhongKhamId').change(function () {
+                let ngay = $('#NgayKham').val();
+                let bsId = $('#BacSiId').val();
+                let pId = $('#PhongKhamId').val();
+
+                if (!ngay || !bsId || !pId) return;
+
+                $('#ContainerGio').html('<div class="col-span-full text-center text-blue-500 animate-pulse py-4 italic font-medium">🔎 Đang đồng bộ lịch từ hệ thống...</div>');
+                $('#GioKhamValue').val('');
+                $('#btnSubmit').prop('disabled', true).addClass('bg-slate-200 text-slate-400 opacity-50 cursor-not-allowed').removeClass('bg-blue-600 text-white shadow-blue-200 cursor-pointer hover:bg-blue-700');
+
+                // Gọi API lấy giờ trống
+                $.get(`/BuoiKham/GetGioTrong?bacSiId=${bsId}&phongKhamId=${pId}&ngay=${ngay}`, function (res) {
+                    $('#ContainerGio').empty();
+                    
+                    // ĐỊNH NGHĨA DANH SÁCH TẤT CẢ CÁC CA TRONG 1 NGÀY
+                    const tatCaCaKham = [
+                        "07:00 - 08:00", "08:00 - 09:00", "09:00 - 10:00", "10:00 - 11:00",
+                        "13:00 - 14:00", "14:00 - 15:00", "15:00 - 16:00", "16:00 - 17:00"
+                    ];
+
+                    if (res.success) {
+                        let cacCaTrong = res.gioTrong;
+
+                        tatCaCaKham.forEach(ca => {
+                            let isAvailable = cacCaTrong.includes(ca);
+
+                            if (isAvailable) {
+                                // NÚT XANH / TRẮNG (CÒN TRỐNG - CHO PHÉP BẤM)
+                                $('#ContainerGio').append(`
+                                    <button type="button" data-time="${ca}"
+                                        class="btn-gio py-3 px-1 border-2 border-blue-200 bg-white text-blue-700 font-bold rounded-xl hover:bg-blue-50 hover:border-blue-400 transition-all shadow-sm text-sm">
+                                        ${ca}
+                                    </button>`);
+                            } else {
+                                // NÚT ĐỎ (KÍN LỊCH / TRÙNG - KHÔNG CHO BẤM)
+                                $('#ContainerGio').append(`
+                                    <div class="relative group">
+                                        <button type="button" disabled
+                                            class="w-full py-3 px-1 border-2 border-red-200 bg-red-50 text-red-500 font-bold rounded-xl cursor-not-allowed line-through text-sm opacity-80">
+                                            ${ca}
+                                        </button>
+                                        <span class="absolute -top-8 left-1/2 -translate-x-1/2 bg-red-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                                            Kín lịch
+                                        </span>
+                                    </div>`);
+                            }
+                        });
+                    }
+                });
+            });
+
+            // 3. XỬ LÝ KHI BỆNH NHÂN BẤM CHỌN 1 CA CÒN TRỐNG
+            $(document).on('click', '.btn-gio', function () {
+                // Xóa trạng thái active của các nút khác
+                $('.btn-gio').removeClass('bg-blue-600 text-white border-blue-600 scale-105 shadow-md')
+                             .addClass('bg-white text-blue-700 border-blue-200');
+                
+                // Set trạng thái active cho nút vừa bấm
+                $(this).removeClass('bg-white text-blue-700 border-blue-200')
+                       .addClass('bg-blue-600 text-white border-blue-600 scale-105 shadow-md');
+                
+                // --- ĐÃ FIX CẮT LẤY GIỜ VÀ NỐI THÊM :00 ---
+                let caKham = $(this).data('time');
+                let gioCut = caKham.split(' - ')[0]; // Lấy "07:00"
+                $('#GioKhamValue').val(gioCut + ":00"); // Gửi về C# là "07:00:00" để không bị thành 12h
+                
+                // Mở khóa nút Xác Nhận
+                $('#btnSubmit').prop('disabled', false)
+                             .removeClass('bg-slate-200 text-slate-400 opacity-50 cursor-not-allowed')
+                             .addClass('bg-blue-600 text-white hover:bg-blue-700 shadow-blue-200 cursor-pointer');
+            });
+        });
+    </script>
+}
