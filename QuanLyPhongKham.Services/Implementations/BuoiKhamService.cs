@@ -89,7 +89,6 @@ namespace QuanLyPhongKham.Services.Implementations
                 TrangThai = TrangThaiBuoiKham.ChuaXacNhan
             };
 
-            // LOGIC PHÂN QUYỀN (Giữ nguyên gốc)
             if (role == "BenhNhan")
             {
                 buoiKham.BenhNhanId = currentUserId;
@@ -139,11 +138,30 @@ namespace QuanLyPhongKham.Services.Implementations
             return await _buoiKhamRepo.UpdateAsync(buoiKham);
         }
 
+        //public List<BuoiKham> GetByBacSiId(int bacSiId)
+        //{
+        //    return _buoiKhamRepo.GetByBacSiId(bacSiId);
+        //}
         public List<BuoiKham> GetByBacSiId(int bacSiId)
         {
-            return _buoiKhamRepo.GetByBacSiId(bacSiId);
+            return _context.BuoiKhams
+                .Include(b => b.BenhNhan) // Để lấy tên bệnh nhân
+                .Include(b => b.PhongKham) // Để lấy tên phòng
+                .Where(b => b.BacSiId == bacSiId)
+                .OrderByDescending(b => b.Ngay) // Hiện ngày mới nhất lên đầu
+                .ThenBy(b => b.Gio)            // Sắp xếp theo giờ khám
+                .ToList();
         }
-
+        public List<BuoiKham> GetByBenhNhanId(int benhNhanId)
+        {
+            return _context.BuoiKhams
+                .Include(b => b.BacSi)      // Lấy tên Bác sĩ để hiển thị cho Bệnh nhân
+                .Include(b => b.PhongKham)  // Lấy tên phòng
+                .Where(b => b.BenhNhanId == benhNhanId)
+                .OrderByDescending(b => b.Ngay)
+                .ThenByDescending(b => b.Gio)
+                .ToList();
+        }
         public List<BuoiKham> GetAllLichKham()
         {
             return _buoiKhamRepo.GetAll();
@@ -156,7 +174,17 @@ namespace QuanLyPhongKham.Services.Implementations
                 throw new Exception("Không tìm thấy lịch");
             return lich;
         }
-
+        public bool XoaBuoiKham(int id)
+        {
+            var lich = _context.BuoiKhams.Find(id);
+            if (lich != null)
+            {
+                _context.BuoiKhams.Remove(lich);
+                _context.SaveChanges();
+                return true;
+            }
+            return false;
+        }
         public bool CapNhatTrangThai(int id, TrangThaiBuoiKham trangThaiMoi)
         {
             var lich = _buoiKhamRepo.GetById(id);

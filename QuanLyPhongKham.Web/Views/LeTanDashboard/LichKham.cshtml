@@ -8,6 +8,20 @@
 <div class="bg-slate-50 min-h-screen py-10 px-4">
     <div class="max-w-4xl mx-auto bg-white p-8 rounded-3xl shadow-2xl border border-slate-100">
         
+        @if (TempData["ThongBao"] != null)
+        {
+            var msg = TempData["ThongBao"].ToString();
+            var isSuccess = msg.Contains("✅") || msg.Contains("thành công");
+            
+            <div class="mb-6 p-4 rounded-xl border flex items-center transition-all shadow-sm @(isSuccess ? "bg-green-50 border-green-200 text-green-700" : "bg-red-50 border-red-200 text-red-700")">
+                
+                <span class="font-medium text-lg">@msg</span>
+                
+                <button type="button" class="ml-auto text-slate-400 hover:text-slate-600 focus:outline-none" onclick="this.parentElement.style.display='none';">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+        }
         <div class="text-center mb-10 border-b pb-6">
             <h2 class="text-3xl font-black text-slate-800 uppercase tracking-tight">Đăng Ký Khám (Lễ Tân)</h2>
             <p class="text-slate-500 mt-2 italic">Chọn bệnh nhân và hoàn thành các bước để đặt lịch hộ</p>
@@ -133,7 +147,7 @@
     checkEnableSubmit();
     });
 
-    // --- CÁC HÀM XỬ LÝ KHOA, BÁC SĨ, GIỜ NHƯ CŨ ---
+    // --- CÁC HÀM XỬ LÝ KHOA, BÁC SĨ, GIỜ ---
     function setFieldState(elementId, disabled, placeholderText) {
     let el = $(elementId);
     el.prop('disabled', disabled);
@@ -170,7 +184,7 @@
     let tenBS = bs.ten.replace(/^BS\.\s*/i, "");
     $('#BacSiId').append(`<option value="${bs.id}">BS. ${tenBS}</option>`);
     });
-                    
+                                    
     setFieldState('#PhongKhamId', false);
     $('#PhongKhamId').append('<option value="">-- Chọn Phòng --</option>');
     res.data.phongs.forEach(p => {
@@ -178,7 +192,7 @@
     let loai = p.loai === "VIP" ? "⭐ VIP" : "Thường";
     $('#PhongKhamId').append(`<option value="${p.id}">Phòng ${tenPhong} (${loai})</option>`);
     });
-                    
+                                    
     $('#NgayKham').prop('disabled', false).removeClass('bg-slate-50 text-slate-400 cursor-not-allowed').addClass('bg-white text-slate-900');
     }
     });
@@ -199,7 +213,7 @@
     // Gọi API lấy giờ trống
     $.get(`/BuoiKham/GetGioTrong?bacSiId=${bsId}&phongKhamId=${pId}&ngay=${ngay}`, function (res) {
     $('#ContainerGio').empty();
-                
+                                
     const tatCaCaKham = [
     "07:00 - 08:00", "08:00 - 09:00", "09:00 - 10:00", "10:00 - 11:00",
     "13:00 - 14:00", "14:00 - 15:00", "15:00 - 16:00", "16:00 - 17:00"
@@ -212,14 +226,12 @@
     let isAvailable = cacCaTrong.includes(ca);
 
     if (isAvailable) {
-    // NÚT XANH / TRẮNG (CÒN TRỐNG - CHO PHÉP BẤM)
     $('#ContainerGio').append(`
     <button type="button" data-time="${ca}"
     class="btn-gio py-3 px-1 border-2 border-blue-200 bg-white text-blue-700 font-bold rounded-xl hover:bg-blue-50 hover:border-blue-400 transition-all shadow-sm text-sm">
     ${ca}
     </button>`);
     } else {
-    // NÚT ĐỎ (KÍN LỊCH / TRÙNG - KHÔNG CHO BẤM)
     $('#ContainerGio').append(`
     <div class="relative group">
     <button type="button" disabled
@@ -239,14 +251,16 @@
     $(document).on('click', '.btn-gio', function () {
     $('.btn-gio').removeClass('bg-blue-600 text-white border-blue-600 scale-105 shadow-md')
     .addClass('bg-white text-blue-700 border-blue-200');
-            
+                        
     $(this).removeClass('bg-white text-blue-700 border-blue-200')
     .addClass('bg-blue-600 text-white border-blue-600 scale-105 shadow-md');
-            
-    // Trích xuất "07:00" từ "07:00 - 08:00" để C# nhận diện được TimeOnly
+                        
+    // --- ĐÃ FIX CẮT LẤY GIỜ VÀ NỐI THÊM :00 (TRÁNH LỖI 12:00 AM) ---
     let caKham = $(this).data('time');
-    $('#GioKhamValue').val(caKham.split(' - ')[0]);
-            
+    let gioCut = caKham.split(' - ')[0]; // Lấy "07:00"
+    $('#GioKhamValue').val(gioCut + ":00"); // Gửi về C# là "07:00:00"
+    // ---------------------------------------------------------------
+                        
     checkEnableSubmit();
     });
     });

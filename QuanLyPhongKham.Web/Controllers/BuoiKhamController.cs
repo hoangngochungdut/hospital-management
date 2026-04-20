@@ -47,7 +47,6 @@ namespace QuanLyPhongKham.Web.Controllers
         [HttpPost]
         public async Task<IActionResult> DatLich(DatLichRequest request)
         {
-            // Lấy ID người dùng từ Session (vì đây là MVC dùng Session)
             int userId = HttpContext.Session.GetInt32("UserId") ?? 0;
             string role = HttpContext.Session.GetString("UserRole") ?? "BenhNhan";
 

@@ -13,11 +13,12 @@ namespace QuanLyPhongKham.Services.Interfaces
 
         public List<BuoiKham> GetAllLichKham();
         public BuoiKham GetById(int id);
-
+        List<BuoiKham> GetByBenhNhanId(int benhNhanId);
         public bool CapNhatTrangThai(int id, TrangThaiBuoiKham trangThaiMoi);
         Task<object> LayBacSiVaPhongTheoKhoaAsync(int chuyenKhoaId);
         Task<List<string>> LayCacGioKhamTrongAsync(int bacSiId, int phongKhamId, DateOnly ngay);
         Task<List<ChuyenKhoa>> LayTatCaChuyenKhoaAsync();
         Task<List<BenhNhan>> LayTatCaBenhNhanAsync();
+        bool XoaBuoiKham(int id);
     }
 }

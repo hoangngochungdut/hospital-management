@@ -61,13 +61,12 @@ namespace QuanLyLichKham.Controllers
             {
                 "Admin" => RedirectToAction("AdminDashboard", "AdminDashboard"),
                 "BacSi" => RedirectToAction("BacSiDashboard", "BacSiDashboard"),
-                "BenhNhan" => RedirectToAction("BenhNhanDashboard", "BenhNhanDashboard"),
+                "BenhNhan" => RedirectToAction("XemLichKham", "BenhNhanDashboard"),
                 "LeTan" => RedirectToAction("LeTanDashboard", "LeTanDashboard"),
                 _ => RedirectToAction("Login", "Account")
             };
 
         }
-
         [HttpGet]
         public IActionResult Register()
         {
@@ -111,6 +110,13 @@ namespace QuanLyLichKham.Controllers
             _tkservice.Add(newTaiKhoan);
 
             TempData["SuccessMessage"] = "Tạo tài khoản Bệnh Nhân thành công! Vui lòng đăng nhập để tiếp tục.";
+            return RedirectToAction("Login", "Account");
+        }
+        [HttpGet]
+        public IActionResult Logout()
+        {
+            HttpContext.Session.Clear();
+
             return RedirectToAction("Login", "Account");
         }
     }

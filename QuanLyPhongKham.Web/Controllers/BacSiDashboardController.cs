@@ -9,12 +9,11 @@ namespace QuanLyPhongKham.Web.Controllers
 {
     public class BacSiDashboardController : Controller
     {
-        private readonly AppDbContext _context;
         private readonly IBacSiService _bacSiService;
         private readonly IBuoiKhamService _buoiKhamService;
-       
-        public BacSiDashboardController(AppDbContext context, IBacSiService bacSiService, IBuoiKhamService buoiKhamService) {
-            _context = context;
+
+        public BacSiDashboardController(IBacSiService bacSiService, IBuoiKhamService buoiKhamService)
+        {
             _bacSiService = bacSiService;
             _buoiKhamService = buoiKhamService;
         }
@@ -37,96 +36,91 @@ namespace QuanLyPhongKham.Web.Controllers
         [HttpPost]
         public IActionResult DoiTrangThai(int id, int trangThaiMoi)
         {
-            var lich = _context.BuoiKhams.Find(id);
-            if (lich != null)
-            {
-                lich.TrangThai = (TrangThaiBuoiKham)trangThaiMoi;
-                _context.SaveChanges();
-            }
+            _buoiKhamService.CapNhatTrangThai(id, (TrangThaiBuoiKham)trangThaiMoi);
             return RedirectToAction("LichKham");
         }
-        [HttpGet]
-        public IActionResult ThongTinCaNhan()
-        {
-            int? userId = HttpContext.Session.GetInt32("UserId");
-            if (userId == null)
-            {
-                return RedirectToAction("Login", "Account");
-            }
+        //[HttpGet]
+        //public IActionResult ThongTinCaNhan()
+        //{
+        //    int? userId = HttpContext.Session.GetInt32("UserId");
+        //    if (userId == null)
+        //    {
+        //        return RedirectToAction("Login", "Account");
+        //    }
 
-            var result = _bacSiService.GetHoSo(userId.Value);
-            if (result == null)
-            {
-                TempData["Error"] = "Không tìm thấy thông tin";
-                return RedirectToAction("BacSiDashboard");
-            }
+        //    var result = _bacSiService.GetHoSo(userId.Value);
+        //    if (result == null)
+        //    {
+        //        TempData["Error"] = "Không tìm thấy thông tin";
+        //        return RedirectToAction("BacSiDashboard");
+        //    }
 
-            return View(result);
-        }
+        //    return View(result);
+        //}
 
-        // GET: Chỉnh sửa hồ sơ
-        [HttpGet]
-        public IActionResult HoSo()
-        {
-            int? userId = HttpContext.Session.GetInt32("UserId");
-            if (userId == null)
-            {
-                return RedirectToAction("Login", "Account");
-            }
+    //    // GET: Chỉnh sửa hồ sơ
+    //    [HttpGet]
+    //    public IActionResult HoSo()
+    //    {
+    //        int? userId = HttpContext.Session.GetInt32("UserId");
+    //        if (userId == null)
+    //        {
+    //            return RedirectToAction("Login", "Account");
+    //        }
 
-            var result = _bacSiService.GetHoSo(userId.Value);
+    //        var result = _bacSiService.GetHoSo(userId.Value);
 
-            // Lấy danh sách chuyên khoa và phòng khám cho dropdown
-            ViewBag.DanhSachChuyenKhoa = _context.ChuyenKhoas.ToList();
-            ViewBag.DanhSachPhongKham = _context.PhongKhams.ToList();
+    //        // Lấy danh sách chuyên khoa và phòng khám cho dropdown
+    //        ViewBag.DanhSachChuyenKhoa = _context.ChuyenKhoas.ToList();
+    //        ViewBag.DanhSachPhongKham = _context.PhongKhams.ToList();
 
-            return View(result);
-        }
+    //        return View(result);
+    //    }
 
-        // POST: Cập nhật hồ sơ
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult CapNhatHoSo(CapNhatHoSoBacSiRequest request)
-        {
-            int? userId = HttpContext.Session.GetInt32("UserId");
-            if (userId == null)
-            {
-                return RedirectToAction("Login", "Account");
-            }
+    //    // POST: Cập nhật hồ sơ
+    //    [HttpPost]
+    //    [ValidateAntiForgeryToken]
+    //    public IActionResult CapNhatHoSo(CapNhatHoSoBacSiRequest request)
+    //    {
+    //        int? userId = HttpContext.Session.GetInt32("UserId");
+    //        if (userId == null)
+    //        {
+    //            return RedirectToAction("Login", "Account");
+    //        }
 
-            var (success, message) = _bacSiService.CapNhatHoSo(userId.Value, request);
-            if (success)
-                TempData["Success"] = message;
-            else
-                TempData["Error"] = message;
+    //        var (success, message) = _bacSiService.CapNhatHoSo(userId.Value, request);
+    //        if (success)
+    //            TempData["Success"] = message;
+    //        else
+    //            TempData["Error"] = message;
 
-            return RedirectToAction(nameof(ThongTinCaNhan));
-        }
+    //        return RedirectToAction(nameof(ThongTinCaNhan));
+    //    }
 
-        // POST: Đổi mật khẩu
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DoiMatKhau(DoiMatKhauRequest request)
-        {
-            int? userId = HttpContext.Session.GetInt32("UserId");
-            if (userId == null)
-            {
-                return RedirectToAction("Login", "Account");
-            }
+    //    // POST: Đổi mật khẩu
+    //    [HttpPost]
+    //    [ValidateAntiForgeryToken]
+    //    public async Task<IActionResult> DoiMatKhau(DoiMatKhauRequest request)
+    //    {
+    //        int? userId = HttpContext.Session.GetInt32("UserId");
+    //        if (userId == null)
+    //        {
+    //            return RedirectToAction("Login", "Account");
+    //        }
 
-            if (request.MatKhauMoi != request.XacNhanMatKhauMoi)
-            {
-                TempData["Error"] = "Mật khẩu mới và xác nhận không khớp";
-                return RedirectToAction(nameof(HoSo));
-            }
+    //        if (request.MatKhauMoi != request.XacNhanMatKhauMoi)
+    //        {
+    //            TempData["Error"] = "Mật khẩu mới và xác nhận không khớp";
+    //            return RedirectToAction(nameof(HoSo));
+    //        }
 
-            var (success, message) = await _bacSiService.DoiMatKhau(userId.Value, request);
-            if (success)
-                TempData["Success"] = message;
-            else
-                TempData["Error"] = message;
+    //        var (success, message) = await _bacSiService.DoiMatKhau(userId.Value, request);
+    //        if (success)
+    //            TempData["Success"] = message;
+    //        else
+    //            TempData["Error"] = message;
 
-            return RedirectToAction(nameof(HoSo));
-        }
+    //        return RedirectToAction(nameof(HoSo));
+    //    }
     }
 }

@@ -43,7 +43,7 @@ namespace QuanLyPhongKham.Web.Controllers
             return View();
         }
         [HttpPost]
-        public async Task<IActionResult> DatLich(DateOnly Ngay, TimeOnly Gio, int BacSiId, int PhongKhamId)
+        public async Task<IActionResult> DatLich(DateOnly Ngay, string Gio, int BacSiId, int PhongKhamId)
         {
             int? currentBenhNhanId = HttpContext.Session.GetInt32("UserId");
 
@@ -52,10 +52,19 @@ namespace QuanLyPhongKham.Web.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
+            // 2. ÉP KIỂU GIỜ TỪ CHUỖI SANG TIMEONLY 
+            TimeOnly gioKhamChuan;
+            if (!TimeOnly.TryParse(Gio, out gioKhamChuan))
+            {
+                TempData["ThongBao"] = "❌ Hệ thống không đọc được định dạng giờ (" + Gio + ")!";
+                return RedirectToAction("LichKham");
+            }
+
+            // Gói dữ liệu vào DTO
             var request = new DatLichRequest
             {
                 Ngay = Ngay,
-                Gio = Gio,
+                Gio = gioKhamChuan, // 3. GÁN BIẾN GIỜ ĐÃ ÉP KIỂU VÀO ĐÂY 👇
                 BacSiId = BacSiId,
                 PhongKhamId = PhongKhamId
             };
@@ -113,7 +122,19 @@ namespace QuanLyPhongKham.Web.Controllers
                 return Json(new { success = false, message = ex.Message });
             }
         }
+        [HttpGet]
+        public IActionResult XemLichKham()
+        {
+            int? currentBenhNhanId = HttpContext.Session.GetInt32("UserId");
+            if (currentBenhNhanId == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
 
+            var lichCuaToi = _buoiKhamService.GetByBenhNhanId(currentBenhNhanId.Value);
+
+            return View(lichCuaToi);
+        }
 
         //// GET: Thông tin cá nhân (chế độ xem)
         //[HttpGet]

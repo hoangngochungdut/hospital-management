@@ -37,7 +37,8 @@ namespace QuanLyPhongKham.Web.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> DatLich(int BenhNhanId, DateOnly Ngay, TimeOnly Gio, int BacSiId, int PhongKhamId)
+        // 1. ĐỔI 'TimeOnly Gio' THÀNH 'string Gio' Ở ĐÂY 👇
+        public async Task<IActionResult> DatLich(int BenhNhanId, DateOnly Ngay, string Gio, int BacSiId, int PhongKhamId)
         {
             int? currentLeTanId = HttpContext.Session.GetInt32("UserId");
             if (currentLeTanId == null)
@@ -45,14 +46,23 @@ namespace QuanLyPhongKham.Web.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
+            // 2. TỰ ÉP KIỂU BẰNG TAY CHO CHẮC CỐP
+            TimeOnly gioKhamChuan;
+            // Thử ép chuỗi "07:00" thành TimeOnly. Nếu thất bại thì báo lỗi luôn.
+            if (!TimeOnly.TryParse(Gio, out gioKhamChuan))
+            {
+                TempData["ThongBao"] = "❌ Hệ thống không đọc được định dạng giờ (" + Gio + ")!";
+                return RedirectToAction("LichKham");
+            }
+
             // Gói dữ liệu vào DTO
             var request = new DatLichRequest
             {
                 Ngay = Ngay,
-                Gio = Gio,
+                Gio = gioKhamChuan, // 3. TRUYỀN CÁI GIỜ ĐÃ ÉP KIỂU VÀO ĐÂY 👇
                 BacSiId = BacSiId,
                 PhongKhamId = PhongKhamId,
-                BenhNhanId = BenhNhanId // Bắt buộc phải có vì Lễ tân đang đặt hộ
+                BenhNhanId = BenhNhanId
             };
 
             try
