@@ -66,26 +66,61 @@ namespace QuanLyPhongKham.Repositories.Implementations
             return _context.BuoiKhams.Find(id);
         }
 
-        // =====================================================================
-        // HÀM ĐÁP ỨNG YÊU CẦU: LẤY CÁC CA ĐÃ ĐẶT ĐỂ CHECK TRÙNG LỊCH
-        // =====================================================================
         public async Task<List<BuoiKham>> GetCacCaDaDatAsync(DateOnly ngay, TimeOnly gio)
         {
             return await _context.BuoiKhams
                 .Where(b => b.Ngay == ngay
                          && b.Gio == gio
-                         // LƯU Ý Ở ĐÂY: Ông gõ chữ TrangThaiBuoiKham. rồi chọn đúng tên Trạng Thái trong Enum của ông nhé
                          && (b.TrangThai == TrangThaiBuoiKham.XacNhan || b.TrangThai == TrangThaiBuoiKham.ChuaXacNhan))
                 .ToListAsync();
         }
         public async Task<List<BuoiKham>> GetLichDaDatTrongNgayAsync(DateOnly ngay, int bacSiId, int phongKhamId)
         {
-            // Lấy tất cả các ca đang Active của Bác sĩ HOẶC Phòng đó trong 1 ngày cụ thể
             return await _context.BuoiKhams
                 .Where(b => b.Ngay == ngay
                          && (b.BacSiId == bacSiId || b.PhongKhamId == phongKhamId)
                          && (b.TrangThai == Models.Enums.TrangThaiBuoiKham.XacNhan ||
                              b.TrangThai == Models.Enums.TrangThaiBuoiKham.ChuaXacNhan))
+                .ToListAsync();
+        }
+        public List<BuoiKham> GetByBenhNhanId(int benhNhanId)
+        {
+            return _context.BuoiKhams
+                .Include(b => b.BacSi)
+                .Include(b => b.PhongKham)
+                .Where(b => b.BenhNhanId == benhNhanId)
+                .OrderByDescending(b => b.Ngay)
+                .ThenByDescending(b => b.Gio)
+                .ToList();
+        }
+
+        public bool Update(BuoiKham buoiKham)
+        {
+            _context.BuoiKhams.Update(buoiKham);
+            var result = _context.SaveChanges();
+            return result > 0;
+        }
+
+        public bool Delete(int id)
+        {
+            var lich = _context.BuoiKhams.Find(id);
+            if (lich != null)
+            {
+                _context.BuoiKhams.Remove(lich);
+                var result = _context.SaveChanges();
+                return result > 0;
+            }
+            return false;
+        }
+
+        public async Task<List<TimeOnly>> GetCacGioDaDatAsync(int bacSiId, int phongKhamId, DateOnly ngayKham)
+        {
+            return await _context.BuoiKhams
+                .Where(b => b.BacSiId == bacSiId
+                         && b.PhongKhamId == phongKhamId
+                         && b.Ngay == ngayKham
+                         && b.TrangThai != TrangThaiBuoiKham.Huy)
+                .Select(b => b.Gio)
                 .ToListAsync();
         }
     }

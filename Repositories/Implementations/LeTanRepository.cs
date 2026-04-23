@@ -47,9 +47,5 @@ namespace QuanLyPhongKham.Repositories.Implementations
             _context.SaveChanges();
         }
 
-        //LeTan? IRepository<LeTan>.GetByNguoiDungId(int nguoiDungId)
-        //{
-        //    throw new NotImplementedException();
-        //}
     }
 }
