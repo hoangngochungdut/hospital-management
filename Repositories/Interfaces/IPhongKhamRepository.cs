@@ -5,8 +5,8 @@ using System.Text;
 
 namespace QuanLyPhongKham.Repositories.Interfaces
 {
-    public interface IBenhNhanRepository 
+    public interface IPhongKhamRepository
     {
-       Task<List<BenhNhan>> GetAllAsync();
+        Task<List<PhongKham>> GetByChuyenKhoaIdAsync(int chuyenKhoaId);
     }
 }
