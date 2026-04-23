@@ -87,7 +87,15 @@ namespace QuanLyPhongKham.Web.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
+            // ✅ THÊM ĐOẠN NÀY
+            if (!ModelState.IsValid)
+            {
+                TempData["Error"] = "Dữ liệu không hợp lệ!";
+                return RedirectToAction(nameof(HoSo));
+            }
+
             var (success, message) = _bacSiService.CapNhatHoSo(userId.Value, request);
+
             if (success)
                 TempData["Success"] = message;
             else

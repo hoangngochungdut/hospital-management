@@ -18,7 +18,7 @@ namespace QuanLyPhongKham.Repositories.Implementations
         public void Add(BacSi entity)
         {
             _context.BacSis.Add(entity);
-            //_context.SaveChanges();
+            _context.SaveChanges();
         }
 
         public ICollection<BacSi> GetAll()
@@ -32,19 +32,19 @@ namespace QuanLyPhongKham.Repositories.Implementations
 
         public BacSi? GetById(int id)
         {
-            return _context.BacSis.Find(id);
+            return _context.BacSis
+                .FirstOrDefault(x => x.Id == id);
         }
-
         public void Update(BacSi entity)
         {
-            _context.BacSis.Update(entity);
-            //_context.SaveChanges();
+            _context.Entry(entity).State = EntityState.Modified;
+            _context.SaveChanges();
         }
 
         public void Delete(BacSi entity)
         {
             _context.BacSis.Remove(entity);
-            //_context.SaveChanges();
+            _context.SaveChanges();
         }
 
         public XemHoSoBacSiResponse? GetHoSo(int id)
