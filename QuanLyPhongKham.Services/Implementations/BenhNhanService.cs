@@ -1,26 +1,26 @@
-﻿using Microsoft.EntityFrameworkCore;
-using QuanLyPhongKham.Models;
+﻿using QuanLyPhongKham.Models;
 using QuanLyPhongKham.Models.DTOs;
-using QuanLyPhongKham.Data;  // 👈 THÊM DÒNG NÀY (cho AppDbContext)
 using QuanLyPhongKham.Repositories.Interfaces;
 using QuanLyPhongKham.Services.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace QuanLyPhongKham.Services.Implementations
 {
-    public  class BenhNhanService : IBenhNhanService
+    public class BenhNhanService : IBenhNhanService
     {
         private readonly INguoiDungRepository _nguoiDungRepo;
-        private readonly AppDbContext _context;  
+        private readonly ITaiKhoanRepository _taiKhoanRepo;
 
-        public BenhNhanService(INguoiDungRepository nguoiDungRepo, AppDbContext context)
+        public BenhNhanService(
+            INguoiDungRepository nguoiDungRepo,
+            ITaiKhoanRepository taiKhoanRepo)
         {
             _nguoiDungRepo = nguoiDungRepo;
-            _context = context;
+            _taiKhoanRepo = taiKhoanRepo;
         }
 
+        // =========================
+        // LẤY HỒ SƠ
+        // =========================
         public XemHoSoBenhNhanResponse? GetHoSo(int nguoiDungId)
         {
             var nguoiDung = _nguoiDungRepo.GetById(nguoiDungId);
@@ -33,10 +33,12 @@ namespace QuanLyPhongKham.Services.Implementations
                 GioiTinh = nguoiDung.GioiTinh,
                 DiaChi = nguoiDung.DiaChi,
                 SoDienThoai = nguoiDung.Sdt
-                
             };
         }
 
+        // =========================
+        // CẬP NHẬT HỒ SƠ
+        // =========================
         public (bool Success, string Message) CapNhatHoSo(int nguoiDungId, CapNhatHoSoBenhNhanRequest request)
         {
             try
@@ -45,13 +47,10 @@ namespace QuanLyPhongKham.Services.Implementations
                 if (nguoiDung == null)
                     return (false, "Không tìm thấy người dùng");
 
-                
                 nguoiDung.HoTen = request.HoTen;
                 nguoiDung.GioiTinh = request.GioiTinh;
                 nguoiDung.DiaChi = request.DiaChi;
                 nguoiDung.Sdt = request.SoDienThoai;
-
-               
 
                 _nguoiDungRepo.Update(nguoiDung);
 
@@ -62,23 +61,24 @@ namespace QuanLyPhongKham.Services.Implementations
                 return (false, $"Lỗi: {ex.Message}");
             }
         }
+
+        // =========================
+        // ĐỔI MẬT KHẨU
+        // =========================
         public async Task<(bool Success, string Message)> DoiMatKhau(int nguoiDungId, DoiMatKhauRequest request)
         {
             try
             {
-                // Lấy thông tin tài khoản
-                var taiKhoan = _context.TaiKhoans.FirstOrDefault(tk => tk.NguoiDungId == nguoiDungId);
+                var taiKhoan = _taiKhoanRepo.GetByNguoiDungId(nguoiDungId);
                 if (taiKhoan == null)
                     return (false, "Không tìm thấy tài khoản");
 
-                // Kiểm tra mật khẩu cũ (nếu dùng plain text)
                 if (taiKhoan.MatKhauHash != request.MatKhauCu)
                     return (false, "Mật khẩu cũ không đúng");
 
-                // Cập nhật mật khẩu mới
                 taiKhoan.MatKhauHash = request.MatKhauMoi;
-                _context.TaiKhoans.Update(taiKhoan);
-                await _context.SaveChangesAsync();
+
+                _taiKhoanRepo.Update(taiKhoan);
 
                 return (true, "Đổi mật khẩu thành công!");
             }

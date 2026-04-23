@@ -9,5 +9,6 @@ namespace QuanLyPhongKham.Repositories.Interfaces
     {
         public TaiKhoan? GetByUsername(string username);
         public bool ExistedByUsername(string username);
+        TaiKhoan? GetByNguoiDungId(int nguoiDungId);
     }
 }

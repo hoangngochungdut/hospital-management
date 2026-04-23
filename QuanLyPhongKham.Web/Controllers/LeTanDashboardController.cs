@@ -136,7 +136,6 @@ namespace QuanLyPhongKham.Web.Controllers
 
             return View(result);
         }
-
         // GET: Chỉnh sửa hồ sơ
         [HttpGet]
         public IActionResult HoSo()
@@ -148,14 +147,28 @@ namespace QuanLyPhongKham.Web.Controllers
             }
 
             var result = _leTanService.GetHoSo(userId.Value);
+
+            if (result == null)
+            {
+                TempData["Error"] = "Không tìm thấy hồ sơ";
+                return RedirectToAction("LeTanDashboard");
+            }
+
             return View(result);
         }
+
 
         // POST: Cập nhật hồ sơ
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult CapNhatHoSo(CapNhatHoSoLeTanRequest request)
         {
+            if (!ModelState.IsValid)
+            {
+                TempData["Error"] = "Dữ liệu không hợp lệ";
+                return RedirectToAction(nameof(HoSo));
+            }
+
             int? userId = HttpContext.Session.GetInt32("UserId");
             if (userId == null)
             {
@@ -163,6 +176,7 @@ namespace QuanLyPhongKham.Web.Controllers
             }
 
             var (success, message) = _leTanService.CapNhatHoSo(userId.Value, request);
+
             if (success)
                 TempData["Success"] = message;
             else
@@ -171,11 +185,18 @@ namespace QuanLyPhongKham.Web.Controllers
             return RedirectToAction(nameof(ThongTinCaNhan));
         }
 
+
         // POST: Đổi mật khẩu
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DoiMatKhau(DoiMatKhauRequest request)
         {
+            if (!ModelState.IsValid)
+            {
+                TempData["Error"] = "Dữ liệu không hợp lệ";
+                return RedirectToAction(nameof(HoSo));
+            }
+
             int? userId = HttpContext.Session.GetInt32("UserId");
             if (userId == null)
             {
@@ -189,6 +210,7 @@ namespace QuanLyPhongKham.Web.Controllers
             }
 
             var (success, message) = await _leTanService.DoiMatKhau(userId.Value, request);
+
             if (success)
                 TempData["Success"] = message;
             else

@@ -51,6 +51,11 @@ namespace QuanLyPhongKham.Repositories.Implementations
         {
             return _context.TaiKhoans.Any(t => t.TenDangNhap == username);
         }
+        public TaiKhoan? GetByNguoiDungId(int nguoiDungId)
+        {
+            return _context.TaiKhoans
+                .FirstOrDefault(tk => tk.NguoiDungId == nguoiDungId);
+        }
 
     }
 }

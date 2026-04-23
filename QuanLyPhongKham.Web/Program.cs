@@ -47,6 +47,7 @@ builder.Services.AddScoped<ITaiKhoanRepository, TaiKhoanRepository>();
 builder.Services.AddScoped<INguoiDungRepository, NguoiDungRepository>();
 builder.Services.AddScoped<ILeTanRepository, LeTanRepository>();
 builder.Services.AddScoped<IBuoiKhamRepository, BuoiKhamRepository>();
+builder.Services.AddScoped<IChuyenKhoaRepository, ChuyenKhoaRepository>();
 //builder.Services.AddScoped<IChuyenKhoaRepository, ChuyenKhoaRepository>();
 //builder.Services.AddScoped<IPhongKhamRepository, PhongKhamRepository>();
 // Thêm các dịch vụ khác của Chuyên khoa/Phòng khám nếu có
@@ -54,6 +55,7 @@ builder.Services.AddScoped<IBacSiService, BacSiService>();
 builder.Services.AddScoped<IBenhNhanService, BenhNhanService>();
 builder.Services.AddScoped<ILeTanService, LeTanService>();
 builder.Services.AddScoped<IBuoiKhamService, BuoiKhamService>();
+
 
 builder.Services.AddScoped<TaiKhoanService>();
 builder.Services.AddScoped<AccountValidationService>();
