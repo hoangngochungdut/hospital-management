@@ -25,7 +25,6 @@ namespace QuanLyPhongKham.Repositories.Implementations
         {
             return _context.BacSis
                 .Include(x => x.ChuyenKhoa)
-                //.Include(x => x.PhongLamViec)
                 .Include(x => x.BuoiKhams)
                 .ToList();
         }
@@ -37,14 +36,17 @@ namespace QuanLyPhongKham.Repositories.Implementations
         }
         public void Update(BacSi entity)
         {
-            _context.Entry(entity).State = EntityState.Modified;
+            _context.BacSis.Update(entity);
             _context.SaveChanges();
+            
+
         }
 
         public void Delete(BacSi entity)
         {
             _context.BacSis.Remove(entity);
             _context.SaveChanges();
+
         }
 
         public XemHoSoBacSiResponse? GetHoSo(int id)
@@ -61,7 +63,12 @@ namespace QuanLyPhongKham.Repositories.Implementations
                 })
                 .FirstOrDefault();
         }
-
+        public async Task<List<BacSi>> GetByChuyenKhoaIdAsync(int chuyenKhoaId)
+        {
+            return await _context.BacSis
+                .Where(b => b.ChuyenKhoaId == chuyenKhoaId)
+                .ToListAsync();
+        }
 
     }
 }

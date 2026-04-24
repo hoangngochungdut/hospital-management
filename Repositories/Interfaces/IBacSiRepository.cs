@@ -7,5 +7,7 @@ namespace QuanLyPhongKham.Repositories.Interfaces
     {
         //BacSi? GetByNguoiDungId(int nguoiDungId);
         public XemHoSoBacSiResponse? GetHoSo(int id);
+        // của đặt lịch khám, có thể lấy thông tin bác sĩ để hiển thị trong lịch sử đặt lịch khám của bệnh nhân
+        Task<List<BacSi>> GetByChuyenKhoaIdAsync(int chuyenKhoaId);
     }
 }
