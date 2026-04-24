@@ -1,7 +1,5 @@
-﻿using QuanLyPhongKham.Data;
-using QuanLyPhongKham.Models;
+﻿using QuanLyPhongKham.Models;
 using QuanLyPhongKham.Models.DTOs;
-using QuanLyPhongKham.Repositories.Implementations;
 using QuanLyPhongKham.Repositories.Interfaces;
 using QuanLyPhongKham.Services.Interfaces;
 
@@ -11,20 +9,23 @@ namespace QuanLyPhongKham.Services.Implementations
     {
         private readonly IBacSiRepository _bacSiRepo;
         private readonly ITaiKhoanRepository _taiKhoanRepo;
-        private readonly AppDbContext _context;
+        private readonly IChuyenKhoaRepository _chuyenKhoaRepo;
 
-        public BacSiService(IBacSiRepository bacSiRepo, ITaiKhoanRepository taiKhoanRepo, AppDbContext context)
+        public BacSiService(
+            IBacSiRepository bacSiRepo,
+            ITaiKhoanRepository taiKhoanRepo,
+            IChuyenKhoaRepository chuyenKhoaRepo)
         {
-            //_nguoiDungRepo = nguoiDungRepo;
             _bacSiRepo = bacSiRepo;
-            _taiKhoanRepo = taiKhoanRepo; 
-            _context = context;
+            _taiKhoanRepo = taiKhoanRepo;
+            _chuyenKhoaRepo = chuyenKhoaRepo;
         }
 
         public ICollection<BacSi> GetAll()
         {
             return _bacSiRepo.GetAll();
         }
+
         public XemHoSoBacSiResponse? GetHoSo(int nguoiDungId)
         {
             return _bacSiRepo.GetHoSo(nguoiDungId);
@@ -43,12 +44,9 @@ namespace QuanLyPhongKham.Services.Implementations
                 bacSi.GioiTinh = request.GioiTinh;
                 bacSi.DiaChi = request.DiaChi;
                 bacSi.Sdt = request.SoDienThoai;
-
                 bacSi.ChuyenKhoaId = request.ChuyenKhoaId;
-             //   bacSi.PhongLamViecId = request.PhongLamViecId;
 
                 _bacSiRepo.Update(bacSi);
-                _context.SaveChanges(); // hoặc _context.SaveChanges() nếu chưa có UoW
 
                 return (true, "Cập nhật thành công!");
             }
@@ -62,7 +60,7 @@ namespace QuanLyPhongKham.Services.Implementations
         {
             try
             {
-                var taiKhoan = _taiKhoanRepo.GetById(nguoiDungId);
+                var taiKhoan = _taiKhoanRepo.GetByNguoiDungId(nguoiDungId);
 
                 if (taiKhoan == null)
                     return (false, "Không tìm thấy tài khoản");
@@ -73,7 +71,6 @@ namespace QuanLyPhongKham.Services.Implementations
                 taiKhoan.MatKhauHash = request.MatKhauMoi;
 
                 _taiKhoanRepo.Update(taiKhoan);
-                await _context.SaveChangesAsync(); 
 
                 return (true, "Đổi mật khẩu thành công!");
             }
@@ -85,9 +82,13 @@ namespace QuanLyPhongKham.Services.Implementations
 
         public BacSi? GetById(int id)
         {
-            var bs = _bacSiRepo.GetById(id);
-            
-            return bs;
+            return _bacSiRepo.GetById(id);
+        }
+
+        // ✅ CHỈ GIỮ CHUYÊN KHOA
+        public ICollection<ChuyenKhoa> GetDanhSachChuyenKhoa()
+        {
+            return _chuyenKhoaRepo.GetAll();
         }
     }
 }

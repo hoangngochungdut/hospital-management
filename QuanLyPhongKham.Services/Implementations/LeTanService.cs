@@ -10,13 +10,16 @@ namespace QuanLyPhongKham.Services.Implementations
     public class LeTanService : ILeTanService
     {
         private readonly INguoiDungRepository _nguoiDungRepo;
-        private readonly AppDbContext _context;
+        private readonly ITaiKhoanRepository _taiKhoanRepo;
+        //private readonly AppDbContext _context;
 
-        public LeTanService(INguoiDungRepository nguoiDungRepo, AppDbContext context)
+        public LeTanService(INguoiDungRepository nguoiDungRepo, ITaiKhoanRepository taiKhoanRepo)
         {
             _nguoiDungRepo = nguoiDungRepo;
-            _context = context;
+            _taiKhoanRepo = taiKhoanRepo;
         }
+
+        
         //public async Task<IEnumerable<object>> SearchBenhNhanAsync(string term)
         //{
         //    if (string.IsNullOrWhiteSpace(term))
@@ -82,15 +85,21 @@ namespace QuanLyPhongKham.Services.Implementations
         {
             try
             {
-                var taiKhoan = _context.TaiKhoans.FirstOrDefault(x => x.NguoiDungId == nguoiDungId);
+                // ✅ Lấy từ repository (KHÔNG dùng _context nữa)
+                var taiKhoan = _taiKhoanRepo.GetByNguoiDungId(nguoiDungId);
+
                 if (taiKhoan == null)
                     return (false, "Không tìm thấy tài khoản");
 
                 if (taiKhoan.MatKhauHash != request.MatKhauCu)
                     return (false, "Mật khẩu cũ không đúng");
 
+                // ✅ Cập nhật mật khẩu
                 taiKhoan.MatKhauHash = request.MatKhauMoi;
-                await _context.SaveChangesAsync();
+
+                // ✅ Lưu qua repository
+                _taiKhoanRepo.Update(taiKhoan);
+
                 return (true, "Đổi mật khẩu thành công!");
             }
             catch (Exception ex)

@@ -136,137 +136,111 @@ namespace QuanLyPhongKham.Web.Controllers
             return View(lichCuaToi);
         }
 
-        //// GET: Thông tin cá nhân (chế độ xem)
-        //[HttpGet]
-        //public IActionResult ThongTinCaNhan()
-        //{
-        //    // Lấy UserId từ Session
-        //    int? currentBenhNhanId = HttpContext.Session.GetInt32("UserId");
+        // GET: Thông tin cá nhân
+        [HttpGet]
+        public IActionResult ThongTinCaNhan()
+        {
+            int? currentBenhNhanId = HttpContext.Session.GetInt32("UserId");
 
-        //    if (currentBenhNhanId == null)
-        //    {
-        //        TempData["Error"] = "Vui lòng đăng nhập để xem thông tin";
-        //        return RedirectToAction("Login", "Account");
-        //    }
+            if (currentBenhNhanId == null)
+            {
+                TempData["Error"] = "Vui lòng đăng nhập để xem thông tin";
+                return RedirectToAction("Login", "Account");
+            }
 
-        //    var benhNhan = _context.BenhNhans
-        //        .FirstOrDefault(b => b.Id == currentBenhNhanId.Value);
+            var hoSo = _benhNhanService.GetHoSo(currentBenhNhanId.Value);
 
-        //    if (benhNhan == null)
-        //    {
-        //        TempData["Error"] = "Không tìm thấy thông tin bệnh nhân";
-        //        return RedirectToAction("BenhNhanDashboard");
-        //    }
+            if (hoSo == null)
+            {
+                TempData["Error"] = "Không tìm thấy hồ sơ";
+                return RedirectToAction("BenhNhanDashboard");
+            }
 
-        //    var hoSo = _benhNhanService.GetHoSo(benhNhan.Id);
+            return View(hoSo);
+        }
 
-        //    if (hoSo == null)
-        //    {
-        //        TempData["Error"] = "Không tìm thấy hồ sơ";
-        //        return RedirectToAction("BenhNhanDashboard");
-        //    }
 
-        //    return View(hoSo);
-        //}
-        //// GET: Xem hồ sơ
-        //[HttpGet]
-        //public IActionResult HoSo()
-        //{
-        //    // Lấy UserId từ Session (giống cách bạn đã dùng ở trên)
-        //    int? currentBenhNhanId = HttpContext.Session.GetInt32("UserId");
+        // GET: Xem hồ sơ
+        [HttpGet]
+        public IActionResult HoSo()
+        {
+            int? currentBenhNhanId = HttpContext.Session.GetInt32("UserId");
 
-        //    if (currentBenhNhanId == null)
-        //    {
-        //        TempData["Error"] = "Vui lòng đăng nhập để xem hồ sơ";
-        //        return RedirectToAction("Login", "Account");
-        //    }
+            if (currentBenhNhanId == null)
+            {
+                TempData["Error"] = "Vui lòng đăng nhập để xem hồ sơ";
+                return RedirectToAction("Login", "Account");
+            }
 
-        //    // Lấy NguoiDungId từ bảng BenhNhan (vì BenhNhan.Id chính là NguoiDungId)
-        //    var benhNhan = _context.BenhNhans
-        //        .FirstOrDefault(b => b.Id == currentBenhNhanId.Value);
+            var hoSo = _benhNhanService.GetHoSo(currentBenhNhanId.Value);
 
-        //    if (benhNhan == null)
-        //    {
-        //        TempData["Error"] = "Không tìm thấy thông tin bệnh nhân";
-        //        return RedirectToAction("BenhNhanDashboard");
-        //    }
+            if (hoSo == null)
+            {
+                TempData["Error"] = "Không tìm thấy hồ sơ";
+                return RedirectToAction("BenhNhanDashboard");
+            }
 
-        //    var hoSo = _benhNhanService.GetHoSo(benhNhan.Id);
+            return View(hoSo);
+        }
 
-        //    if (hoSo == null)
-        //    {
-        //        TempData["Error"] = "Không tìm thấy hồ sơ";
-        //        return RedirectToAction("BenhNhanDashboard");
-        //    }
 
-        //    return View(hoSo);
-        //}
+        // POST: Cập nhật hồ sơ
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult CapNhatHoSo(CapNhatHoSoBenhNhanRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                TempData["Error"] = "Dữ liệu không hợp lệ, vui lòng kiểm tra lại";
+                return RedirectToAction(nameof(HoSo));
+            }
 
-        //// POST: Cập nhật hồ sơ
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public IActionResult CapNhatHoSo(CapNhatHoSoBenhNhanRequest request)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        TempData["Error"] = "Dữ liệu không hợp lệ, vui lòng kiểm tra lại";
-        //        return RedirectToAction(nameof(HoSo));
-        //    }
+            int? currentBenhNhanId = HttpContext.Session.GetInt32("UserId");
 
-        //    // Lấy UserId từ Session
-        //    int? currentBenhNhanId = HttpContext.Session.GetInt32("UserId");
+            if (currentBenhNhanId == null)
+            {
+                TempData["Error"] = "Vui lòng đăng nhập để cập nhật hồ sơ";
+                return RedirectToAction("Login", "Account");
+            }
 
-        //    if (currentBenhNhanId == null)
-        //    {
-        //        TempData["Error"] = "Vui lòng đăng nhập để cập nhật hồ sơ";
-        //        return RedirectToAction("Login", "Account");
-        //    }
+            var (success, message) = _benhNhanService.CapNhatHoSo(currentBenhNhanId.Value, request);
 
-        //    var benhNhan = _context.BenhNhans
-        //        .FirstOrDefault(b => b.Id == currentBenhNhanId.Value);
+            if (success)
+                TempData["Success"] = message;
+            else
+                TempData["Error"] = message;
 
-        //    if (benhNhan == null)
-        //    {
-        //        TempData["Error"] = "Không tìm thấy thông tin bệnh nhân";
-        //        return RedirectToAction("BenhNhanDashboard");
-        //    }
+            return RedirectToAction(nameof(ThongTinCaNhan));
+        }
 
-        //    var (success, message) = _benhNhanService.CapNhatHoSo(benhNhan.Id, request);
 
-        //    if (success)
-        //        TempData["Success"] = message;
-        //    else
-        //        TempData["Error"] = message;
+        // POST: Đổi mật khẩu
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DoiMatKhau(DoiMatKhauRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                TempData["Error"] = "Vui lòng kiểm tra lại thông tin";
+                return RedirectToAction(nameof(HoSo));
+            }
 
-        //    return RedirectToAction(nameof(ThongTinCaNhan));
-        //}
-        //// POST: Đổi mật khẩu
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> DoiMatKhau(DoiMatKhauRequest request)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        TempData["Error"] = "Vui lòng kiểm tra lại thông tin";
-        //        return RedirectToAction(nameof(HoSo));
-        //    }
+            int? currentBenhNhanId = HttpContext.Session.GetInt32("UserId");
 
-        //    int? currentBenhNhanId = HttpContext.Session.GetInt32("UserId");
+            if (currentBenhNhanId == null)
+            {
+                TempData["Error"] = "Vui lòng đăng nhập";
+                return RedirectToAction("Login", "Account");
+            }
 
-        //    if (currentBenhNhanId == null)
-        //    {
-        //        TempData["Error"] = "Vui lòng đăng nhập";
-        //        return RedirectToAction("Login", "Account");
-        //    }
+            var (success, message) = await _benhNhanService.DoiMatKhau(currentBenhNhanId.Value, request);
 
-        //    var (success, message) = await _benhNhanService.DoiMatKhau(currentBenhNhanId.Value, request);
+            if (success)
+                TempData["Success"] = message;
+            else
+                TempData["Error"] = message;
 
-        //    if (success)
-        //        TempData["Success"] = message;
-        //    else
-        //        TempData["Error"] = message;
-
-        //    return RedirectToAction(nameof(HoSo));
-        //}
+            return RedirectToAction(nameof(HoSo));
+        }
     }
 }
