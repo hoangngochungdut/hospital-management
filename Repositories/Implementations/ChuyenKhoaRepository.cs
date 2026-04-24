@@ -18,12 +18,11 @@ public class ChuyenKhoaRepository : IChuyenKhoaRepository
         _context.SaveChanges();
     }
 
-    // Gộp GetAll: Giữ ICollection của bạn nhưng thêm OrderBy của master cho chuyên nghiệp
-    public ICollection<ChuyenKhoa> GetAll()
+    public async Task<List<ChuyenKhoa>> GetAllAsync()
     {
-        return _context.ChuyenKhoas
-            .OrderBy(x => x.TenKhoa) // Sắp xếp tên khoa từ A-Z theo ý của master
-            .ToList(); 
+        return await _context.ChuyenKhoas
+            .OrderBy(x => x.TenKhoa)
+            .ToListAsync();
     }
 
     public ChuyenKhoa? GetById(int id)
@@ -42,4 +41,11 @@ public class ChuyenKhoaRepository : IChuyenKhoaRepository
         _context.ChuyenKhoas.Remove(entity);
         _context.SaveChanges();
     }
+    public ICollection<ChuyenKhoa> GetAll()
+    {
+        return _context.ChuyenKhoas
+            .OrderBy(x => x.TenKhoa)
+            .ToList();
+    }
+
 }

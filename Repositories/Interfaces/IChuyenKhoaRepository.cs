@@ -9,5 +9,6 @@ namespace QuanLyPhongKham.Repositories.Interfaces
     {
         // của đặt lịch khám, cần lấy danh sách bác sĩ theo chuyên khoa
         Task<List<ChuyenKhoa>> GetAllAsync();
+        ICollection<ChuyenKhoa> GetAll();
     }
 }
