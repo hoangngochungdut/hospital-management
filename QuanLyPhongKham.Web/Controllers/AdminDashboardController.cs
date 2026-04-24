@@ -4,31 +4,50 @@ using QuanLyPhongKham.Data;
 using QuanLyPhongKham.Models.Enums;
 using QuanLyPhongKham.Services.Implementations;
 using QuanLyPhongKham.Services.Interfaces;
+using System;
+using System.Linq;
 
 namespace QuanLyPhongKham.Web.Controllers
 {
     public class AdminDashboardController : Controller
     {
-        // 1. ĐÃ XÓA AppDbContext, CHỈ GIỮ LẠI SERVICE
         private readonly IBacSiService _bacSiService;
         private readonly IBuoiKhamService _buoiKhamService;
+        private readonly IBenhNhanService _benhNhanService;
 
-        public AdminDashboardController(IBuoiKhamService buoiKhamService, IBacSiService bacSiService)
+        // 2. Inject nó vào Constructor
+        public AdminDashboardController(
+            IBuoiKhamService buoiKhamService,
+            IBacSiService bacSiService,
+            IBenhNhanService benhNhanService) 
         {
             _buoiKhamService = buoiKhamService;
             _bacSiService = bacSiService;
+            _benhNhanService = benhNhanService;
         }
 
-        public IActionResult AdminDashboard()
+        public async Task<IActionResult> TongQuan()
         {
+            var listBacSi = _bacSiService.GetAll();
+            ViewBag.TongBacSi = listBacSi != null ? listBacSi.Count() : 0;
+
+            // 2. Thêm chữ 'await' và gọi đúng tên hàm (ví dụ: GetAllAsync) 👇
+            var listBenhNhan = await _benhNhanService.GetAllAsync();
+            ViewBag.TongBenhNhan = listBenhNhan != null ? listBenhNhan.Count() : 0;
+
+            var listLichKham = _buoiKhamService.GetAllLichKham();
+            var homNay = DateOnly.FromDateTime(DateTime.Now);
+
+            ViewBag.LichHomNay = listLichKham != null
+                ? listLichKham.Count(l => l.Ngay == homNay)
+                : 0;
+
             return View();
         }
 
-        // 2. HIỂN THỊ TẤT CẢ LỊCH
         [HttpGet]
         public IActionResult LichKham()
         {
-            // Lấy toàn bộ lịch từ Service
             var tatCaLich = _buoiKhamService.GetAllLichKham();
             return View(tatCaLich);
         }
@@ -41,7 +60,6 @@ namespace QuanLyPhongKham.Web.Controllers
             return RedirectToAction("LichKham");
         }
 
-        // 3. THÊM MỚI: TÍNH NĂNG XÓA LỊCH
         [HttpPost]
         public IActionResult XoaLich(int id)
         {

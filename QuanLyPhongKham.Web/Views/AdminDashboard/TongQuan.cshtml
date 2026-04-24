@@ -7,13 +7,13 @@
     <h1 class="text-3xl font-black text-slate-800 mb-2">Xin chào Quản Trị Viên! 👑</h1>
     <p class="text-slate-500 mb-8">Tổng quan tình hình hoạt động của phòng khám PBL3 MED ngày hôm nay.</p>
     
-    <!-- Các khối thống kê siêu ngầu -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
         <div class="bg-blue-50 border border-blue-100 p-6 rounded-xl">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-blue-600 font-bold text-sm uppercase">Tổng Bác Sĩ</p>
-                    <h3 class="text-3xl font-black text-blue-900 mt-1">12</h3>
+                    <h3 class="text-3xl font-black text-blue-900 mt-1">@ViewBag.TongBacSi</h3>
                 </div>
                 <div class="w-12 h-12 bg-blue-200 text-blue-700 rounded-full flex items-center justify-center text-xl">
                     <i class="fas fa-user-md"></i>
@@ -24,8 +24,8 @@
         <div class="bg-green-50 border border-green-100 p-6 rounded-xl">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-green-600 font-bold text-sm uppercase">Bệnh Nhân Mới</p>
-                    <h3 class="text-3xl font-black text-green-900 mt-1">45</h3>
+                    <p class="text-green-600 font-bold text-sm uppercase">Tổng Bệnh Nhân</p>
+                    <h3 class="text-3xl font-black text-green-900 mt-1">@ViewBag.TongBenhNhan</h3>
                 </div>
                 <div class="w-12 h-12 bg-green-200 text-green-700 rounded-full flex items-center justify-center text-xl">
                     <i class="fas fa-users"></i>
@@ -37,12 +37,13 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-purple-600 font-bold text-sm uppercase">Lịch Khám Hôm Nay</p>
-                    <h3 class="text-3xl font-black text-purple-900 mt-1">28</h3>
+                    <h3 class="text-3xl font-black text-purple-900 mt-1">@ViewBag.LichHomNay</h3>
                 </div>
                 <div class="w-12 h-12 bg-purple-200 text-purple-700 rounded-full flex items-center justify-center text-xl">
                     <i class="fas fa-calendar-check"></i>
                 </div>
             </div>
         </div>
+
     </div>
 </div>

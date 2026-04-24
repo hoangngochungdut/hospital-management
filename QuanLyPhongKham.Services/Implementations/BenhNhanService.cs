@@ -9,13 +9,16 @@ namespace QuanLyPhongKham.Services.Implementations
     {
         private readonly INguoiDungRepository _nguoiDungRepo;
         private readonly ITaiKhoanRepository _taiKhoanRepo;
+        private readonly IBenhNhanRepository _benhNhanRepo;
 
         public BenhNhanService(
             INguoiDungRepository nguoiDungRepo,
-            ITaiKhoanRepository taiKhoanRepo)
+            ITaiKhoanRepository taiKhoanRepo,
+            IBenhNhanRepository benhNhanRepo)
         {
             _nguoiDungRepo = nguoiDungRepo;
             _taiKhoanRepo = taiKhoanRepo;
+            _benhNhanRepo = benhNhanRepo;
         }
 
         // =========================
@@ -60,6 +63,11 @@ namespace QuanLyPhongKham.Services.Implementations
             {
                 return (false, $"Lỗi: {ex.Message}");
             }
+        }
+        public async Task<IEnumerable<BenhNhan>> GetAllAsync()
+        {
+            // Gọi thằng Repo lên làm việc
+            return await _benhNhanRepo.GetAllAsync();
         }
 
         // =========================

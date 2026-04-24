@@ -59,10 +59,10 @@ namespace QuanLyLichKham.Controllers
             // Chuyển hướng dựa trên vai trò
             return mappedRole switch
             {
-                "Admin" => RedirectToAction("AdminDashboard", "AdminDashboard"),
-                "BacSi" => RedirectToAction("BacSiDashboard", "BacSiDashboard"),
+                "Admin" => RedirectToAction("TongQuan", "AdminDashboard"),
+                "BacSi" => RedirectToAction("LichKham", "BacSiDashboard"),
                 "BenhNhan" => RedirectToAction("XemLichKham", "BenhNhanDashboard"),
-                "LeTan" => RedirectToAction("LeTanDashboard", "LeTanDashboard"),
+                "LeTan" => RedirectToAction("LichKham", "LeTanDashboard"),
                 _ => RedirectToAction("Login", "Account")
             };
 

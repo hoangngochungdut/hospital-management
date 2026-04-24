@@ -21,11 +21,6 @@ namespace QuanLyPhongKham.Web.Controllers
             _buoiKhamService = buoiKhamService;
         }
 
-        public IActionResult LeTanDashboard()
-        {
-            return View();
-        }
-
         public async Task<IActionResult> LichKham()
         {
             var dsKhoa = await _buoiKhamService.LayTatCaChuyenKhoaAsync();

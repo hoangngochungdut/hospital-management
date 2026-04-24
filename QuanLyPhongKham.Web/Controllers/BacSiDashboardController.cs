@@ -18,8 +18,6 @@ namespace QuanLyPhongKham.Web.Controllers
             _buoiKhamService = buoiKhamService;
         }
 
-        public IActionResult BacSiDashboard() { return View(); }
-
         [HttpGet]
         public IActionResult LichKham()
         {

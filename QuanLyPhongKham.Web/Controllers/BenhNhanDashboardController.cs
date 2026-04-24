@@ -28,13 +28,6 @@ namespace QuanLyPhongKham.Web.Controllers
         }
 
         [HttpGet]
-        public IActionResult BenhNhanDashboard()
-        {
-            // Trả về View trống, Giao diện sẽ tự load các thứ cần thiết
-            return View();
-        }
-
-        [HttpGet]
         public async Task<IActionResult> LichKham()
         {
             var dsKhoa = await _buoiKhamService.LayTatCaChuyenKhoaAsync();
@@ -52,7 +45,6 @@ namespace QuanLyPhongKham.Web.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
-            // 2. ÉP KIỂU GIỜ TỪ CHUỖI SANG TIMEONLY 
             TimeOnly gioKhamChuan;
             if (!TimeOnly.TryParse(Gio, out gioKhamChuan))
             {

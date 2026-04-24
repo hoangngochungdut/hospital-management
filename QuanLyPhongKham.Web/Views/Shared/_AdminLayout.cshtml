@@ -34,11 +34,17 @@
 
                 <nav class="flex-1 px-4 space-y-1">
                     <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-4 mb-2">Chính</p>
+    
+                    <a href="@Url.Action("TongQuan", "AdminDashboard")"
+                           class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all @(currentController == "AdminDashboard" && currentAction == "TongQuan" ? activeClass : inactiveClass)">
+                        <i class="fas fa-chart-line w-5"></i>
+                        <span>Tổng quan</span>
+                    </a>
                     <a href="@Url.Action("LichKham", "AdminDashboard")" class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all @(currentController == "AdminDashboard" && currentAction == "LichKham" ? activeClass : inactiveClass)">
                         <i class="fas fa-calendar-alt w-5"></i>
                         <span>Lịch Khám</span>
                     </a>
-                
+
                     <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-4 mt-6 mb-2">Nhân sự & Dữ liệu</p>
                     <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all @inactiveClass">
                         <i class="fas fa-user-tie w-5"></i>
@@ -51,10 +57,6 @@
                     <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all @inactiveClass">
                         <i class="fas fa-user-injured w-5"></i>
                         <span>Bệnh Nhân</span>
-                    </a>
-                    <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all @inactiveClass">
-                        <i class="fas fa-hospital w-5"></i>
-                        <span>Phòng Khám</span>
                     </a>
                 </nav>
 
