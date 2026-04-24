@@ -33,19 +33,14 @@ namespace QuanLyPhongKham.Services.Implementations
             _benhNhanRepo = benhNhanRepo;
         }
 
-        // =====================================================================
-        // 1. LẤY DATA CHO DROPDOWN (Dùng Repo tương ứng)
-        // =====================================================================
         public async Task<object> LayBacSiVaPhongTheoKhoaAsync(int chuyenKhoaId)
         {
-            // Yêu cầu: Trong IBacSiRepository ông phải có hàm GetByChuyenKhoaIdAsync
             var bacSisList = await _bacSiRepo.GetByChuyenKhoaIdAsync(chuyenKhoaId);
             var bacSis = bacSisList.Select(b => new {
                 id = b.Id,
                 ten = "BS. " + b.HoTen
             }).ToList();
 
-            // Yêu cầu: Trong IPhongKhamRepository ông phải có hàm GetByChuyenKhoaIdAsync
             var phongsList = await _phongKhamRepo.GetByChuyenKhoaIdAsync(chuyenKhoaId);
             var phongs = phongsList.Select(p => new {
                 id = p.Id,
@@ -57,7 +52,6 @@ namespace QuanLyPhongKham.Services.Implementations
 
         public async Task<List<ChuyenKhoa>> LayTatCaChuyenKhoaAsync()
         {
-            // Yêu cầu: Trong IChuyenKhoaRepository ông phải có hàm GetAllAsync
             return await _chuyenKhoaRepo.GetAllAsync();
         }
 
@@ -67,9 +61,6 @@ namespace QuanLyPhongKham.Services.Implementations
             return data.ToList(); 
         }
 
-        // =====================================================================
-        // 2. ĐẶT LỊCH (GIỮ NGUYÊN)
-        // =====================================================================
         public async Task<bool> DatLichKhamAsync(DatLichRequest request, int currentUserId, string role)
         {
             var homNay = DateOnly.FromDateTime(DateTime.Now);
@@ -121,9 +112,6 @@ namespace QuanLyPhongKham.Services.Implementations
             return await _buoiKhamRepo.AddAsync(buoiKham);
         }
 
-        // =====================================================================
-        // 3. CÁC HÀM CẬP NHẬT TRẠNG THÁI VÀ LẤY LỊCH (GIỮ NGUYÊN)
-        // =====================================================================
         public async Task<bool> CapNhatTrangThaiAsync(int buoiKhamId, TrangThaiBuoiKham trangThaiMoi, int currentUserId, string role)
         {
             var buoiKham = await _buoiKhamRepo.GetByIdAsync(buoiKhamId);

@@ -1,4 +1,6 @@
-﻿@{
+﻿@using QuanLyPhongKham.Models
+
+@{
     Layout = "~/Views/Shared/_BenhNhanLayout.cshtml";
     ViewData["Title"] = "Đặt Lịch Khám";
 }
@@ -141,10 +143,10 @@
                         
                         setFieldState('#PhongKhamId', false);
                         $('#PhongKhamId').append('<option value="">-- Chọn Phòng --</option>');
+                        
+                        // ĐÃ SỬA CHỖ NÀY: Dùng nguyên biến p.ten từ C# trả về, không cộng thêm chữ nào nữa 👇
                         res.data.phongs.forEach(p => {
-                            let tenPhong = p.ten.replace(/^Phòng\s*/i, "");
-                            let loai = p.loai === "VIP" ? "⭐ VIP" : "Thường";
-                            $('#PhongKhamId').append(`<option value="${p.id}">Phòng ${tenPhong} (${loai})</option>`);
+                            $('#PhongKhamId').append(`<option value="${p.id}">${p.ten}</option>`);
                         });
                         
                         $('#NgayKham').prop('disabled', false).removeClass('bg-slate-50 text-slate-400 cursor-not-allowed').addClass('bg-white text-slate-900');
