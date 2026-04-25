@@ -1,4 +1,5 @@
-﻿using QuanLyPhongKham.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using QuanLyPhongKham.Models;
 using QuanLyPhongKham.Models.DTOs;
 using QuanLyPhongKham.Models.Enums;
 using QuanLyPhongKham.Repositories.Interfaces;
@@ -18,19 +19,22 @@ namespace QuanLyPhongKham.Services.Implementations
         private readonly IPhongKhamRepository _phongKhamRepo;
         private readonly IChuyenKhoaRepository _chuyenKhoaRepo;
         private readonly IBenhNhanRepository _benhNhanRepo;
+        private readonly ILichTrucRepository _lichTrucRepo;
 
         public BuoiKhamService(
             IBuoiKhamRepository buoiKhamRepo,
             IBacSiRepository bacSiRepo,
             IPhongKhamRepository phongKhamRepo,
             IChuyenKhoaRepository chuyenKhoaRepo,
-            IBenhNhanRepository benhNhanRepo)
+            IBenhNhanRepository benhNhanRepo,
+            ILichTrucRepository lichTrucRepo)
         {
             _buoiKhamRepo = buoiKhamRepo;
             _bacSiRepo = bacSiRepo;
             _phongKhamRepo = phongKhamRepo;
             _chuyenKhoaRepo = chuyenKhoaRepo;
             _benhNhanRepo = benhNhanRepo;
+            _lichTrucRepo = lichTrucRepo;
         }
 
         public async Task<object> LayBacSiVaPhongTheoKhoaAsync(int chuyenKhoaId)
@@ -41,7 +45,7 @@ namespace QuanLyPhongKham.Services.Implementations
                 ten = "BS. " + b.HoTen
             }).ToList();
 
-            var phongsList = await _phongKhamRepo.GetByChuyenKhoaIdAsync(chuyenKhoaId);
+            var phongsList = await _phongKhamRepo.GetByChuyenKhoaAsync(chuyenKhoaId);
             var phongs = phongsList.Select(p => new {
                 id = p.Id,
                 ten = "Phòng " + p.SoPhong + " (Tầng " + p.Tang + ") " + p.LoaiPhong

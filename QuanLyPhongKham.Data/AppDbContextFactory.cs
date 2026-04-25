@@ -10,7 +10,7 @@ namespace QuanLyPhongKham.Data
             var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
 
             optionsBuilder.UseSqlServer(
-                "Server=LAPTOP-M1BHTJ4C\\SQLEXPRESS;Database=QuanLyPhongKham;Trusted_Connection=True;TrustServerCertificate=True");
+                "Server=.;Database=QuanLyPhongKham;Trusted_Connection=True;TrustServerCertificate=True");
 
             return new AppDbContext(optionsBuilder.Options);
         }

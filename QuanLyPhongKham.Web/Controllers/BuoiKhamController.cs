@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 
 namespace QuanLyPhongKham.Web.Controllers
 {
-    // Đổi thành Controller (không phải ControllerBase) để dùng trong MVC
     public class BuoiKhamController : Controller
     {
         private readonly IBuoiKhamService _service;
@@ -19,7 +18,6 @@ namespace QuanLyPhongKham.Web.Controllers
             _service = service;
         }
 
-        // 1. AJAX: Lấy Bác sĩ và Phòng khi chọn Chuyên khoa
         [HttpGet]
         public async Task<IActionResult> GetBacSiVaPhong(int chuyenKhoaId)
         {
@@ -27,7 +25,6 @@ namespace QuanLyPhongKham.Web.Controllers
             return Json(new { success = true, data = data });
         }
 
-        // 2. AJAX: Lấy danh sách giờ trống khi chọn Ngày
         [HttpGet]
         public async Task<IActionResult> GetGioTrong(int bacSiId, int phongKhamId, string ngay)
         {
@@ -43,7 +40,6 @@ namespace QuanLyPhongKham.Web.Controllers
             }
         }
 
-        // 3. POST: Xử lý đặt lịch khi bấm nút "Xác nhận"
         [HttpPost]
         public async Task<IActionResult> DatLich(DatLichRequest request)
         {

@@ -1,13 +1,17 @@
 ﻿using QuanLyPhongKham.Models;
 using QuanLyPhongKham.Models.DTOs;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace QuanLyPhongKham.Repositories.Interfaces
 {
     public interface IBacSiRepository : IRepository<BacSi>
     {
-        //BacSi? GetByNguoiDungId(int nguoiDungId);
+        // Thằng IRepository đã có: BacSi GetById(int id); rồi, không cần viết lại.
+
         public XemHoSoBacSiResponse? GetHoSo(int id);
-        // của đặt lịch khám, có thể lấy thông tin bác sĩ để hiển thị trong lịch sử đặt lịch khám của bệnh nhân
+
+        // Hàm này dùng Task vì nó là hàm mới, không bị ràng buộc bởi IRepository
         Task<List<BacSi>> GetByChuyenKhoaIdAsync(int chuyenKhoaId);
     }
 }

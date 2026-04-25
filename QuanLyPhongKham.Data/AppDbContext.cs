@@ -25,6 +25,7 @@ namespace QuanLyPhongKham.Data
         public DbSet<PhongKham> PhongKhams { get; set; }
         public DbSet<TaiKhoan> TaiKhoans { get; set; }
         public DbSet<TieuSuBenhAn> TieuSuBenhAns { get; set; }
+        public DbSet<LichTruc> LichTrucs { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

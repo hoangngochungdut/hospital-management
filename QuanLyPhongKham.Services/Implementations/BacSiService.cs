@@ -2,6 +2,10 @@
 using QuanLyPhongKham.Models.DTOs;
 using QuanLyPhongKham.Repositories.Interfaces;
 using QuanLyPhongKham.Services.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace QuanLyPhongKham.Services.Implementations
 {
@@ -31,15 +35,18 @@ namespace QuanLyPhongKham.Services.Implementations
             return _bacSiRepo.GetHoSo(nguoiDungId);
         }
 
+        // ✅ HÀM ĐỒNG BỘ: Không dùng async/await để khớp Interface nhóm
         public (bool Success, string Message) CapNhatHoSo(int nguoiDungId, CapNhatHoSoBacSiRequest request)
         {
             try
             {
+                // Gọi đồng bộ, bacSi sẽ nhận đúng đối tượng chứ không phải Task
                 var bacSi = _bacSiRepo.GetById(nguoiDungId);
 
                 if (bacSi == null)
                     return (false, "Không tìm thấy bác sĩ");
 
+                // Giờ thì chấm HoTen thoải mái không lo lỗi
                 bacSi.HoTen = request.HoTen;
                 bacSi.GioiTinh = request.GioiTinh;
                 bacSi.DiaChi = request.DiaChi;
@@ -80,15 +87,20 @@ namespace QuanLyPhongKham.Services.Implementations
             }
         }
 
-        public BacSi? GetById(int id)
+        // ✅ ĐÃ SỬA: Trả về BacSi thường, không dùng Task nữa
+        public BacSi GetById(int id)
         {
             return _bacSiRepo.GetById(id);
         }
 
-        // ✅ CHỈ GIỮ CHUYÊN KHOA
         public ICollection<ChuyenKhoa> GetDanhSachChuyenKhoa()
         {
             return _chuyenKhoaRepo.GetAll();
+        }
+
+        public async Task<IEnumerable<BacSi>> GetByChuyenKhoaIdAsync(int chuyenKhoaId)
+        {
+            return await _bacSiRepo.GetByChuyenKhoaIdAsync(chuyenKhoaId);
         }
     }
 }

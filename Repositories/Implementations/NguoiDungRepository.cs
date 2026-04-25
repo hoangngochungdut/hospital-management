@@ -14,7 +14,6 @@ namespace QuanLyPhongKham.Repositories.Implementations
             _context = context;
         }
 
-        // Implement từ IRepository<NguoiDung>
         public void Add(NguoiDung entity)
         {
             _context.NguoiDungs.Add(entity);
@@ -43,14 +42,11 @@ namespace QuanLyPhongKham.Repositories.Implementations
             _context.SaveChanges();
         }
 
-        // Implement method ĐẶC BIỆT từ INguoiDungRepository
-        // Đổi từ async thành non-async cho đồng bộ
         public NguoiDung? GetByTaiKhoanId(int taiKhoanId)
         {
             return _context.NguoiDungs
                 .Include(n => n.TaiKhoan)
                 .FirstOrDefault(n => n.TaiKhoan != null && n.TaiKhoan.Id == taiKhoanId);
         }
-
     }
 }

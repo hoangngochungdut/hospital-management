@@ -20,5 +20,6 @@ namespace QuanLyPhongKham.Services.Interfaces
         Task<List<ChuyenKhoa>> LayTatCaChuyenKhoaAsync();
         Task<List<BenhNhan>> LayTatCaBenhNhanAsync();
         bool XoaBuoiKham(int id);
+
     }
 }

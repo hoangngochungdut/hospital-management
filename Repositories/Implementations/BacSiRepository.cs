@@ -3,6 +3,9 @@ using QuanLyPhongKham.Data;
 using QuanLyPhongKham.Models;
 using QuanLyPhongKham.Models.DTOs;
 using QuanLyPhongKham.Repositories.Interfaces;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace QuanLyPhongKham.Repositories.Implementations
 {
@@ -29,24 +32,24 @@ namespace QuanLyPhongKham.Repositories.Implementations
                 .ToList();
         }
 
-        public BacSi? GetById(int id)
+        // 👉 FIX LỖI CS0738: Trả về BacSi thường, không dùng Task ở đây để khớp Interface của nhóm
+        public BacSi GetById(int id)
         {
             return _context.BacSis
-                .FirstOrDefault(x => x.Id == id);
+                .Include(b => b.ChuyenKhoa) // Nạp Chuyên Khoa để Controller không bị Null TenKhoa
+                .FirstOrDefault(b => b.Id == id);
         }
+
         public void Update(BacSi entity)
         {
             _context.BacSis.Update(entity);
             _context.SaveChanges();
-            
-
         }
 
         public void Delete(BacSi entity)
         {
             _context.BacSis.Remove(entity);
             _context.SaveChanges();
-
         }
 
         public XemHoSoBacSiResponse? GetHoSo(int id)
@@ -63,12 +66,14 @@ namespace QuanLyPhongKham.Repositories.Implementations
                 })
                 .FirstOrDefault();
         }
+
+        // Hàm này nếu Interface của nhóm cho phép dùng Async thì giữ nguyên
         public async Task<List<BacSi>> GetByChuyenKhoaIdAsync(int chuyenKhoaId)
         {
             return await _context.BacSis
                 .Where(b => b.ChuyenKhoaId == chuyenKhoaId)
+                .Include(b => b.ChuyenKhoa)
                 .ToListAsync();
         }
-
     }
 }

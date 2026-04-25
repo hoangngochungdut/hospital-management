@@ -17,11 +17,16 @@ namespace QuanLyPhongKham.Repositories.Implementations
             _context = context;
         }
 
-        public async Task<List<PhongKham>> GetByChuyenKhoaIdAsync(int chuyenKhoaId)
+        public async Task<IEnumerable<PhongKham>> GetByChuyenKhoaAsync(int chuyenKhoaId)
         {
             return await _context.PhongKhams
                 .Where(p => p.ChuyenKhoaId == chuyenKhoaId)
                 .ToListAsync();
+        }
+
+        public async Task<IEnumerable<PhongKham>> GetAllAsync()
+        {
+            return await _context.PhongKhams.ToListAsync();
         }
     }
 }

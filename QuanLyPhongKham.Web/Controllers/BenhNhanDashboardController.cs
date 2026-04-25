@@ -26,6 +26,10 @@ namespace QuanLyPhongKham.Web.Controllers
             _benhNhanService = benhNhanService;
             _buoiKhamService = buoiKhamService;
         }
+        public IActionResult DanhGiaBS()
+        {
+            return View();
+        }
 
         [HttpGet]
         public async Task<IActionResult> LichKham()

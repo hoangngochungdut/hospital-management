@@ -1,0 +1,175 @@
+﻿@model IEnumerable<QuanLyPhongKham.Models.LichTruc>
+
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Phân Công Lịch Trực";
+}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/airbnb.css">
+
+<div class="container mx-auto px-4 py-8">
+
+    @if (TempData["ThongBao"] != null)
+    {
+        var msg = TempData["ThongBao"].ToString();
+        var isSuccess = msg.Contains("✅");
+        <div class="mb-6 p-4 rounded-xl border font-bold @(isSuccess ? "bg-green-50 text-green-700 border-green-200" : "bg-red-50 text-red-700 border-red-200")">
+            @msg
+        </div>
+    }
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <div class="bg-white p-6 rounded-2xl shadow-lg border border-slate-100 h-fit">
+            <h2 class="text-xl font-black text-blue-700 mb-6 uppercase border-b pb-3">Tạo Phân Công Mới</h2>
+            
+            <form asp-controller="AdminDashboard" asp-action="LuuPhanCong" method="POST">
+                
+                <div class="mb-5">
+                    <label class="block text-slate-700 font-bold mb-2">1. Chọn Chuyên Khoa</label>
+                    <select id="SelectKhoa" class="w-full border-2 border-blue-400 p-3 rounded-xl outline-none focus:border-blue-700 font-bold text-blue-700 bg-blue-50" required>
+                        <option value="">-- Vui lòng chọn khoa --</option>
+                        @if (ViewBag.DsChuyenKhoa != null)
+                        {
+                            foreach (var khoa in ViewBag.DsChuyenKhoa)
+                            {
+                                <option value="@khoa.Id">@khoa.TenKhoa</option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <div class="mb-5">
+                    <label class="block text-slate-700 font-bold mb-2">2. Chọn Bác Sĩ</label>
+                    <select id="SelectBacSi" name="BacSiId" class="w-full border-2 border-slate-200 p-3 rounded-xl outline-none focus:border-blue-500 font-medium bg-slate-100 cursor-not-allowed" disabled required>
+                        <option value="">-- Chọn khoa trước --</option>
+                    </select>
+                </div>
+
+                <div class="mb-5">
+                    <label class="block text-slate-700 font-bold mb-2">3. Chọn Phòng Khám</label>
+                    <select id="SelectPhong" name="PhongKhamId" class="w-full border-2 border-slate-200 p-3 rounded-xl outline-none focus:border-blue-500 font-medium bg-slate-100 cursor-not-allowed" disabled required>
+                        <option value="">-- Chọn khoa trước --</option>
+                    </select>
+                </div>
+
+                <div class="mb-8">
+                    <label class="block text-slate-700 font-bold mb-2">4. Chọn ngày trên lịch</label>
+                    <input type="text" id="LichToDung" name="DanhSachNgay" class="w-full border-2 border-blue-300 p-3 rounded-xl outline-none focus:border-blue-600 font-bold text-blue-700 bg-white cursor-pointer shadow-inner" placeholder="📅 Bấm vào đây để chọn ngày..." readonly required />
+                    <p class="text-xs text-slate-500 mt-2 italic">* Click để chọn nhiều ngày. Click lần nữa để bỏ chọn.</p>
+                </div>
+
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-md transition-all">
+                    🚀 XÁC NHẬN PHÂN CÔNG
+                </button>
+            </form>
+        </div>
+
+        <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-lg border border-slate-100">
+            <h2 class="text-xl font-black text-slate-800 mb-6 uppercase border-b pb-3">Danh Sách Đã Xếp Lịch</h2>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50 text-slate-500 text-sm uppercase">
+                            <th class="p-4 border-b-2 font-bold">Ngày</th>
+                            <th class="p-4 border-b-2 font-bold">Chuyên Khoa</th>
+                            <th class="p-4 border-b-2 font-bold">Bác Sĩ</th>
+                            <th class="p-4 border-b-2 font-bold">Phòng</th>
+                            <th class="p-4 border-b-2 font-bold text-center">Hành Động</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-slate-700 font-medium">
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var item in Model)
+                            {
+                                <tr class="hover:bg-slate-50 border-b transition-all">
+                                    <td class="p-4 text-blue-700 font-bold whitespace-nowrap">@item.Ngay.ToString("dd/MM/yyyy")</td>
+                                    
+                                    <td class="p-4">
+                                        <span class="px-2 py-1 bg-blue-50 text-blue-600 rounded text-xs font-bold border border-blue-100">
+                                            @(item.BacSi.ChuyenKhoa != null ? item.BacSi.ChuyenKhoa.TenKhoa : "Chưa có khoa")
+                                        </span>
+                                    </td>
+
+                                    <td class="p-4">BS. @item.BacSi.HoTen</td>
+                                    <td class="p-4 whitespace-nowrap">Phòng @item.PhongKham.SoPhong</td>
+                                    
+                                    <td class="p-4 text-center">
+                                        <form asp-controller="AdminDashboard" asp-action="XoaLichTruc" method="POST" onsubmit="return confirm('Ông có chắc chắn muốn xóa lịch ngày @item.Ngay.ToString("dd/MM/yyyy") của BS. @item.BacSi.HoTen không?');">
+                                            <input type="hidden" name="id" value="@item.Id" />
+                                            <button type="submit" class="text-red-500 hover:text-red-700 font-bold text-sm px-4 py-2 bg-red-50 hover:bg-red-100 rounded-lg transition-all">Xóa</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="5" class="p-6 text-center text-slate-400 italic font-medium">
+                                    Chưa có dữ liệu phân công lịch trực.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/vn.js"></script>
+    <script>
+        $(document).ready(function () {
+            
+        // KÍCH HOẠT FLATPICKR
+        flatpickr("#LichToDung", {
+        mode: "multiple",
+        dateFormat: "Y-m-d",
+        minDate: "today",
+        locale: "vn",
+        placeholder: "📅 Bấm vào để chọn ngày..."
+        });
+
+        // LOGIC AJAX LỌC KHOA -> BÁC SĨ & PHÒNG
+        $('#SelectKhoa').change(function () {
+        let khoaId = $(this).val();
+        let selectBs = $('#SelectBacSi');
+        let selectPhong = $('#SelectPhong');
+
+        if (khoaId) {
+        selectBs.prop('disabled', true).html('<option>⏳ Đang tải...</option>');
+        selectPhong.prop('disabled', true).html('<option>⏳ Đang tải...</option>');
+                                
+        $.get('/AdminDashboard/GetDataByKhoa?chuyenKhoaId=' + khoaId, function (res) {
+        if (res.success) {
+        let bsHtml = '<option value="">-- Chọn Bác Sĩ --</option>';
+        res.bacSis.forEach(bs => {
+        bsHtml += `<option value="${bs.id}">BS. ${bs.hoTen}</option>`;
+        });
+        selectBs.html(bsHtml).prop('disabled', false).removeClass('bg-slate-100 cursor-not-allowed');
+
+        let phongHtml = '<option value="">-- Chọn Phòng --</option>';
+        res.phongs.forEach(p => {
+        let loai = p.loaiPhong === "VIP" ? "⭐ VIP" : "Thường";
+        phongHtml += `<option value="${p.id}">Phòng ${p.soPhong} (${loai})</option>`;
+        });
+        selectPhong.html(phongHtml).prop('disabled', false).removeClass('bg-slate-100 cursor-not-allowed');
+        } else {
+        alert("Có lỗi xảy ra khi lấy dữ liệu!");
+        }
+        });
+        } else {
+        selectBs.prop('disabled', true).addClass('bg-slate-100 cursor-not-allowed').html('<option value="">-- Chọn khoa trước --</option>');
+        selectPhong.prop('disabled', true).addClass('bg-slate-100 cursor-not-allowed').html('<option value="">-- Chọn khoa trước --</option>');
+        }
+        });
+        });
+    </script>
+}
