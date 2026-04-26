@@ -178,22 +178,65 @@ namespace QuanLyPhongKham.Services.Implementations
             lich.TrangThai = trangThaiMoi;
             return _buoiKhamRepo.Update(lich);
         }
-
+        // =================================================================
+        // ĐÃ CẬP NHẬT: XỬ LÝ SINH GIỜ BẰNG KIỂU DỮ LIỆU TIMEONLY
+        // =================================================================
         public async Task<List<string>> LayCacGioKhamTrongAsync(int bacSiId, int phongKhamId, DateOnly ngayKham)
         {
-            var tatCaCaKham = new List<string>
-            {
-             "07:00 - 08:00", "08:00 - 09:00", "09:00 - 10:00", "10:00 - 11:00",
-             "13:00 - 14:00", "14:00 - 15:00", "15:00 - 16:00", "16:00 - 17:00"
-             };
+            int phutMoiCa = 60; // Mặc định 60 phút
 
+            var bacSi = _bacSiRepo.GetById(bacSiId);
+            if (bacSi != null)
+            {
+                // Dùng switch case theo Id cho chuyên nghiệp và chính xác
+                phutMoiCa = bacSi.ChuyenKhoaId switch
+                {
+                    2 or 6 => 30, // Khoa Răng, Răng Hàm Mặt
+                    5 or 7 => 30, // Nhi, Tai Mũi Họng
+                    8 => 20, // Da Liễu
+                    _ => 60  // Các khoa còn lại (Nội, Ngoại...)
+                };
+            }
+
+            var tatCaCaKham = new List<string>();
+
+            // 2. Dùng TimeOnly để sinh danh sách Ca Sáng (07:00 -> 11:00)
+            var batDauSang = new TimeOnly(7, 0);
+            var ketThucSang = new TimeOnly(11, 0);
+            var caHienTai = batDauSang;
+
+            while (caHienTai.AddMinutes(phutMoiCa) <= ketThucSang)
+            {
+                var caTiepTheo = caHienTai.AddMinutes(phutMoiCa);
+                // Format cứng HH:mm để string trả về đúng chuẩn hiển thị
+                tatCaCaKham.Add($"{caHienTai:HH\\:mm} - {caTiepTheo:HH\\:mm}");
+                caHienTai = caTiepTheo;
+            }
+
+            // 3. Dùng TimeOnly để sinh danh sách Ca Chiều (13:00 -> 17:00)
+            var batDauChieu = new TimeOnly(13, 0);
+            var ketThucChieu = new TimeOnly(17, 0);
+            caHienTai = batDauChieu;
+
+            while (caHienTai.AddMinutes(phutMoiCa) <= ketThucChieu)
+            {
+                var caTiepTheo = caHienTai.AddMinutes(phutMoiCa);
+                tatCaCaKham.Add($"{caHienTai:HH\\:mm} - {caTiepTheo:HH\\:mm}");
+                caHienTai = caTiepTheo;
+            }
+
+            // 4. Lấy các ca đã Kín (Repo trả về List<TimeOnly>)
             var cacGioDaDat = await _buoiKhamRepo.GetCacGioDaDatAsync(bacSiId, phongKhamId, ngayKham);
 
-            var cacCaDaKín = cacGioDaDat.Select(g =>
-                $"{g:HH\\:mm} - {g.AddHours(1):HH\\:mm}"
-            ).ToList();
+            // 5. Cộng thêm phút để tạo chuỗi so khớp
+            var cacCaDaKin = cacGioDaDat.Select(g =>
+            {
+                var end = g.AddMinutes(phutMoiCa);
+                return $"{g:HH\\:mm} - {end:HH\\:mm}";
+            }).ToList();
 
-            return tatCaCaKham.Except(cacCaDaKín).ToList();
+            // 6. Trả về các ca còn Trống
+            return tatCaCaKham.Except(cacCaDaKin).ToList();
         }
     }
 }
