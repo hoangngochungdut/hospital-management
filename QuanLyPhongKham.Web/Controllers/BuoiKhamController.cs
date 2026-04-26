@@ -67,5 +67,6 @@ namespace QuanLyPhongKham.Web.Controllers
 
             return RedirectToAction("LichKham", "BenhNhanDashboard");
         }
+
     }
 }
