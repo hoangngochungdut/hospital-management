@@ -14,9 +14,7 @@
             var isSuccess = msg.Contains("✅") || msg.Contains("thành công");
             
             <div class="mb-6 p-4 rounded-xl border flex items-center transition-all shadow-sm @(isSuccess ? "bg-green-50 border-green-200 text-green-700" : "bg-red-50 border-red-200 text-red-700")">
-                
                 <span class="font-medium text-lg">@msg</span>
-                
                 <button type="button" class="ml-auto text-slate-400 hover:text-slate-600 focus:outline-none" onclick="this.parentElement.style.display='none';">
                     <i class="fas fa-times text-xl"></i>
                 </button>
@@ -74,8 +72,8 @@
                     <h3 class="font-bold text-lg text-blue-700 mb-4 flex items-center">
                         <span class="w-7 h-7 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mr-2 text-xs">4</span> Chọn Ngày Khám
                     </h3>
-                    <input type="date" id="NgayKham" name="Ngay" min="@DateTime.Now.ToString("yyyy-MM-dd")"
-                           class="w-full border-2 border-slate-200 p-3 rounded-xl outline-none focus:border-blue-500 bg-slate-50 text-slate-400 font-bold cursor-not-allowed" disabled required />
+                    <input type="text" id="NgayKham" name="Ngay" placeholder="📅 Bấm vào để chọn ngày..."
+                           class="w-full border-2 border-slate-200 p-3 rounded-xl outline-none focus:border-blue-500 bg-white text-slate-900 font-bold transition-all" required />
                 </div>
 
                 <div>
@@ -105,128 +103,155 @@
 </div>
 
 @section Scripts {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/vn.js"></script>
+
     <script>
+        let danhSachLich = [];
+        let datePicker;
+
         $(document).ready(function () {
             
-            function setFieldState(elementId, disabled, placeholderText) {
-                let el = $(elementId); el.prop('disabled', disabled);
-                if (disabled) {
-                    el.addClass('bg-slate-50 text-slate-400 cursor-not-allowed').removeClass('bg-white text-slate-900 border-blue-200');
-                    if (el.is("select")) el.html(`<option value="">${placeholderText}</option>`);
-                } else {
-                    el.removeClass('bg-slate-50 text-slate-400 cursor-not-allowed').addClass('bg-white text-slate-900 border-blue-200');
-                    if (el.is("select")) el.empty();
-                }
-            }
+        function checkEnableSubmit() {
+        let coGioKham = $('#GioKhamValue').val() !== '';
+        if (coGioKham) {
+        $('#btnSubmit').prop('disabled', false).removeClass('bg-slate-200 text-slate-400 opacity-50 cursor-not-allowed').addClass('bg-blue-600 text-white hover:bg-blue-700 shadow-blue-200 cursor-pointer');
+        } else {
+        $('#btnSubmit').prop('disabled', true).removeClass('bg-blue-600 text-white hover:bg-blue-700 shadow-blue-200 cursor-pointer').addClass('bg-slate-200 text-slate-400 opacity-50 cursor-not-allowed');
+        }
+        }
 
-            // 1. SỰ KIỆN CHỌN KHOA -> LOAD BÁC SĨ & PHÒNG
-            $('#ChuyenKhoaId').change(function () {
-                let khoaId = $(this).val();
-                if (!khoaId) {
-                    setFieldState('#BacSiId', true, '-- Chọn khoa trước --');
-                    setFieldState('#PhongKhamId', true, '-- Chọn khoa trước --');
-                    $('#NgayKham').prop('disabled', true).addClass('bg-slate-50 cursor-not-allowed');
-                    return;
-                }
+        // KÍCH HOẠT LỊCH
+        datePicker = flatpickr("#NgayKham", {
+        dateFormat: "Y-m-d",
+        altInput: true,
+        altFormat: "d/m/Y",
+        minDate: "today",
+        locale: "vn",
+        enable: [ function() { return false; } ], // Khóa mọi ngày cho đến khi có data
+        onChange: function() {
+        loadGioKham();
+        }
+        });
 
-                setFieldState('#BacSiId', true, '🔎 Đang tải bác sĩ...');
-                setFieldState('#PhongKhamId', true, '🔎 Đang tải phòng...');
-
-                $.get('/BuoiKham/GetBacSiVaPhong?chuyenKhoaId=' + khoaId, function (res) {
-                    if (res.success) {
-                        setFieldState('#BacSiId', false);
-                        $('#BacSiId').append('<option value="">-- Chọn Bác Sĩ --</option>');
-                        res.data.bacSis.forEach(bs => {
-                            let tenBS = bs.ten.replace(/^BS\.\s*/i, "");
-                            $('#BacSiId').append(`<option value="${bs.id}">BS. ${tenBS}</option>`);
-                        });
-                        
-                        setFieldState('#PhongKhamId', false);
-                        $('#PhongKhamId').append('<option value="">-- Chọn Phòng --</option>');
-                        
-                        // ĐÃ SỬA CHỖ NÀY: Dùng nguyên biến p.ten từ C# trả về, không cộng thêm chữ nào nữa 👇
-                        res.data.phongs.forEach(p => {
-                            $('#PhongKhamId').append(`<option value="${p.id}">${p.ten}</option>`);
-                        });
-                        
-                        $('#NgayKham').prop('disabled', false).removeClass('bg-slate-50 text-slate-400 cursor-not-allowed').addClass('bg-white text-slate-900');
-                    }
-                });
-            });
-
-            // 2. TÌM CA KHÁM (HIỂN THỊ CẢ CA TRỐNG & CA KÍN)
-            $('#NgayKham, #BacSiId, #PhongKhamId').change(function () {
-                let ngay = $('#NgayKham').val();
-                let bsId = $('#BacSiId').val();
-                let pId = $('#PhongKhamId').val();
-
-                if (!ngay || !bsId || !pId) return;
-
-                $('#ContainerGio').html('<div class="col-span-full text-center text-blue-500 animate-pulse py-4 italic font-medium">🔎 Đang đồng bộ lịch từ hệ thống...</div>');
-                $('#GioKhamValue').val('');
-                $('#btnSubmit').prop('disabled', true).addClass('bg-slate-200 text-slate-400 opacity-50 cursor-not-allowed').removeClass('bg-blue-600 text-white shadow-blue-200 cursor-pointer hover:bg-blue-700');
-
-                // Gọi API lấy giờ trống
-                $.get(`/BuoiKham/GetGioTrong?bacSiId=${bsId}&phongKhamId=${pId}&ngay=${ngay}`, function (res) {
-                    $('#ContainerGio').empty();
-                    
-                    // ĐỊNH NGHĨA DANH SÁCH TẤT CẢ CÁC CA TRONG 1 NGÀY
-                    const tatCaCaKham = [
-                        "07:00 - 08:00", "08:00 - 09:00", "09:00 - 10:00", "10:00 - 11:00",
-                        "13:00 - 14:00", "14:00 - 15:00", "15:00 - 16:00", "16:00 - 17:00"
-                    ];
-
-                    if (res.success) {
-                        let cacCaTrong = res.gioTrong;
-
-                        tatCaCaKham.forEach(ca => {
-                            let isAvailable = cacCaTrong.includes(ca);
-
-                            if (isAvailable) {
-                                // NÚT XANH / TRẮNG (CÒN TRỐNG - CHO PHÉP BẤM)
-                                $('#ContainerGio').append(`
-                                    <button type="button" data-time="${ca}"
-                                        class="btn-gio py-3 px-1 border-2 border-blue-200 bg-white text-blue-700 font-bold rounded-xl hover:bg-blue-50 hover:border-blue-400 transition-all shadow-sm text-sm">
-                                        ${ca}
-                                    </button>`);
-                            } else {
-                                // NÚT ĐỎ (KÍN LỊCH / TRÙNG - KHÔNG CHO BẤM)
-                                $('#ContainerGio').append(`
-                                    <div class="relative group">
-                                        <button type="button" disabled
-                                            class="w-full py-3 px-1 border-2 border-red-200 bg-red-50 text-red-500 font-bold rounded-xl cursor-not-allowed line-through text-sm opacity-80">
-                                            ${ca}
-                                        </button>
-                                        <span class="absolute -top-8 left-1/2 -translate-x-1/2 bg-red-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-                                            Kín lịch
-                                        </span>
-                                    </div>`);
-                            }
-                        });
-                    }
-                });
-            });
-
-            // 3. XỬ LÝ KHI BỆNH NHÂN BẤM CHỌN 1 CA CÒN TRỐNG
-            $(document).on('click', '.btn-gio', function () {
-                // Xóa trạng thái active của các nút khác
-                $('.btn-gio').removeClass('bg-blue-600 text-white border-blue-600 scale-105 shadow-md')
-                             .addClass('bg-white text-blue-700 border-blue-200');
+        // CHỌN KHOA -> LẤY DATA
+        $('#ChuyenKhoaId').change(function () {
+        let khoaId = $(this).val();
                 
-                // Set trạng thái active cho nút vừa bấm
-                $(this).removeClass('bg-white text-blue-700 border-blue-200')
-                       .addClass('bg-blue-600 text-white border-blue-600 scale-105 shadow-md');
+        $('#BacSiId').html('<option value="">-- Chọn khoa trước --</option>').prop('disabled', true).addClass('bg-slate-50 text-slate-400 cursor-not-allowed').removeClass('bg-white text-slate-900 border-blue-200');
+        $('#PhongKhamId').html('<option value="">-- Chọn khoa trước --</option>').prop('disabled', true).addClass('bg-slate-50 text-slate-400 cursor-not-allowed').removeClass('bg-white text-slate-900 border-blue-200');
                 
-                // --- ĐÃ FIX CẮT LẤY GIỜ VÀ NỐI THÊM :00 ---
-                let caKham = $(this).data('time');
-                let gioCut = caKham.split(' - ')[0]; // Lấy "07:00"
-                $('#GioKhamValue').val(gioCut + ":00"); // Gửi về C# là "07:00:00" để không bị thành 12h
+        datePicker.clear();
+        datePicker.set("enable", [ function() { return false; } ]); // Khóa lịch
+
+        $('#ContainerGio').html('<p class="col-span-full text-slate-400 text-center py-4 italic">Vui lòng hoàn thành các bước trên để xem lịch...</p>');
+        $('#GioKhamValue').val('');
+        checkEnableSubmit();
+
+        if (khoaId) {
+        $('#BacSiId').html('<option value="">🔎 Đang tải bác sĩ...</option>');
+        $('#PhongKhamId').html('<option value="">🔎 Đang tải phòng...</option>');
+
+        $.get('/BuoiKham/GetLichKhamKhaDung?chuyenKhoaId=' + khoaId, function (res) {
+        if (res.success && res.data.length > 0) {
+        danhSachLich = res.data;
+                            
+        // Đổ Data Bác Sĩ
+        let listBs = [...new Map(danhSachLich.map(item => [item.bacSiId, item])).values()];
+        let bsHtml = '<option value="">-- Chọn Bác Sĩ --</option>';
+        listBs.forEach(b => { bsHtml += `<option value="${b.bacSiId}">BS. ${b.bacSiTen.replace(/^BS\.\s*/i, "")}</option>`; });
+        $('#BacSiId').html(bsHtml).prop('disabled', false).removeClass('bg-slate-50 text-slate-400 cursor-not-allowed').addClass('bg-white text-slate-900 border-blue-200');
+
+        // Đổ Data Phòng
+        let listPhong = [...new Map(danhSachLich.map(item => [item.phongId, item])).values()];
+        let pHtml = '<option value="">-- Chọn Phòng --</option>';
+        listPhong.forEach(p => { pHtml += `<option value="${p.phongId}">${p.phongTen}</option>`; });
+        $('#PhongKhamId').html(pHtml).prop('disabled', false).removeClass('bg-slate-50 text-slate-400 cursor-not-allowed').addClass('bg-white text-slate-900 border-blue-200');
+
+        capNhatLich(); // Kích hoạt lịch
+        } else {
+        alert("Khoa này hiện chưa có lịch phân công nào!");
+        $('#BacSiId').html('<option value="">-- Trống --</option>');
+        $('#PhongKhamId').html('<option value="">-- Trống --</option>');
+        }
+        });
+        }
+        });
+
+        // SỰ KIỆN LỌC CHÉO 1 CHIỀU
+        $('#BacSiId, #PhongKhamId').change(function() {
+        capNhatLich();
+        loadGioKham();
+        });
+
+        function capNhatLich() {
+        let bsId = $('#BacSiId').val();
+        let pId = $('#PhongKhamId').val();
+        let nGiaTri = datePicker.selectedDates.length > 0 ? datePicker.formatDate(datePicker.selectedDates[0], "Y-m-d") : "";
+
+        // Lọc data
+        let dataDaLoc = danhSachLich;
+        if (bsId) dataDaLoc = dataDaLoc.filter(x => x.bacSiId == bsId);
+        if (pId) dataDaLoc = dataDaLoc.filter(x => x.phongId == pId);
+
+        // Lấy ngày chuẩn và cắt chuỗi thời gian (nếu có)
+        let allowedDates = [...new Set(dataDaLoc.map(item => item.ngay.split('T')[0]))];
+
+        if (allowedDates.length > 0) {
+        datePicker.set("enable", allowedDates);
+        } else {
+        datePicker.set("enable", [ function() { return false; } ]);
+        }
+
+        // Xóa ngày đang chọn nếu nó không còn hợp lệ
+        if (nGiaTri && !allowedDates.includes(nGiaTri)) {
+        datePicker.clear();
+        $('#GioKhamValue').val('');
+        $('#ContainerGio').html('<p class="col-span-full text-slate-400 text-center py-4 italic">Vui lòng hoàn thành các bước trên để xem lịch...</p>');
+        checkEnableSubmit();
+        }
+        }
+
+        function loadGioKham() {
+        let ngay = datePicker.selectedDates.length > 0 ? datePicker.formatDate(datePicker.selectedDates[0], "Y-m-d") : "";
+        let bsId = $('#BacSiId').val();
+        let pId = $('#PhongKhamId').val();
+
+        if (!ngay || !bsId || !pId) return;
+
+        $('#ContainerGio').html('<div class="col-span-full text-center text-blue-500 animate-pulse py-4 italic font-medium">🔎 Đang đồng bộ lịch từ hệ thống...</div>');
+        $('#GioKhamValue').val('');
+        checkEnableSubmit();
+
+        $.get(`/BuoiKham/GetGioTrong?bacSiId=${bsId}&phongKhamId=${pId}&ngay=${ngay}`, function (res) {
+        $('#ContainerGio').empty();
+        const tatCaCaKham = ["07:00 - 08:00", "08:00 - 09:00", "09:00 - 10:00", "10:00 - 11:00", "13:00 - 14:00", "14:00 - 15:00", "15:00 - 16:00", "16:00 - 17:00"];
+
+        if (res.success) {
+        let cacCaTrong = res.gioTrong || [];
+        tatCaCaKham.forEach(ca => {
+        if (cacCaTrong.includes(ca)) {
+        $('#ContainerGio').append(`<button type="button" data-time="${ca}" class="btn-gio py-3 px-1 border-2 border-blue-200 bg-white text-blue-700 font-bold rounded-xl hover:bg-blue-50 hover:border-blue-400 transition-all shadow-sm text-sm">${ca}</button>`);
+        } else {
+        $('#ContainerGio').append(`<div class="relative group"><button type="button" disabled class="w-full py-3 px-1 border-2 border-red-100 bg-red-50 text-red-400 font-bold rounded-xl cursor-not-allowed line-through text-sm opacity-80">${ca}</button></div>`);
+        }
+        });
+        } else {
+        $('#ContainerGio').html('<p class="col-span-full text-red-500 text-center py-4 italic font-bold">❌ Không thể tải lịch, vui lòng thử lại!</p>');
+        }
+        });
+        }
+
+        $(document).on('click', '.btn-gio', function () {
+        $('.btn-gio').removeClass('bg-blue-600 text-white border-blue-600 scale-105 shadow-md').addClass('bg-white text-blue-700 border-blue-200');
+        $(this).removeClass('bg-white text-blue-700 border-blue-200').addClass('bg-blue-600 text-white border-blue-600 scale-105 shadow-md');
                 
-                // Mở khóa nút Xác Nhận
-                $('#btnSubmit').prop('disabled', false)
-                             .removeClass('bg-slate-200 text-slate-400 opacity-50 cursor-not-allowed')
-                             .addClass('bg-blue-600 text-white hover:bg-blue-700 shadow-blue-200 cursor-pointer');
-            });
+        let caKham = $(this).data('time');
+        let gioCut = caKham.split(' - ')[0];
+        $('#GioKhamValue').val(gioCut + ":00");
+        checkEnableSubmit();
+        });
         });
     </script>
 }

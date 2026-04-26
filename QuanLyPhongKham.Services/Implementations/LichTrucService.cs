@@ -1,4 +1,5 @@
 ﻿using QuanLyPhongKham.Models;
+using QuanLyPhongKham.Models.DTOs;
 using QuanLyPhongKham.Repositories.Interfaces;
 using QuanLyPhongKham.Services.Interfaces;
 using System;
@@ -69,6 +70,14 @@ namespace QuanLyPhongKham.Services.Implementations
         public async Task<bool> XoaLichTrucAsync(int id)
         {
             return await _lichTrucRepo.XoaLichTrucAsync(id);
+        }
+        public async Task<List<LichKhaDungDto>> LayDanhSachLichKhaDungAsync(int chuyenKhoaId)
+        {
+            // Logic nghiệp vụ: Lịch khả dụng phải lấy từ hôm nay trở đi
+            var homNay = DateOnly.FromDateTime(DateTime.Now);
+
+            // Gọi xuống Repo lấy data
+            return await _lichTrucRepo.GetLichKhaDungByKhoaAsync(chuyenKhoaId, homNay);
         }
     }
 }

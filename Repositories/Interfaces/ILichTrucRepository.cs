@@ -1,4 +1,5 @@
 ﻿using QuanLyPhongKham.Models;
+using QuanLyPhongKham.Models.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -14,5 +15,6 @@ namespace QuanLyPhongKham.Repositories.Interfaces
         Task<IEnumerable<LichTruc>> LayTatCaLichTrucAsync();
         Task<bool> ThemDanhSachLichTrucAsync(List<LichTruc> dsLich);
         Task<bool> XoaLichTrucAsync(int id);
+        Task<List<LichKhaDungDto>> GetLichKhaDungByKhoaAsync(int chuyenKhoaId, DateOnly tuNgay);
     }
 }

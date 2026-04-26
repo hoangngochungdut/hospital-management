@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using QuanLyPhongKham.Models.DTOs;
 using QuanLyPhongKham.Models.Enums;
+using QuanLyPhongKham.Services.Implementations;
 using QuanLyPhongKham.Services.Interfaces;
 using System;
 using System.Security.Claims;
@@ -12,10 +13,12 @@ namespace QuanLyPhongKham.Web.Controllers
     public class BuoiKhamController : Controller
     {
         private readonly IBuoiKhamService _service;
+        private readonly ILichTrucService _lichTrucService;
 
-        public BuoiKhamController(IBuoiKhamService service)
+        public BuoiKhamController(IBuoiKhamService service, ILichTrucService lichTrucService)
         {
             _service = service;
+            _lichTrucService = lichTrucService;
         }
 
         [HttpGet]
@@ -67,6 +70,21 @@ namespace QuanLyPhongKham.Web.Controllers
 
             return RedirectToAction("LichKham", "BenhNhanDashboard");
         }
+        [HttpGet]
+        public async Task<IActionResult> GetLichKhamKhaDung(int chuyenKhoaId)
+        {
+            try
+            {
+                // Controller chỉ gọi Service, sạch sẽ 100%
+                var data = await _lichTrucService.LayDanhSachLichKhaDungAsync(chuyenKhoaId);
 
+                // Trả về cho file Javascript ở frontend
+                return Json(new { success = true, data = data });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
     }
 }

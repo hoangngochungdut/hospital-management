@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using QuanLyPhongKham.Data;
 using QuanLyPhongKham.Models;
+using QuanLyPhongKham.Models.DTOs;
 using QuanLyPhongKham.Repositories.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -85,6 +86,22 @@ namespace QuanLyPhongKham.Repositories.Implementations
             _context.LichTrucs.Remove(lich);
             await _context.SaveChangesAsync();
             return true;
+        }
+        public async Task<List<LichKhaDungDto>> GetLichKhaDungByKhoaAsync(int chuyenKhoaId, DateOnly tuNgay)
+        {
+            return await _context.LichTrucs
+                .Include(l => l.BacSi)
+                .Include(l => l.PhongKham)
+                .Where(l => l.BacSi.ChuyenKhoaId == chuyenKhoaId && l.Ngay >= tuNgay)
+                .Select(l => new LichKhaDungDto
+                {
+                    BacSiId = l.BacSiId,
+                    BacSiTen = "BS. " + l.BacSi.HoTen,
+                    PhongId = l.PhongKhamId,
+                    PhongTen = "Phòng " + l.PhongKham.SoPhong,
+                    Ngay = l.Ngay.ToString("yyyy-MM-dd")
+                })
+                .ToListAsync();
         }
     }
 }
