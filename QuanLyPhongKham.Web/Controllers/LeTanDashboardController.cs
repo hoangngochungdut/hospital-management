@@ -12,19 +12,22 @@ namespace QuanLyPhongKham.Web.Controllers
     {
         private readonly ILeTanService _leTanService;
         private readonly IBuoiKhamService _buoiKhamService;
+        private readonly IBenhNhanService _benhNhanService;
 
         public LeTanDashboardController(
             ILeTanService leTanService,
-            IBuoiKhamService buoiKhamService)
+            IBuoiKhamService buoiKhamService,
+            IBenhNhanService benhNhanService)
         {
             _leTanService = leTanService;
             _buoiKhamService = buoiKhamService;
+            _benhNhanService = benhNhanService;
         }
 
         public async Task<IActionResult> LichKham()
         {
             var dsKhoa = await _buoiKhamService.LayTatCaChuyenKhoaAsync();
-            var dsBenhNhan = await _buoiKhamService.LayTatCaBenhNhanAsync();
+            var dsBenhNhan = await _benhNhanService.GetAllAsync();
             ViewBag.DsChuyenKhoa = dsKhoa;
             ViewBag.DsBenhNhan = dsBenhNhan;
 

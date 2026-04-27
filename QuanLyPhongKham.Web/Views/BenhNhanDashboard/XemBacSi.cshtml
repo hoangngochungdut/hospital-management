@@ -1,0 +1,104 @@
+﻿@model IEnumerable<QuanLyPhongKham.Models.DTOs.BacSiDanhGiaViewModel>
+
+@{
+    Layout = "~/Views/Shared/_BenhNhanLayout.cshtml";
+    ViewData["Title"] = "Đội ngũ Bác sĩ";
+}
+
+<div class="bg-slate-50 min-h-screen py-10 px-4">
+    <div class="max-w-6xl mx-auto">
+        
+        <div class="mb-8">
+            <h2 class="text-3xl font-black text-slate-800 uppercase tracking-tight">Đội ngũ Bác sĩ</h2>
+            <p class="text-slate-500 mt-2">Xem thông tin và đánh giá thực tế từ các bệnh nhân đi trước để dễ dàng lựa chọn.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            @foreach (var bs in Model)
+            {
+                <div class="bg-white rounded-3xl shadow-lg border border-slate-100 overflow-hidden flex flex-col transition-all hover:shadow-xl hover:-translate-y-1">
+                    
+                    <div class="p-6 border-b border-slate-100 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-bl-full -z-10"></div>
+                        
+                        <h3 class="text-xl font-bold text-slate-800">BS. @bs.TenBacSi</h3>
+                        <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider inline-block mt-2">
+                            Khoa @bs.TenChuyenKhoa
+                        </span>
+
+                        <div class="mt-5 flex items-center gap-4 bg-slate-50 p-3 rounded-2xl border border-slate-100">
+                            <div class="text-4xl font-black text-orange-500">@bs.DiemTrungBinh</div>
+                            <div>
+                                <div class="text-orange-400 text-sm tracking-widest">
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        if (i <= Math.Round(bs.DiemTrungBinh))
+                                        {
+                                            <span>⭐</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="opacity-30 grayscale">⭐</span>
+                                        }
+                                    }
+                                </div>
+                                <div class="text-[11px] text-slate-400 font-bold mt-1 uppercase">Dựa trên @bs.TongSoDanhGia đánh giá</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-6 bg-slate-50 flex-1">
+                        <h4 class="text-[11px] font-black text-slate-400 uppercase mb-4 tracking-widest flex items-center gap-2">
+                            <span>💬 Lời khen chê gần đây</span>
+                        </h4>
+                        
+                        @if (bs.DanhSachNhanXet.Any())
+                        {
+                            <div class="space-y-4 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">
+                                @foreach (var nx in bs.DanhSachNhanXet)
+                                {
+                                    <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm relative">
+                                        <div class="flex justify-between items-center mb-2">
+                                            <div class="font-bold text-xs text-slate-700">@(nx.TenBenhNhan.Length > 8 ? nx.TenBenhNhan.Substring(0, 8) + "***" : nx.TenBenhNhan)</div>
+                                            <div class="text-[10px] text-slate-400 font-medium">@nx.NgayKham.ToString("dd/MM/yyyy")</div>
+                                        </div>
+                                        <div class="text-orange-400 text-[10px] mb-2 tracking-widest">
+                                            @string.Concat(Enumerable.Repeat("⭐", nx.SoSao))
+                                        </div>
+                                        <p class="text-[13px] text-slate-600 italic leading-relaxed">"@nx.NhanXet"</p>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-center py-10">
+                                <div class="text-4xl mb-3 opacity-50">🤫</div>
+                                <div class="text-slate-400 text-xs font-medium">Bác sĩ này chưa có đánh giá nào.</div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 10px;
+    }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+</style>

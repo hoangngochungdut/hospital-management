@@ -31,10 +31,40 @@ namespace QuanLyPhongKham.Web.Controllers
             return View(lichCuaToi);
         }
 
+        // ĐÃ NÂNG CẤP: Thêm tham số ghiChu (Lấy kết quả khám hoặc lý do hủy)
         [HttpPost]
-        public IActionResult DoiTrangThai(int id, int trangThaiMoi)
+        public IActionResult DoiTrangThai(int id, int trangThaiMoi, string? ghiChu)
         {
-            _buoiKhamService.CapNhatTrangThai(id, (TrangThaiBuoiKham)trangThaiMoi);
+            try
+            {
+                _buoiKhamService.CapNhatTrangThai(id, (TrangThaiBuoiKham)trangThaiMoi, ghiChu);
+                TempData["ThongBao"] = "✅ Cập nhật trạng thái thành công!";
+            }
+            catch (Exception ex)
+            {
+                TempData["ThongBao"] = "❌ Cập nhật thất bại: " + ex.Message;
+            }
+            return RedirectToAction("LichKham");
+        }
+
+        // TÍNH NĂNG MỚI: Dời giờ khám
+        [HttpPost]
+        [HttpPost]
+        public IActionResult DoiLichKham(int id, DateTime ngayMoi, string gioMoi, string lyDoDoi)
+        {
+            try
+            {
+                DateOnly dateParsed = DateOnly.FromDateTime(ngayMoi);
+                TimeOnly timeParsed = TimeOnly.Parse(gioMoi);
+
+                // Truyền đủ 4 tham số vào hàm
+                _buoiKhamService.DoiLichKham(id, dateParsed, timeParsed, lyDoDoi);
+                TempData["ThongBao"] = "✅ Dời lịch thành công! Bệnh nhân đã nhận được thông báo.";
+            }
+            catch (Exception ex)
+            {
+                TempData["ThongBao"] = "❌ Không thể dời lịch: " + ex.Message;
+            }
             return RedirectToAction("LichKham");
         }
 

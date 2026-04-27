@@ -22,5 +22,6 @@ namespace QuanLyPhongKham.Repositories.Interfaces
         bool Update(BuoiKham buoiKham); 
         bool Delete(int id);
         Task<List<TimeOnly>> GetCacGioDaDatAsync(int bacSiId, int phongKhamId, DateOnly ngayKham);
+        Task<List<BuoiKham>> GetAllLichKhamFullAsync();
     }
 }

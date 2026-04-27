@@ -13,5 +13,6 @@ namespace QuanLyPhongKham.Repositories.Interfaces
 
         // Hàm này dùng Task vì nó là hàm mới, không bị ràng buộc bởi IRepository
         Task<List<BacSi>> GetByChuyenKhoaIdAsync(int chuyenKhoaId);
+        List<BacSi> GetDanhSachBacSiKemDanhGia();
     }
 }

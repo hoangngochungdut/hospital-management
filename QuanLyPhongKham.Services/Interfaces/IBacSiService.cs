@@ -20,5 +20,6 @@ namespace QuanLyPhongKham.Services.Interfaces
 
         ICollection<ChuyenKhoa> GetDanhSachChuyenKhoa();
         Task<IEnumerable<BacSi>> GetByChuyenKhoaIdAsync(int chuyenKhoaId);
+        List<BacSiDanhGiaViewModel> LayDanhSachBacSiVaDanhGia();
     }
 }

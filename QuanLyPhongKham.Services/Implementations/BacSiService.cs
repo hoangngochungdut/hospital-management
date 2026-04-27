@@ -102,5 +102,41 @@ namespace QuanLyPhongKham.Services.Implementations
         {
             return await _bacSiRepo.GetByChuyenKhoaIdAsync(chuyenKhoaId);
         }
+        public List<BacSiDanhGiaViewModel> LayDanhSachBacSiVaDanhGia()
+        {
+            // 1. Gọi Repo lấy data thô (đã được Include đầy đủ bảng)
+            var danhSachDataTho = _bacSiRepo.GetDanhSachBacSiKemDanhGia();
+
+            // 2. Chuyển đổi (Map) sang ViewModel và tính toán logic
+            var ketQua = danhSachDataTho.Select(bs => new BacSiDanhGiaViewModel
+            {
+                BacSiId = bs.Id,
+                TenBacSi = bs.HoTen,
+                TenChuyenKhoa = bs.ChuyenKhoa?.TenKhoa ?? "Đang cập nhật",
+
+                // Tính tổng số lượt đánh giá
+                TongSoDanhGia = bs.BuoiKhams.Count(bk => bk.DiemDanhGia != null),
+
+                // Tính trung bình sao
+                DiemTrungBinh = bs.BuoiKhams.Any(bk => bk.DiemDanhGia != null)
+                    ? Math.Round(bs.BuoiKhams.Where(bk => bk.DiemDanhGia != null).Average(bk => bk.DiemDanhGia.Value), 1)
+                    : 0,
+
+                // Lấy 5 nhận xét mới nhất
+                DanhSachNhanXet = bs.BuoiKhams
+                    .Where(bk => bk.DiemDanhGia != null)
+                    .OrderByDescending(bk => bk.Ngay)
+                    .Take(5)
+                    .Select(bk => new ChiTietDanhGia
+                    {
+                        SoSao = bk.DiemDanhGia.Value,
+                        NhanXet = bk.NhanXetCuaBenhNhan,
+                        TenBenhNhan = bk.BenhNhan?.HoTen ?? "Bệnh nhân ẩn danh",
+                        NgayKham = bk.Ngay
+                    }).ToList()
+            }).ToList();
+
+            return ketQua;
+        }
     }
 }

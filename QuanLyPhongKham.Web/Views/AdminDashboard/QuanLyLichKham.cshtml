@@ -1,0 +1,215 @@
+﻿@model IEnumerable<QuanLyPhongKham.Models.BuoiKham>
+@using QuanLyPhongKham.Models.Enums
+
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Quản Lý Lịch Khám";
+}
+
+<div class="bg-slate-50 min-h-screen py-8 px-6">
+    <div class="max-w-7xl mx-auto">
+
+        @* --- HEADER & STATS --- *@
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h2 class="text-3xl font-black text-slate-800 uppercase tracking-tight">Hệ Thống Lịch Khám</h2>
+                <p class="text-slate-500 mt-1">Quản lý và điều phối tất cả ca khám trong hệ thống</p>
+            </div>
+            
+            <div class="flex gap-4">
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 text-center min-w-[120px]">
+                    <p class="text-[10px] font-black text-slate-400 uppercase">Tổng ca</p>
+                    <p class="text-xl font-black text-slate-800">@Model.Count()</p>
+                </div>
+                <div class="bg-orange-50 p-4 rounded-2xl shadow-sm border border-orange-100 text-center min-w-[120px]">
+                    <p class="text-[10px] font-black text-orange-400 uppercase">Chờ duyệt</p>
+                    <p class="text-xl font-black text-orange-600">@Model.Count(x => x.TrangThai == TrangThaiBuoiKham.ChuaXacNhan)</p>
+                </div>
+            </div>
+        </div>
+
+        @* --- THANH LỌC VÀ TÌM KIẾM --- *@
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 mb-6">
+            <form method="get" asp-action="QuanLyLichKham" id="filterForm" class="flex flex-wrap gap-4 items-end">
+                <div class="flex-1 min-w-[200px]">
+                    <label class="block text-[11px] font-black text-slate-400 uppercase mb-1.5 ml-1">Lọc theo khoa</label>
+                    <select name="chuyenKhoaId" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-blue-500 transition-all cursor-pointer">
+                        <option value="">-- Tất cả các khoa --</option>
+                        @foreach (var khoa in ViewBag.DsChuyenKhoa)
+                        {
+                            <option value="@khoa.Id" selected="@(ViewBag.SelectedKhoa == khoa.Id)">@khoa.TenKhoa</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="flex-[2] min-w-[300px]">
+                    <label class="block text-[11px] font-black text-slate-400 uppercase mb-1.5 ml-1">Tìm tên bác sĩ</label>
+                    <input type="text" name="tenBacSi" value="@ViewBag.SelectedTen" placeholder="Nhập tên bác sĩ..."
+                           class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-blue-500 transition-all" />
+                </div>
+
+                <div class="flex gap-2">
+                    <button type="submit" class="bg-blue-600 text-white px-8 py-2.5 rounded-xl text-xs font-bold hover:bg-blue-700 transition-all shadow-md uppercase">
+                        🔍 Tìm kiếm
+                    </button>
+                    <a href="/AdminDashboard/QuanLyLichKham" class="bg-slate-100 text-slate-600 px-6 py-2.5 rounded-xl text-xs font-bold hover:bg-slate-200 transition-all uppercase">
+                        🔄 Làm mới
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        @* --- BẢNG DỮ LIỆU --- *@
+        <div class="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 text-[11px] font-black uppercase tracking-widest">
+                        <th class="p-5">Thời gian</th>
+                        <th class="p-5">Bệnh nhân</th>
+                        <th class="p-5">Bác sĩ & Khoa</th>
+                        <th class="p-5 text-center">Phòng</th>
+                        <th class="p-5">Trạng thái</th>
+                        <th class="p-5 text-center">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    @foreach (var item in Model)
+                    {
+                        <tr class="hover:bg-slate-50/50 transition-colors group">
+                            <td class="p-5">
+                                <div class="font-bold text-slate-700">@item.Ngay.ToString("dd/MM/yyyy")</div>
+                                <div class="text-blue-600 text-[11px] font-black">@item.Gio.ToString("HH:mm")</div>
+                            </td>
+                            <td class="p-5">
+                                <div class="font-bold text-slate-800">@item.BenhNhan?.HoTen</div>
+                                <div class="text-[10px] text-slate-400 font-medium">SĐT: @item.BenhNhan?.Sdt</div>
+                            </td>
+                            <td class="p-5">
+                                <div class="font-bold text-slate-800">BS. @item.BacSi?.HoTen</div>
+                                <div class="text-[10px] font-black text-blue-500 uppercase mt-0.5">
+                                    KHOA @(item.BacSi?.ChuyenKhoa?.TenKhoa ?? "N/A")
+                                </div>
+                            </td>
+                            <td class="p-5 text-center">
+                                <span class="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-lg text-[10px] font-black border border-slate-200">P.@item.PhongKham?.SoPhong</span>
+                            </td>
+                            <td class="p-5">
+                                @if (item.TrangThai == TrangThaiBuoiKham.ChuaXacNhan)
+                                {
+                                    <span class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-[10px] font-black uppercase">Chờ duyệt</span>
+                                }
+                                else if (item.TrangThai == TrangThaiBuoiKham.XacNhan)
+                                {
+                                    <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-[10px] font-black uppercase">Đã xác nhận</span>
+                                }
+                                else if (item.TrangThai == TrangThaiBuoiKham.HoanThanh)
+                                {
+                                    <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-[10px] font-black uppercase">Hoàn tất</span>
+                                }
+                                else
+                                {
+                                    <span class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-[10px] font-black uppercase">Đã hủy</span>
+                                }
+                            </td>
+                            <td class="p-5">
+                                <div class="flex justify-center gap-1.5">
+                                    <button type="button" onclick="showDetail('@item.Id')" class="bg-slate-100 text-slate-500 p-2 rounded-xl hover:bg-blue-600 hover:text-white transition-all shadow-sm" title="Xem chi tiết">
+                                        👁️
+                                    </button>
+
+                                    @if (item.TrangThai == TrangThaiBuoiKham.ChuaXacNhan)
+                                    {
+                                        <form asp-action="DoiTrangThai" method="post">
+                                            <input type="hidden" name="id" value="@item.Id" />
+                                            <input type="hidden" name="trangThaiMoi" value="@((int)TrangThaiBuoiKham.XacNhan)" />
+                                            <button class="bg-blue-600 text-white p-2 rounded-xl hover:bg-blue-700 transition-all shadow-sm" title="Xác nhận">
+                                                ✅
+                                            </button>
+                                        </form>
+                                    }
+                                    
+                                    <form asp-action="XoaLich" method="post" onsubmit="return confirm('Bạn muốn hủy/xóa ca khám này?')">
+                                        <input type="hidden" name="id" value="@item.Id" />
+                                        <button class="bg-red-50 text-red-500 border border-red-100 p-2 rounded-xl hover:bg-red-500 hover:text-white transition-all shadow-sm" title="Hủy">
+                                            ❌
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@* --- MODAL CHI TIẾT --- *@
+<div id="detailModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-[32px] shadow-2xl w-full max-w-2xl overflow-hidden transform transition-all scale-95 opacity-0 duration-300" id="modalContent">
+        <div class="bg-blue-600 p-6 text-white flex justify-between items-center">
+            <h3 class="font-black text-xl uppercase tracking-tight">Chi Tiết Ca Khám</h3>
+            <button onclick="closeDetail()" class="text-white/70 hover:text-white text-3xl">&times;</button>
+        </div>
+        <div class="p-8 space-y-6" id="modalBody">
+            <div class="flex justify-center py-10">
+                <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
+            </div>
+        </div>
+        <div class="p-6 bg-slate-50 border-t flex justify-end">
+            <button onclick="closeDetail()" class="px-8 py-3 bg-slate-200 text-slate-700 font-bold rounded-2xl hover:bg-slate-300 transition-all uppercase text-xs">Đóng</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function showDetail(id) {
+        $('#detailModal').removeClass('hidden').addClass('flex');
+        setTimeout(() => {
+            $('#modalContent').removeClass('scale-95 opacity-0').addClass('scale-100 opacity-100');
+        }, 10);
+
+        $.get('/AdminDashboard/GetLichKhamDetail/' + id, function(data) {
+            let html = `
+                <div class="grid grid-cols-2 gap-8">
+                    <div class="space-y-4">
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Thông tin bệnh nhân</p>
+                        <div class="bg-slate-50 p-4 rounded-2xl">
+                            <p class="font-bold text-slate-800 text-lg">${data.benhNhanTen}</p>
+                            <p class="text-sm text-slate-500">SĐT: ${data.sdt}</p>
+                            <p class="text-sm text-slate-500">Địa chỉ: ${data.diaChi || 'Chưa cập nhật'}</p>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Bác sĩ phụ trách</p>
+                        <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100">
+                            <p class="font-bold text-blue-800 text-lg">BS. ${data.bacSiTen}</p>
+                            <p class="text-sm text-blue-600 font-bold uppercase">${data.khoa}</p>
+                            <p class="text-sm text-blue-500">Phòng khám: ${data.soPhong}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="pt-4 space-y-4 border-t">
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Kết luận & Ghi chú hệ thống</p>
+                    <div class="p-4 bg-orange-50 border border-orange-100 rounded-2xl">
+                        <p class="text-sm text-orange-800 leading-relaxed italic">"${data.ghiChu || 'Chưa có kết quả hoặc ghi chú nào.'}"</p>
+                    </div>
+                </div>
+            `;
+            $('#modalBody').html(html);
+        });
+    }
+
+    function closeDetail() {
+        $('#modalContent').removeClass('scale-100 opacity-100').addClass('scale-95 opacity-0');
+        setTimeout(() => {
+            $('#detailModal').addClass('hidden').removeClass('flex');
+        }, 300);
+    }
+</script>
+
+<style>
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+</style>

@@ -13,79 +13,86 @@ namespace QuanLyPhongKham.Services.Implementations
 {
     public class BuoiKhamService : IBuoiKhamService
     {
-        // GỌI HỘI REPOSITORY VÀO ĐÂY, ĐÁ BAY APP_DB_CONTEXT
         private readonly IBuoiKhamRepository _buoiKhamRepo;
         private readonly IBacSiRepository _bacSiRepo;
         private readonly IPhongKhamRepository _phongKhamRepo;
         private readonly IChuyenKhoaRepository _chuyenKhoaRepo;
         private readonly IBenhNhanRepository _benhNhanRepo;
-        private readonly ILichTrucRepository _lichTrucRepo;
 
         public BuoiKhamService(
             IBuoiKhamRepository buoiKhamRepo,
             IBacSiRepository bacSiRepo,
             IPhongKhamRepository phongKhamRepo,
             IChuyenKhoaRepository chuyenKhoaRepo,
-            IBenhNhanRepository benhNhanRepo,
-            ILichTrucRepository lichTrucRepo)
+            IBenhNhanRepository benhNhanRepo)
         {
             _buoiKhamRepo = buoiKhamRepo;
             _bacSiRepo = bacSiRepo;
             _phongKhamRepo = phongKhamRepo;
             _chuyenKhoaRepo = chuyenKhoaRepo;
             _benhNhanRepo = benhNhanRepo;
-            _lichTrucRepo = lichTrucRepo;
         }
+
+        #region QUẢN LÝ DANH SÁCH (READ)
+
+        // Dành cho Admin: Lấy tất cả lịch khám kèm theo Bác sĩ, Bệnh nhân, Phòng
+        public async Task<List<BuoiKham>> LayToanBoLichKhamAdminAsync(int? chuyenKhoaId = null, string? tenBacSi = null)
+        {
+            // 1. Lấy data thô đã Include đầy đủ từ Repo
+            var listLich = await _buoiKhamRepo.GetAllLichKhamFullAsync();
+
+            // 2. Ép kiểu sang Queryable để lọc cho mượt (hoặc lọc trực tiếp trên List)
+            var query = listLich.AsQueryable();
+
+            // 3. Xử lý logic lọc tại Service
+            if (chuyenKhoaId.HasValue && chuyenKhoaId > 0)
+            {
+                // Thay vì: l => l.BacSi?.ChuyenKhoaId == chuyenKhoaId
+                query = query.Where(l => l.BacSi != null && l.BacSi.ChuyenKhoaId == chuyenKhoaId);
+            }
+
+            if (!string.IsNullOrEmpty(tenBacSi))
+            {
+                var searchName = tenBacSi.ToLower();
+                query = query.Where(l => l.BacSi != null && l.BacSi.HoTen.ToLower().Contains(searchName));
+            }
+
+            return query.ToList();
+        }
+
+        public List<BuoiKham> GetByBacSiId(int bacSiId) => _buoiKhamRepo.GetByBacSiId(bacSiId);
+
+        public List<BuoiKham> GetByBenhNhanId(int benhNhanId) => _buoiKhamRepo.GetByBenhNhanId(benhNhanId);
+
+        public BuoiKham GetById(int id) => _buoiKhamRepo.GetById(id) ?? throw new Exception("Không tìm thấy lịch khám");
+
+        public async Task<List<ChuyenKhoa>> LayTatCaChuyenKhoaAsync() => await _chuyenKhoaRepo.GetAllAsync();
+
+        #endregion
+
+        #region NGHIỆP VỤ ĐẶT LỊCH & KIỂM TRA TRÙNG
 
         public async Task<object> LayBacSiVaPhongTheoKhoaAsync(int chuyenKhoaId)
         {
             var bacSisList = await _bacSiRepo.GetByChuyenKhoaIdAsync(chuyenKhoaId);
-            var bacSis = bacSisList.Select(b => new {
-                id = b.Id,
-                ten = "BS. " + b.HoTen
-            }).ToList();
-
             var phongsList = await _phongKhamRepo.GetByChuyenKhoaAsync(chuyenKhoaId);
-            var phongs = phongsList.Select(p => new {
-                id = p.Id,
-                ten = "Phòng " + p.SoPhong + " (Tầng " + p.Tang + ") " + p.LoaiPhong
-            }).ToList();
 
-            return new { BacSis = bacSis, Phongs = phongs };
-        }
-
-        public async Task<List<ChuyenKhoa>> LayTatCaChuyenKhoaAsync()
-        {
-            return await _chuyenKhoaRepo.GetAllAsync();
-        }
-
-        public async Task<List<BenhNhan>> LayTatCaBenhNhanAsync()
-        {
-            var data = await _benhNhanRepo.GetAllAsync();
-            return data.ToList(); 
+            return new
+            {
+                BacSis = bacSisList.Select(b => new { id = b.Id, ten = "BS. " + b.HoTen }),
+                Phongs = phongsList.Select(p => new { id = p.Id, ten = $"Phòng {p.SoPhong} (Tầng {p.Tang})" })
+            };
         }
 
         public async Task<bool> DatLichKhamAsync(DatLichRequest request, int currentUserId, string role)
         {
-            var homNay = DateOnly.FromDateTime(DateTime.Now);
-            if (request.Ngay < homNay)
-            {
-                throw new Exception("Lỗi: Không thể đặt lịch cho ngày trong quá khứ!");
-            }
+            if (request.Ngay < DateOnly.FromDateTime(DateTime.Now))
+                throw new Exception("Lỗi: Không thể đặt lịch cho quá khứ!");
 
+            // Kiểm tra trùng lịch bác sĩ/phòng
             var cacCaDaDat = await _buoiKhamRepo.GetCacCaDaDatAsync(request.Ngay, request.Gio);
-
-            bool trungBacSi = cacCaDaDat.Any(b => b.BacSiId == request.BacSiId);
-            if (trungBacSi)
-            {
-                throw new Exception("Lỗi: Bác sĩ này đã có lịch trực hoặc lịch khám vào khung giờ này.");
-            }
-
-            bool trungPhong = cacCaDaDat.Any(b => b.PhongKhamId == request.PhongKhamId);
-            if (trungPhong)
-            {
-                throw new Exception("Lỗi: Phòng khám này đã được sử dụng vào khung giờ này.");
-            }
+            if (cacCaDaDat.Any(b => b.BacSiId == request.BacSiId)) throw new Exception("Lỗi: Bác sĩ đã có lịch tại khung giờ này.");
+            if (cacCaDaDat.Any(b => b.PhongKhamId == request.PhongKhamId)) throw new Exception("Lỗi: Phòng khám đã kín chỗ.");
 
             var buoiKham = new BuoiKham
             {
@@ -93,150 +100,105 @@ namespace QuanLyPhongKham.Services.Implementations
                 Gio = request.Gio,
                 BacSiId = request.BacSiId,
                 PhongKhamId = request.PhongKhamId,
-                TrangThai = TrangThaiBuoiKham.ChuaXacNhan
+                TrangThai = (role == "BenhNhan") ? TrangThaiBuoiKham.ChuaXacNhan : TrangThaiBuoiKham.XacNhan,
+                BenhNhanId = (role == "BenhNhan") ? currentUserId : (request.BenhNhanId ?? throw new Exception("Thiếu ID bệnh nhân"))
             };
-
-            if (role == "BenhNhan")
-            {
-                buoiKham.BenhNhanId = currentUserId;
-            }
-            else if (role == "Admin" || role == "LeTan")
-            {
-                if (!request.BenhNhanId.HasValue || request.BenhNhanId.Value <= 0)
-                    throw new Exception("Vui lòng chọn bệnh nhân để đặt lịch hộ.");
-
-                buoiKham.BenhNhanId = request.BenhNhanId.Value;
-                buoiKham.TrangThai = TrangThaiBuoiKham.XacNhan;
-            }
-            else
-            {
-                throw new UnauthorizedAccessException("Bạn không có quyền thực hiện chức năng này.");
-            }
 
             return await _buoiKhamRepo.AddAsync(buoiKham);
         }
 
-        public async Task<bool> CapNhatTrangThaiAsync(int buoiKhamId, TrangThaiBuoiKham trangThaiMoi, int currentUserId, string role)
-        {
-            var buoiKham = await _buoiKhamRepo.GetByIdAsync(buoiKhamId);
-            if (buoiKham == null)
-                throw new Exception("Không tìm thấy buổi khám.");
-
-            if (role == "BacSi")
-            {
-                if (buoiKham.BacSiId != currentUserId)
-                    throw new UnauthorizedAccessException("Bạn không thể sửa lịch của bác sĩ khác.");
-            }
-            else if (role == "BenhNhan")
-            {
-                if (buoiKham.BenhNhanId != currentUserId || trangThaiMoi != TrangThaiBuoiKham.Huy)
-                    throw new UnauthorizedAccessException("Bệnh nhân chỉ được phép tự hủy lịch của mình.");
-            }
-            else if (role != "Admin" && role != "LeTan")
-            {
-                throw new UnauthorizedAccessException("Tài khoản không hợp lệ.");
-            }
-
-            buoiKham.TrangThai = trangThaiMoi;
-            return await _buoiKhamRepo.UpdateAsync(buoiKham);
-        }
-
-        public List<BuoiKham> GetByBacSiId(int bacSiId)
-        {
-            return _buoiKhamRepo.GetByBacSiId(bacSiId);
-        }
-
-        public List<BuoiKham> GetByBenhNhanId(int benhNhanId)
-        {
-            return _buoiKhamRepo.GetByBenhNhanId(benhNhanId);
-        }
-
-        public List<BuoiKham> GetAllLichKham()
-        {
-            return _buoiKhamRepo.GetAll();
-        }
-
-        public BuoiKham GetById(int id)
-        {
-            var lich = _buoiKhamRepo.GetById(id);
-            if (lich == null)
-                throw new Exception("Không tìm thấy lịch");
-            return lich;
-        }
-
-        public bool XoaBuoiKham(int id)
-        {
-            return _buoiKhamRepo.Delete(id);
-        }
-
-        public bool CapNhatTrangThai(int id, TrangThaiBuoiKham trangThaiMoi)
-        {
-            var lich = _buoiKhamRepo.GetById(id);
-            if (lich == null)
-                return false;
-
-            lich.TrangThai = trangThaiMoi;
-            return _buoiKhamRepo.Update(lich);
-        }
-        // =================================================================
-        // ĐÃ CẬP NHẬT: XỬ LÝ SINH GIỜ BẰNG KIỂU DỮ LIỆU TIMEONLY
-        // =================================================================
         public async Task<List<string>> LayCacGioKhamTrongAsync(int bacSiId, int phongKhamId, DateOnly ngayKham)
         {
-            int phutMoiCa = 60; // Mặc định 60 phút
-
+            // Logic tính số phút mỗi ca dựa trên khoa (như cũ của ông)
+            int phutMoiCa = 60;
             var bacSi = _bacSiRepo.GetById(bacSiId);
-            if (bacSi != null)
-            {
-                // Dùng switch case theo Id cho chuyên nghiệp và chính xác
-                phutMoiCa = bacSi.ChuyenKhoaId switch
-                {
-                    2 or 6 => 30, // Khoa Răng, Răng Hàm Mặt
-                    5 or 7 => 30, // Nhi, Tai Mũi Họng
-                    8 => 20, // Da Liễu
-                    _ => 60  // Các khoa còn lại (Nội, Ngoại...)
-                };
-            }
+            if (bacSi != null) phutMoiCa = bacSi.ChuyenKhoaId switch { 2 or 5 or 6 or 7 => 30, 8 => 20, _ => 60 };
 
             var tatCaCaKham = new List<string>();
+            Action<TimeOnly, TimeOnly> sinhCa = (start, end) => {
+                while (start.AddMinutes(phutMoiCa) <= end)
+                {
+                    var next = start.AddMinutes(phutMoiCa);
+                    tatCaCaKham.Add($"{start:HH:mm} - {next:HH:mm}");
+                    start = next;
+                }
+            };
 
-            // 2. Dùng TimeOnly để sinh danh sách Ca Sáng (07:00 -> 11:00)
-            var batDauSang = new TimeOnly(7, 0);
-            var ketThucSang = new TimeOnly(11, 0);
-            var caHienTai = batDauSang;
+            sinhCa(new TimeOnly(7, 0), new TimeOnly(11, 0));  // Sáng
+            sinhCa(new TimeOnly(13, 0), new TimeOnly(17, 0)); // Chiều
 
-            while (caHienTai.AddMinutes(phutMoiCa) <= ketThucSang)
-            {
-                var caTiepTheo = caHienTai.AddMinutes(phutMoiCa);
-                // Format cứng HH:mm để string trả về đúng chuẩn hiển thị
-                tatCaCaKham.Add($"{caHienTai:HH\\:mm} - {caTiepTheo:HH\\:mm}");
-                caHienTai = caTiepTheo;
-            }
-
-            // 3. Dùng TimeOnly để sinh danh sách Ca Chiều (13:00 -> 17:00)
-            var batDauChieu = new TimeOnly(13, 0);
-            var ketThucChieu = new TimeOnly(17, 0);
-            caHienTai = batDauChieu;
-
-            while (caHienTai.AddMinutes(phutMoiCa) <= ketThucChieu)
-            {
-                var caTiepTheo = caHienTai.AddMinutes(phutMoiCa);
-                tatCaCaKham.Add($"{caHienTai:HH\\:mm} - {caTiepTheo:HH\\:mm}");
-                caHienTai = caTiepTheo;
-            }
-
-            // 4. Lấy các ca đã Kín (Repo trả về List<TimeOnly>)
             var cacGioDaDat = await _buoiKhamRepo.GetCacGioDaDatAsync(bacSiId, phongKhamId, ngayKham);
+            var cacCaDaKin = cacGioDaDat.Select(g => $"{g:HH:mm} - {g.AddMinutes(phutMoiCa):HH:mm}");
 
-            // 5. Cộng thêm phút để tạo chuỗi so khớp
-            var cacCaDaKin = cacGioDaDat.Select(g =>
-            {
-                var end = g.AddMinutes(phutMoiCa);
-                return $"{g:HH\\:mm} - {end:HH\\:mm}";
-            }).ToList();
-
-            // 6. Trả về các ca còn Trống
             return tatCaCaKham.Except(cacCaDaKin).ToList();
         }
+
+        #endregion
+
+        #region CẬP NHẬT TRẠNG THÁI & DỜI LỊCH
+
+        public bool CapNhatTrangThai(int id, TrangThaiBuoiKham trangThaiMoi, string ghiChu = null)
+        {
+            var lich = _buoiKhamRepo.GetById(id);
+            if (lich == null) return false;
+
+            lich.TrangThai = trangThaiMoi;
+
+            if (trangThaiMoi == TrangThaiBuoiKham.HoanThanh)
+            {
+                lich.GhiChuKetQua = ghiChu;
+                lich.ThongBaoChoBenhNhan = "✅ Lịch khám đã hoàn thành. Vui lòng xem kết quả.";
+            }
+            else if (trangThaiMoi == TrangThaiBuoiKham.Huy)
+            {
+                lich.ThongBaoChoBenhNhan = "❌ Lịch đã bị hủy. Lý do: " + (ghiChu ?? "Không có lý do cụ thể");
+            }
+            else if (trangThaiMoi == TrangThaiBuoiKham.XacNhan)
+            {
+                if (string.IsNullOrEmpty(lich.ThongBaoChoBenhNhan) || !lich.ThongBaoChoBenhNhan.Contains("dời lịch"))
+                    lich.ThongBaoChoBenhNhan = "✅ Bác sĩ đã xác nhận lịch khám của bạn.";
+            }
+
+            return _buoiKhamRepo.Update(lich);
+        }
+
+        public bool DoiLichKham(int id, DateOnly ngayMoi, TimeOnly gioMoi, string lyDo)
+        {
+            var lich = _buoiKhamRepo.GetById(id);
+            if (lich == null || lich.TrangThai == TrangThaiBuoiKham.HoanThanh || lich.TrangThai == TrangThaiBuoiKham.Huy)
+                throw new Exception("Không thể thay đổi lịch đã kết thúc.");
+
+            lich.Ngay = ngayMoi;
+            lich.Gio = gioMoi;
+            lich.TrangThai = TrangThaiBuoiKham.XacNhan;
+            lich.ThongBaoChoBenhNhan = $"🔄 Bác sĩ dời lịch từ {lich.Ngay:dd/MM} sang {ngayMoi:dd/MM} lúc {gioMoi:HH:mm}. Lý do: {lyDo}";
+
+            return _buoiKhamRepo.Update(lich);
+        }
+
+        public bool BenhNhanYeuCauDoiLich(int id, DateOnly ngayMoi, TimeOnly gioMoi, string lyDo)
+        {
+            var lich = _buoiKhamRepo.GetById(id);
+            if (lich == null) return false;
+
+            lich.Ngay = ngayMoi;
+            lich.Gio = gioMoi;
+            lich.TrangThai = TrangThaiBuoiKham.ChuaXacNhan;
+            lich.ThongBaoChoBenhNhan = $"📌 Bạn yêu cầu dời lịch sang {ngayMoi:dd/MM} lúc {gioMoi:HH:mm}. Lý do: {lyDo}. Đang chờ xác nhận.";
+
+            return _buoiKhamRepo.Update(lich);
+        }
+
+        public bool LuuDanhGiaCuaBenhNhan(int id, int soSao, string nhanXet)
+        {
+            var lich = _buoiKhamRepo.GetById(id);
+            if (lich == null || lich.TrangThai != TrangThaiBuoiKham.HoanThanh) return false;
+
+            lich.DiemDanhGia = soSao;
+            lich.NhanXetCuaBenhNhan = nhanXet;
+            return _buoiKhamRepo.Update(lich);
+        }
+
+        #endregion
     }
 }

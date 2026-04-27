@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using QuanLyPhongKham.Data;
 using QuanLyPhongKham.Models;
 using QuanLyPhongKham.Models.Enums;
-using QuanLyPhongKham.Services.Implementations;
 using QuanLyPhongKham.Services.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -34,26 +32,27 @@ namespace QuanLyPhongKham.Web.Controllers
             _lichTrucService = lichTrucService;
         }
 
+        #region TỔNG QUAN
         public async Task<IActionResult> TongQuan()
         {
+            // Sửa lại cách đếm để tránh lỗi Null Reference
             var listBacSi = _bacSiService.GetAll();
-            ViewBag.TongBacSi = listBacSi != null ? listBacSi.Count() : 0;
+            ViewBag.TongBacSi = listBacSi?.Count() ?? 0;
 
             var listBenhNhan = await _benhNhanService.GetAllAsync();
-            ViewBag.TongBenhNhan = listBenhNhan != null ? listBenhNhan.Count() : 0;
+            ViewBag.TongBenhNhan = listBenhNhan?.Count() ?? 0;
 
-            var listLichKham = _buoiKhamService.GetAllLichKham();
+            // Admin dùng hàm LayToanBoLichKhamAdminAsync để lấy đủ thông tin
+            var listLichKham = await _buoiKhamService.LayToanBoLichKhamAdminAsync();
             var homNay = DateOnly.FromDateTime(DateTime.Now);
 
-            ViewBag.LichHomNay = listLichKham != null
-                ? listLichKham.Count(l => l.Ngay == homNay)
-                : 0;
+            ViewBag.LichHomNay = listLichKham?.Count(l => l.Ngay == homNay) ?? 0;
 
             return View();
         }
+        #endregion
 
-        // --- QUẢN LÝ LỊCH TRỰC ---
-
+        #region QUẢN LÝ LỊCH TRỰC
         [HttpGet]
         public async Task<IActionResult> LichTruc()
         {
@@ -72,23 +71,20 @@ namespace QuanLyPhongKham.Web.Controllers
                 var mangNgayStr = DanhSachNgay.Split(',');
                 var listDateObj = mangNgayStr.Select(str => DateOnly.Parse(str.Trim())).ToList();
 
-                // 1. Lấy thông tin để hiển thị thông báo cho "oai"
-                var bacSi = _bacSiService.GetById(BacSiId); // Giả sử hàm này có include Khoa
-                var phong = (await _phongKhamService.GetAllAsync()).FirstOrDefault(p => p.Id == PhongKhamId);
+                var bacSi = _bacSiService.GetById(BacSiId);
+                var phongs = await _phongKhamService.GetAllAsync();
+                var phong = phongs.FirstOrDefault(p => p.Id == PhongKhamId);
 
-                // 2. Gọi Service xử lý (Ông nên sửa Service để nó trả về danh sách ngày THÀNH CÔNG)
                 var ketQua = await _lichTrucService.PhanCongNhieuNgayAsync(BacSiId, PhongKhamId, listDateObj);
 
                 if (ketQua)
                 {
-                    // Gom danh sách ngày để hiển thị: "28/04, 29/04, 30/04"
                     var ngayHienThi = string.Join(", ", listDateObj.Select(d => d.ToString("dd/MM")));
-
-                    TempData["ThongBao"] = $"✅ BS. {bacSi.HoTen} ({bacSi.ChuyenKhoa.TenKhoa}) - Phòng {phong.SoPhong} làm việc ngày: {ngayHienThi}";
+                    TempData["ThongBao"] = $"✅ Đã phân công BS. {bacSi?.HoTen} trực tại Phòng {phong?.SoPhong} các ngày: {ngayHienThi}";
                 }
                 else
                 {
-                    TempData["ThongBao"] = "⚠️ Không thể phân công (Lịch bị trùng bác sĩ hoặc trùng phòng)!";
+                    TempData["ThongBao"] = "⚠️ Trùng lịch! Bác sĩ hoặc Phòng này đã có lịch trực trong danh sách ngày đã chọn.";
                 }
             }
             catch (Exception ex)
@@ -97,24 +93,70 @@ namespace QuanLyPhongKham.Web.Controllers
             }
             return RedirectToAction("LichTruc");
         }
+        #endregion
 
-        [HttpPost]
-        public async Task<IActionResult> XoaLichTruc(int id)
+        #region QUẢN LÝ LỊCH KHÁM (BỆNH NHÂN ĐẶT)
+
+        [HttpGet]
+        [HttpGet]
+        public async Task<IActionResult> QuanLyLichKham(int? chuyenKhoaId, string tenBacSi)
         {
-            try
-            {
-                var result = await _lichTrucService.XoaLichTrucAsync(id);
-                if (result) TempData["ThongBao"] = "✅ Đã xóa lịch trực thành công!";
-                else TempData["ThongBao"] = "❌ Lỗi: Không tìm thấy lịch trực này!";
-            }
-            catch (Exception ex)
-            {
-                TempData["ThongBao"] = "❌ Lỗi hệ thống: " + ex.Message;
-            }
+            // Gọi Service và truyền tham số lọc xuống dưới
+            var ketQuaLoc = await _buoiKhamService.LayToanBoLichKhamAdminAsync(chuyenKhoaId, tenBacSi);
 
-            return RedirectToAction("LichTruc");
+            // Chuẩn bị dữ liệu cho các Dropdown ở View
+            ViewBag.DsChuyenKhoa = await _buoiKhamService.LayTatCaChuyenKhoaAsync();
+            ViewBag.SelectedKhoa = chuyenKhoaId;
+            ViewBag.SelectedTen = tenBacSi;
+
+            return View(ketQuaLoc);
         }
 
+        [HttpPost]
+        public IActionResult DoiTrangThai(int id, int trangThaiMoi)
+        {
+            // Sử dụng hàm CapNhatTrangThai (đồng bộ) đã viết ở BuoiKhamService
+            _buoiKhamService.CapNhatTrangThai(id, (TrangThaiBuoiKham)trangThaiMoi, "Admin cập nhật");
+            TempData["ThongBao"] = "✅ Cập nhật trạng thái thành công!";
+            return RedirectToAction("QuanLyLichKham");
+        }
+
+        // Admin có thể xóa lịch nếu cần thiết (dùng cho trường hợp dọn rác hệ thống)
+        [HttpPost]
+        public IActionResult XoaLich(int id)
+        {
+            // Sử dụng hàm GetById sau đó xóa nếu cần, hoặc dùng hàm xóa trực tiếp nếu Repo hỗ trợ
+            // Ở đây tạm dùng logic xóa đã có
+            bool success = _buoiKhamService.CapNhatTrangThai(id, TrangThaiBuoiKham.Huy, "Admin xóa ca khám");
+            TempData["ThongBao"] = success ? "✅ Đã hủy/xóa lịch khám!" : "❌ Không tìm thấy lịch!";
+            return RedirectToAction("QuanLyLichKham");
+        }
+        // --- ACTION LẤY CHI TIẾT CA KHÁM CHO MODAL ---
+        [HttpGet]
+        public async Task<IActionResult> GetLichKhamDetail(int id)
+        {
+            // 1. Lấy ca khám theo ID (Nên dùng hàm có Include để lấy đủ thông tin liên quan)
+            var lich = await _buoiKhamService.LayToanBoLichKhamAdminAsync();
+            var detail = lich.FirstOrDefault(x => x.Id == id);
+
+            if (detail == null) return NotFound();
+
+            // 2. Map dữ liệu sang kiểu JSON đúng với các tên biến trong Javascript của ông
+            return Json(new
+            {
+                benhNhanTen = detail.BenhNhan?.HoTen,
+                sdt = detail.BenhNhan?.Sdt,
+                diaChi = detail.BenhNhan?.DiaChi ?? "Chưa cập nhật",
+                bacSiTen = detail.BacSi?.HoTen,
+                khoa = detail.BacSi?.ChuyenKhoa?.TenKhoa,
+                soPhong = detail.PhongKham?.SoPhong,
+                // Ghi chú này có thể là lý do dời lịch hoặc kết quả khám
+                ghiChu = detail.GhiChuKetQua ?? detail.ThongBaoChoBenhNhan ?? "Không có ghi chú đặc biệt."
+            });
+        }
+        #endregion
+
+        #region AJAX DATA
         [HttpGet]
         public async Task<IActionResult> GetDataByKhoa(int chuyenKhoaId)
         {
@@ -128,41 +170,6 @@ namespace QuanLyPhongKham.Web.Controllers
                 phongs = phongs.Select(p => new { p.Id, p.SoPhong, p.LoaiPhong })
             });
         }
-
-        // --- QUẢN LÝ LỊCH KHÁM (BỆNH NHÂN ĐẶT) ---
-
-        [HttpGet]
-        public IActionResult LichKham()
-        {
-            var tatCaLich = _buoiKhamService.GetAllLichKham();
-            return View(tatCaLich);
-        }
-
-        [HttpPost]
-        public IActionResult DoiTrangThai(int id, int trangThaiMoi)
-        {
-            _buoiKhamService.CapNhatTrangThai(id, (TrangThaiBuoiKham)trangThaiMoi);
-            TempData["Success"] = "Cập nhật trạng thái thành công!";
-            return RedirectToAction("LichKham");
-        }
-
-        [HttpPost]
-        public IActionResult XoaLich(int id)
-        {
-            bool success = _buoiKhamService.XoaBuoiKham(id);
-            if (success) TempData["Success"] = "Đã xóa lịch khám thành công!";
-            else TempData["Error"] = "Lỗi: Không tìm thấy lịch khám này!";
-
-            return RedirectToAction("LichKham");
-        }
-
-        // --- QUẢN LÝ BÁC SĨ ---
-
-        [HttpGet]
-        public IActionResult BacSi()
-        {
-            var tatCaBacSi = _bacSiService.GetAll();
-            return View(tatCaBacSi);
-        }
+        #endregion
     }
 }

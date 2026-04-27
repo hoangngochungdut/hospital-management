@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
+
 namespace QuanLyPhongKham.Models
 {
     public class BuoiKham
@@ -22,6 +23,9 @@ namespace QuanLyPhongKham.Models
         public KetQuaKham? KetQuaKham { get; set; }
         public int? HoaDonId { get; set; }
         public HoaDon? HoaDon { get; set; }
-        
+        public string? GhiChuKetQua { get; set; }
+        public int? DiemDanhGia { get; set; }
+        public string? NhanXetCuaBenhNhan { get; set; }
+        public string? ThongBaoChoBenhNhan { get; set; }
     }
 }

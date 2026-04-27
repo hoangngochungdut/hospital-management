@@ -75,5 +75,13 @@ namespace QuanLyPhongKham.Repositories.Implementations
                 .Include(b => b.ChuyenKhoa)
                 .ToListAsync();
         }
+        public List<BacSi> GetDanhSachBacSiKemDanhGia()
+        {
+            return _context.BacSis
+                .Include(bs => bs.ChuyenKhoa) // Lấy tên khoa
+                .Include(bs => bs.BuoiKhams)  // Lấy các buổi khám của BS đó
+                    .ThenInclude(bk => bk.BenhNhan) // Lấy tên bệnh nhân để hiện nhận xét
+                .ToList();
+        }
     }
 }

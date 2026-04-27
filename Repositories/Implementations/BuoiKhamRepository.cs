@@ -88,6 +88,8 @@ namespace QuanLyPhongKham.Repositories.Implementations
             return _context.BuoiKhams
                 .Include(b => b.BacSi)
                 .Include(b => b.PhongKham)
+                .Include(b => b.BacSi) // Tải thông tin Bác sĩ
+                .ThenInclude(bs => bs.ChuyenKhoa)
                 .Where(b => b.BenhNhanId == benhNhanId)
                 .OrderByDescending(b => b.Ngay)
                 .ThenByDescending(b => b.Gio)
@@ -121,6 +123,16 @@ namespace QuanLyPhongKham.Repositories.Implementations
                          && b.Ngay == ngayKham
                          && b.TrangThai != TrangThaiBuoiKham.Huy)
                 .Select(b => b.Gio)
+                .ToListAsync();
+        }
+        public async Task<List<BuoiKham>> GetAllLichKhamFullAsync()
+        {
+            return await _context.BuoiKhams
+                .Include(b => b.BenhNhan)
+                .Include(b => b.PhongKham)
+                .Include(b => b.BacSi)
+                    .ThenInclude(bs => bs.ChuyenKhoa) // <-- THÊM DÒNG NÀY ĐỂ LẤY TÊN KHOA
+                .OrderByDescending(b => b.Ngay)
                 .ToListAsync();
         }
     }

@@ -26,10 +26,6 @@ namespace QuanLyPhongKham.Web.Controllers
             _benhNhanService = benhNhanService;
             _buoiKhamService = buoiKhamService;
         }
-        public IActionResult DanhGiaBS()
-        {
-            return View();
-        }
 
         [HttpGet]
         public async Task<IActionResult> LichKham()
@@ -131,7 +127,79 @@ namespace QuanLyPhongKham.Web.Controllers
 
             return View(lichCuaToi);
         }
+        // Thêm đoạn này vào trong BenhNhanDashboardController.cs
 
+        [HttpPost]
+        public IActionResult NopDanhGia(int id, int soSao, string nhanXet)
+        {
+            try
+            {
+                _buoiKhamService.LuuDanhGiaCuaBenhNhan(id, soSao, nhanXet);
+                TempData["ThongBao"] = "✅ Đánh giá thành công! Cảm ơn bạn đã phản hồi.";
+            }
+            catch (Exception ex)
+            {
+                TempData["ThongBao"] = "❌ Có lỗi xảy ra: " + ex.Message;
+            }
+
+            // ĐÃ SỬA THÀNH XemLichKham
+            return RedirectToAction("XemLichKham");
+        }
+        // ==========================================================
+        // CÁC HÀM XỬ LÝ HỦY VÀ DỜI LỊCH CHO BỆNH NHÂN
+        // ==========================================================
+
+        [HttpPost]
+        public IActionResult BenhNhanHuyLich(int id, string lyDo)
+        {
+            try
+            {
+                // Tái sử dụng hàm cập nhật trạng thái
+                _buoiKhamService.CapNhatTrangThai(id, TrangThaiBuoiKham.Huy, lyDo);
+                TempData["ThongBao"] = "✅ Đã hủy lịch thành công!";
+            }
+            catch (Exception ex)
+            {
+                TempData["ThongBao"] = "❌ Lỗi: " + ex.Message;
+            }
+            return RedirectToAction("XemLichKham"); // Trở về trang danh sách
+        }
+
+        [HttpPost]
+        public IActionResult BenhNhanDoiLich(int id, DateTime ngayMoi, string gioMoi, string lyDo)
+        {
+            try
+            {
+                DateOnly date = DateOnly.FromDateTime(ngayMoi);
+                TimeOnly time = TimeOnly.Parse(gioMoi);
+
+                // Gọi hàm Dời lịch của bệnh nhân (Đảm bảo ông đã thêm hàm này ở IBuoiKhamService và BuoiKhamService.cs nhé)
+                _buoiKhamService.BenhNhanYeuCauDoiLich(id, date, time, lyDo);
+
+                TempData["ThongBao"] = "✅ Gửi yêu cầu dời lịch thành công! Vui lòng chờ bác sĩ xác nhận.";
+            }
+            catch (Exception ex)
+            {
+                TempData["ThongBao"] = "❌ Lỗi: " + ex.Message;
+            }
+            return RedirectToAction("XemLichKham"); // Trở về trang danh sách
+        }
+        [HttpGet]
+        public IActionResult XemBacSi()
+        {
+            // Kiểm tra xem bệnh nhân đã đăng nhập chưa
+            int? currentBenhNhanId = HttpContext.Session.GetInt32("UserId");
+            if (currentBenhNhanId == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            // Gọi Service để lấy cái "Hộp dữ liệu" (ViewModel) anh em mình vừa tạo
+            var danhSachBacSi = _bacSiService.LayDanhSachBacSiVaDanhGia();
+
+            // Quăng dữ liệu ra View hiển thị
+            return View(danhSachBacSi);
+        }
         // GET: Thông tin cá nhân
         [HttpGet]
         public IActionResult ThongTinCaNhan()
