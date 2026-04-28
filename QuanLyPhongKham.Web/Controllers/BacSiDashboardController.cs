@@ -1,6 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using QuanLyPhongKham.Data;
 using QuanLyPhongKham.Models.DTOs;
 using QuanLyPhongKham.Models.Enums;
 using QuanLyPhongKham.Services.Interfaces;
@@ -12,12 +10,15 @@ namespace QuanLyPhongKham.Web.Controllers
         private readonly IBacSiService _bacSiService;
         private readonly IBuoiKhamService _buoiKhamService;
 
-        public BacSiDashboardController(IBacSiService bacSiService, IBuoiKhamService buoiKhamService)
+        public BacSiDashboardController(
+            IBacSiService bacSiService,
+            IBuoiKhamService buoiKhamService)
         {
             _bacSiService = bacSiService;
             _buoiKhamService = buoiKhamService;
         }
 
+        // ==================== LỊCH KHÁM ====================
         [HttpGet]
         public IActionResult LichKham()
         {
@@ -31,24 +32,28 @@ namespace QuanLyPhongKham.Web.Controllers
             return View(lichCuaToi);
         }
 
-        // ĐÃ NÂNG CẤP: Thêm tham số ghiChu (Lấy kết quả khám hoặc lý do hủy)
         [HttpPost]
         public IActionResult DoiTrangThai(int id, int trangThaiMoi, string? ghiChu)
         {
             try
             {
-                _buoiKhamService.CapNhatTrangThai(id, (TrangThaiBuoiKham)trangThaiMoi, ghiChu);
+                _buoiKhamService.CapNhatTrangThai(
+                    id,
+                    (TrangThaiBuoiKham)trangThaiMoi,
+                    ghiChu
+                );
+
                 TempData["ThongBao"] = "✅ Cập nhật trạng thái thành công!";
             }
             catch (Exception ex)
             {
                 TempData["ThongBao"] = "❌ Cập nhật thất bại: " + ex.Message;
             }
+
             return RedirectToAction("LichKham");
         }
 
-        // TÍNH NĂNG MỚI: Dời giờ khám
-        [HttpPost]
+        // Dời lịch khám
         [HttpPost]
         public IActionResult DoiLichKham(int id, DateTime ngayMoi, string gioMoi, string lyDoDoi)
         {
@@ -57,27 +62,31 @@ namespace QuanLyPhongKham.Web.Controllers
                 DateOnly dateParsed = DateOnly.FromDateTime(ngayMoi);
                 TimeOnly timeParsed = TimeOnly.Parse(gioMoi);
 
-                // Truyền đủ 4 tham số vào hàm
                 _buoiKhamService.DoiLichKham(id, dateParsed, timeParsed, lyDoDoi);
-                TempData["ThongBao"] = "✅ Dời lịch thành công! Bệnh nhân đã nhận được thông báo.";
+
+                TempData["ThongBao"] =
+                    "✅ Dời lịch thành công! Bệnh nhân đã nhận được thông báo.";
             }
             catch (Exception ex)
             {
-                TempData["ThongBao"] = "❌ Không thể dời lịch: " + ex.Message;
+                TempData["ThongBao"] =
+                    "❌ Không thể dời lịch: " + ex.Message;
             }
+
             return RedirectToAction("LichKham");
         }
 
+        // ==================== HỒ SƠ ====================
         [HttpGet]
         public IActionResult ThongTinCaNhan()
         {
             int? userId = HttpContext.Session.GetInt32("UserId");
+
             if (userId == null)
-            {
                 return RedirectToAction("Login", "Account");
-            }
 
             var result = _bacSiService.GetHoSo(userId.Value);
+
             if (result == null)
             {
                 TempData["Error"] = "Không tìm thấy thông tin";
@@ -91,38 +100,35 @@ namespace QuanLyPhongKham.Web.Controllers
         public IActionResult HoSo()
         {
             int? userId = HttpContext.Session.GetInt32("UserId");
+
             if (userId == null)
-            {
                 return RedirectToAction("Login", "Account");
-            }
 
             var result = _bacSiService.GetHoSo(userId.Value);
 
-            // ✅ gọi qua service
-            ViewBag.DanhSachChuyenKhoa = _bacSiService.GetDanhSachChuyenKhoa();
+            ViewBag.DanhSachChuyenKhoa =
+                _bacSiService.GetDanhSachChuyenKhoa();
 
             return View(result);
         }
 
-        // POST: Cập nhật hồ sơ
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult CapNhatHoSo(CapNhatHoSoBacSiRequest request)
         {
             int? userId = HttpContext.Session.GetInt32("UserId");
-            if (userId == null)
-            {
-                return RedirectToAction("Login", "Account");
-            }
 
-            // ✅ THÊM ĐOẠN NÀY
+            if (userId == null)
+                return RedirectToAction("Login", "Account");
+
             if (!ModelState.IsValid)
             {
                 TempData["Error"] = "Dữ liệu không hợp lệ!";
                 return RedirectToAction(nameof(HoSo));
             }
 
-            var (success, message) = _bacSiService.CapNhatHoSo(userId.Value, request);
+            var (success, message) =
+                _bacSiService.CapNhatHoSo(userId.Value, request);
 
             if (success)
                 TempData["Success"] = message;
@@ -132,16 +138,14 @@ namespace QuanLyPhongKham.Web.Controllers
             return RedirectToAction(nameof(ThongTinCaNhan));
         }
 
-        // POST: Đổi mật khẩu
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DoiMatKhau(DoiMatKhauRequest request)
         {
             int? userId = HttpContext.Session.GetInt32("UserId");
+
             if (userId == null)
-            {
                 return RedirectToAction("Login", "Account");
-            }
 
             if (request.MatKhauMoi != request.XacNhanMatKhauMoi)
             {
@@ -149,7 +153,9 @@ namespace QuanLyPhongKham.Web.Controllers
                 return RedirectToAction(nameof(HoSo));
             }
 
-            var (success, message) = await _bacSiService.DoiMatKhau(userId.Value, request);
+            var (success, message) =
+                await _bacSiService.DoiMatKhau(userId.Value, request);
+
             if (success)
                 TempData["Success"] = message;
             else
