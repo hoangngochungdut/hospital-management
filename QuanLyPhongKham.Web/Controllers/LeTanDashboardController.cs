@@ -1,10 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using QuanLyPhongKham.Data;
-using QuanLyPhongKham.Models;
 using QuanLyPhongKham.Models.DTOs;
-using QuanLyPhongKham.Models.Enums;
 using QuanLyPhongKham.Services.Interfaces;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace QuanLyPhongKham.Web.Controllers
 {
@@ -21,45 +22,61 @@ namespace QuanLyPhongKham.Web.Controllers
             _buoiKhamService = buoiKhamService;
         }
 
-        public IActionResult LeTanDashboard()
+        // ==========================================
+        // 1. DASHBOARD & THANH TOÁN
+        // ==========================================
+        [HttpGet]
+        public async Task<IActionResult> LeTanDashboard()
         {
-            return View();
+            var dsChoThanhToan = await _leTanService.GetDanhSachChoThanhToanAsync();
+            return View(dsChoThanhToan);
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> XacNhanThanhToan(int buoiKhamId, decimal tongTien)
+        {
+            try
+            {
+                var result = await _leTanService.XacNhanThanhToanAsync(buoiKhamId, tongTien);
+                if (result) TempData["ThongBao"] = "✅ Đã xác nhận thanh toán thành công!";
+                else TempData["ThongBao"] = "❌ Lỗi: Không thể xử lý thanh toán.";
+            }
+            catch (Exception ex)
+            {
+                TempData["ThongBao"] = "❌ Lỗi hệ thống: " + ex.Message;
+            }
+            return RedirectToAction(nameof(LeTanDashboard));
+        }
+
+        // ==========================================
+        // 2. QUẢN LÝ ĐẶT LỊCH HỘ
+        // ==========================================
+        [HttpGet]
         public async Task<IActionResult> LichKham()
         {
-            var dsKhoa = await _buoiKhamService.LayTatCaChuyenKhoaAsync();
-            var dsBenhNhan = await _buoiKhamService.LayTatCaBenhNhanAsync();
-            ViewBag.DsChuyenKhoa = dsKhoa;
-            ViewBag.DsBenhNhan = dsBenhNhan;
-
+            ViewBag.DsChuyenKhoa = await _buoiKhamService.LayTatCaChuyenKhoaAsync();
+            ViewBag.DsBenhNhan = await _buoiKhamService.LayTatCaBenhNhanAsync();
             return View();
         }
 
         [HttpPost]
-        // 1. ĐỔI 'TimeOnly Gio' THÀNH 'string Gio' Ở ĐÂY 👇
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DatLich(int BenhNhanId, DateOnly Ngay, string Gio, int BacSiId, int PhongKhamId)
         {
             int? currentLeTanId = HttpContext.Session.GetInt32("UserId");
-            if (currentLeTanId == null)
+            if (currentLeTanId == null) return RedirectToAction("Login", "Account");
+
+            if (!TimeOnly.TryParse(Gio, out TimeOnly gioKhamChuan))
             {
-                return RedirectToAction("Login", "Account");
+                TempData["ThongBao"] = "❌ Định dạng giờ không hợp lệ!";
+                return RedirectToAction(nameof(LichKham));
             }
 
-            // 2. TỰ ÉP KIỂU BẰNG TAY CHO CHẮC CỐP
-            TimeOnly gioKhamChuan;
-            // Thử ép chuỗi "07:00" thành TimeOnly. Nếu thất bại thì báo lỗi luôn.
-            if (!TimeOnly.TryParse(Gio, out gioKhamChuan))
-            {
-                TempData["ThongBao"] = "❌ Hệ thống không đọc được định dạng giờ (" + Gio + ")!";
-                return RedirectToAction("LichKham");
-            }
-
-            // Gói dữ liệu vào DTO
             var request = new DatLichRequest
             {
                 Ngay = Ngay,
-                Gio = gioKhamChuan, // 3. TRUYỀN CÁI GIỜ ĐÃ ÉP KIỂU VÀO ĐÂY 👇
+                Gio = gioKhamChuan,
                 BacSiId = BacSiId,
                 PhongKhamId = PhongKhamId,
                 BenhNhanId = BenhNhanId
@@ -67,156 +84,73 @@ namespace QuanLyPhongKham.Web.Controllers
 
             try
             {
-                // Gọi Service. Truyền role "LeTan" xuống để Service tự động set trạng thái thành "Xác nhận"
                 var result = await _buoiKhamService.DatLichKhamAsync(request, currentLeTanId.Value, "LeTan");
-
                 if (result)
                 {
-                    TempData["ThongBao"] = "✅ Lễ tân đặt lịch hộ thành công (Đã tự động xác nhận)!";
+                    TempData["ThongBao"] = "✅ Đặt lịch thành công!";
+                    return RedirectToAction(nameof(LeTanDashboard));
                 }
             }
             catch (Exception ex)
             {
-                // Nếu trùng lịch/trùng phòng, Service sẽ ném lỗi ra đây
-                TempData["ThongBao"] = ex.Message;
+                TempData["ThongBao"] = "❌ " + ex.Message;
             }
 
-            return RedirectToAction("LichKham");
+            return RedirectToAction(nameof(LichKham));
+        }
+
+        // ==========================================
+        // 3. QUẢN LÝ HỒ SƠ BỆNH NHÂN (MỤC 6)
+        // ==========================================
+        [HttpGet]
+        public async Task<IActionResult> QuanLyBenhNhan(string keyword)
+        {
+            // ĐÃ SỬA: Gọi qua _leTanService thay vì _context
+            var records = await _leTanService.TimKiemBenhNhanAsync(keyword ?? "");
+
+            ViewBag.Keyword = keyword;
+            return View(records);
         }
 
         [HttpGet]
+        public async Task<IActionResult> LichSuBenhNhan(int id)
+        {
+            var detail = await _leTanService.GetChiTietBenhNhanAsync(id);
+            if (detail == null)
+            {
+                TempData["ThongBao"] = "❌ Không tìm thấy hồ sơ bệnh nhân!";
+                return RedirectToAction(nameof(QuanLyBenhNhan));
+            }
+            return View(detail);
+        }
+
+       
+        [HttpGet]
         public async Task<IActionResult> GetBacSiVaPhong(int chuyenKhoaId)
         {
-            try
-            {
-                // Gọi Service lấy data (Hàm này ông đã viết ở BuoiKhamService rồi)
-                var data = await _buoiKhamService.LayBacSiVaPhongTheoKhoaAsync(chuyenKhoaId);
-
-                // Ném cục data đó ra dưới dạng văn bản JSON
-                return Json(new { success = true, data = data });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = ex.Message });
-            }
+            var data = await _buoiKhamService.LayBacSiVaPhongTheoKhoaAsync(chuyenKhoaId);
+            return Json(new { success = true, data = data });
         }
 
         [HttpGet]
         public async Task<IActionResult> GetGioTrong(int bacSiId, int phongKhamId, string ngay)
         {
-            try
+            if (DateOnly.TryParse(ngay, out DateOnly dateObj))
             {
-                var dateObj = DateOnly.Parse(ngay);
                 var gioTrong = await _buoiKhamService.LayCacGioKhamTrongAsync(bacSiId, phongKhamId, dateObj);
-
                 return Json(new { success = true, gioTrong = gioTrong });
             }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = ex.Message });
-            }
+            return Json(new { success = false });
         }
 
-        // GET: Thông tin cá nhân (xem)
         [HttpGet]
         public IActionResult ThongTinCaNhan()
         {
             int? userId = HttpContext.Session.GetInt32("UserId");
-            if (userId == null)
-            {
-                return RedirectToAction("Login", "Account");
-            }
+            if (userId == null) return RedirectToAction("Login", "Account");
 
             var result = _leTanService.GetHoSo(userId.Value);
-            if (result == null)
-            {
-                TempData["Error"] = "Không tìm thấy thông tin";
-                return RedirectToAction("LeTanDashboard");
-            }
-
-            return View(result);
-        }
-        // GET: Chỉnh sửa hồ sơ
-        [HttpGet]
-        public IActionResult HoSo()
-        {
-            int? userId = HttpContext.Session.GetInt32("UserId");
-            if (userId == null)
-            {
-                return RedirectToAction("Login", "Account");
-            }
-
-            var result = _leTanService.GetHoSo(userId.Value);
-
-            if (result == null)
-            {
-                TempData["Error"] = "Không tìm thấy hồ sơ";
-                return RedirectToAction("LeTanDashboard");
-            }
-
-            return View(result);
-        }
-
-
-        // POST: Cập nhật hồ sơ
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult CapNhatHoSo(CapNhatHoSoLeTanRequest request)
-        {
-            if (!ModelState.IsValid)
-            {
-                TempData["Error"] = "Dữ liệu không hợp lệ";
-                return RedirectToAction(nameof(HoSo));
-            }
-
-            int? userId = HttpContext.Session.GetInt32("UserId");
-            if (userId == null)
-            {
-                return RedirectToAction("Login", "Account");
-            }
-
-            var (success, message) = _leTanService.CapNhatHoSo(userId.Value, request);
-
-            if (success)
-                TempData["Success"] = message;
-            else
-                TempData["Error"] = message;
-
-            return RedirectToAction(nameof(ThongTinCaNhan));
-        }
-
-
-        // POST: Đổi mật khẩu
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DoiMatKhau(DoiMatKhauRequest request)
-        {
-            if (!ModelState.IsValid)
-            {
-                TempData["Error"] = "Dữ liệu không hợp lệ";
-                return RedirectToAction(nameof(HoSo));
-            }
-
-            int? userId = HttpContext.Session.GetInt32("UserId");
-            if (userId == null)
-            {
-                return RedirectToAction("Login", "Account");
-            }
-
-            if (request.MatKhauMoi != request.XacNhanMatKhauMoi)
-            {
-                TempData["Error"] = "Mật khẩu mới và xác nhận không khớp";
-                return RedirectToAction(nameof(HoSo));
-            }
-
-            var (success, message) = await _leTanService.DoiMatKhau(userId.Value, request);
-
-            if (success)
-                TempData["Success"] = message;
-            else
-                TempData["Error"] = message;
-
-            return RedirectToAction(nameof(HoSo));
+            return result == null ? RedirectToAction(nameof(LeTanDashboard)) : View(result);
         }
     }
 }

@@ -1,0 +1,74 @@
+﻿@model IEnumerable<QuanLyPhongKham.Models.BenhNhan>
+
+@{
+    Layout = "_LeTanLayout";    
+    ViewData["Title"] = "Quản Lý Bệnh Nhân";
+}
+
+<div class="space-y-6">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-800">Hồ Sơ Bệnh Nhân</h1>
+            <p class="text-sm text-slate-500">Quản lý và tra cứu lịch sử khám bệnh</p>
+        </div>
+        
+        <form asp-action="QuanLyBenhNhan" method="get" class="flex items-center">
+            <div class="relative">
+                <input type="text" name="keyword" value="@ViewBag.Keyword"
+                       placeholder="Tìm tên hoặc số điện thoại..."
+                       class="w-80 pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all shadow-sm">
+                <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+            </div>
+            <button type="submit" class="ml-2 px-5 py-2.5 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all">
+                Tìm kiếm
+            </button>
+        </form>
+    </div>
+
+    <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+        <table class="w-full text-left border-collapse">
+            <thead class="bg-slate-50 border-b border-slate-200">
+                <tr>
+                    <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Họ Tên</th>
+                    <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Giới Tính</th>
+                    <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Số Điện Thoại</th>
+                    <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Địa Chỉ</th>
+                    <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">Thao Tác</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var item in Model)
+                    {
+                        <tr class="hover:bg-slate-50/50 transition-colors">
+                            <td class="px-6 py-4 font-semibold text-slate-700">@item.HoTen</td>
+                            <td class="px-6 py-4">
+                                <span class="px-2.5 py-1 rounded-full text-xs font-medium @(item.GioiTinh == "Nam" ? "bg-blue-50 text-blue-600" : "bg-pink-50 text-pink-600")">
+                                    @item.GioiTinh
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-slate-600">@item.Sdt</td>
+                            <td class="px-6 py-4 text-slate-600">@item.DiaChi</td>
+                            <td class="px-6 py-4 text-center">
+                                <a asp-action="LichSuBenhNhan" asp-route-id="@item.Id"
+                                       class="inline-flex items-center space-x-1.5 text-blue-600 hover:text-blue-800 font-bold transition-colors">
+                                    <i class="fas fa-history text-sm"></i>
+                                    <span>Xem lịch sử</span>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="5" class="px-6 py-12 text-center text-slate-400 italic">
+                            Không tìm thấy bệnh nhân nào phù hợp.
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

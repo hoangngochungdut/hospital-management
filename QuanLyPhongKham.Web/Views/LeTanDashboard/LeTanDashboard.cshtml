@@ -1,34 +1,91 @@
-﻿@{
+﻿@using QuanLyPhongKham.Services.Interfaces
+@inject ILeTanService LeTanService
+@{
     Layout = "~/Views/Shared/_LeTanLayout.cshtml";
-    ViewData["Title"] = "Trang Chủ Lễ Tân";
+    ViewData["Title"] = "Bảng điều khiển Lễ Tân";
+
+    // Lấy danh sách chờ từ Service
+    var danhSachCho = await LeTanService.GetDanhSachChoThanhToanAsync();
 }
 
-<div class="bg-white p-8 rounded-xl shadow-sm border border-slate-200">
-    <div class="flex items-center space-x-4 mb-6">
-        <div class="w-16 h-16 bg-pink-100 text-pink-600 rounded-full flex items-center justify-center text-3xl">
-            <i class="fas fa-headset"></i>
-        </div>
+<div class="max-w-6xl mx-auto">
+    @* --- Header --- *@
+    <div class="mb-10 flex justify-between items-end">
         <div>
-            <h1 class="text-3xl font-black text-slate-800">Xin chào Lễ Tân! 👩‍💼</h1>
-            <p class="text-slate-500">Chào mừng bạn đến với ca trực phòng khám PBL3 MED.</p>
+            <h2 class="text-3xl font-black text-slate-800 uppercase tracking-tight">Danh sách chờ thu phí</h2>
+            <p class="text-slate-500 mt-2 font-medium">Các ca khám đã hoàn thành và chưa lập hóa đơn</p>
         </div>
+        <button onclick="location.reload()" class="p-3 bg-white border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 transition shadow-sm">
+            <i class="fas fa-sync-alt"></i>
+        </button>
     </div>
-    
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-        <div class="bg-indigo-50 border border-indigo-100 p-6 rounded-xl">
-            <h3 class="text-indigo-800 font-bold text-lg mb-2"><i class="fas fa-calendar-plus mr-2"></i> Đặt lịch nhanh</h3>
-            <p class="text-indigo-600 text-sm mb-4">Hỗ trợ bệnh nhân đăng ký lịch khám mới với bác sĩ chuyên khoa.</p>
-            <a href="@Url.Action("LichKham", "LeTanDashboard")" class="bg-indigo-600 text-white px-4 py-2 rounded shadow text-sm font-bold hover:bg-indigo-700 transition">
-                Đến trang Đặt lịch
-            </a>
-        </div>
-        
-        <div class="bg-teal-50 border border-teal-100 p-6 rounded-xl">
-            <h3 class="text-teal-800 font-bold text-lg mb-2"><i class="fas fa-money-check-alt mr-2"></i> Thanh toán</h3>
-            <p class="text-teal-600 text-sm mb-4">Xử lý hóa đơn và viện phí cho các ca khám đã hoàn thành.</p>
-            <button class="bg-teal-600 text-white px-4 py-2 rounded shadow text-sm font-bold hover:bg-teal-700 transition">
-                Chuyển đến Thanh toán
-            </button>
-        </div>
+
+    @* --- Bảng danh sách --- *@
+    <div class="bg-white rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
+        @if (danhSachCho == null || !danhSachCho.Any())
+        {
+            <div class="py-20 text-center">
+                <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-inbox text-3xl text-slate-300"></i>
+                </div>
+                <h3 class="text-lg font-bold text-slate-700">Hiện tại không có ca chờ thanh toán</h3>
+            </div>
+        }
+        else
+        {
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50/50 border-b border-slate-100 text-slate-400 uppercase text-[10px] font-bold tracking-widest">
+                            <th class="py-5 px-8">Bệnh nhân</th>
+                            <th class="py-5 px-6">Bác sĩ</th>
+                            <th class="py-5 px-6">Thời gian</th>
+                            <th class="py-5 px-8 text-right">Thanh toán</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-50">
+                        @foreach (var item in danhSachCho)
+                        {
+                            <tr class="hover:bg-blue-50/30 transition-colors group">
+                                <td class="py-5 px-8">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-sm shadow-md">
+                                            @(string.IsNullOrEmpty(item.BenhNhan?.HoTen) ? "?" : item.BenhNhan.HoTen.Substring(0, 1).ToUpper())
+                                        </div>
+                                        <div>
+                                            <div class="font-bold text-slate-800">@item.BenhNhan?.HoTen</div>
+                                            <div class="text-[11px] text-slate-500">@item.BenhNhan?.Sdt</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="py-5 px-6 font-medium text-slate-600">
+                                    <i class="fas fa-user-md mr-1.5 text-blue-400"></i> @item.BacSi?.HoTen
+                                </td>
+                                <td class="py-5 px-6">
+                                    <div class="text-slate-700 font-bold text-sm">@item.Gio.ToString("HH:mm")</div>
+                                    <div class="text-[10px] text-slate-400 font-medium">@item.Ngay.ToString("dd/MM/yyyy")</div>
+                                </td>
+                                <td class="py-5 px-8">
+                                    <form asp-action="XacNhanThanhToan" asp-controller="LeTanDashboard" method="POST" class="flex items-center justify-end space-x-2">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="buoiKhamId" value="@item.Id" />
+                                        
+                                        <div class="relative w-32">
+                                            <input type="number" name="tongTien" value="150000"
+                                                   class="w-full pl-3 pr-8 py-2 text-sm font-bold border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+                                            <span class="absolute right-2 top-2 text-[10px] font-bold text-slate-400">đ</span>
+                                        </div>
+
+                                        <button type="submit" class="bg-blue-600 text-white px-5 py-2 rounded-xl font-bold text-xs shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all transform active:scale-95">
+                                            THU TIỀN
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
     </div>
 </div>

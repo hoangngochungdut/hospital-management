@@ -1,0 +1,125 @@
+﻿@model IEnumerable<QuanLyPhongKham.Models.LeTan>
+@{
+    Layout = "_AdminLayout";
+}
+
+<div class="space-y-6">
+    <div class="flex justify-between items-center p-4 bg-white rounded-2xl border border-slate-100 shadow-sm">
+        <div>
+            <h1 class="text-2xl font-black tracking-tighter text-slate-900">Quản Lý Nhân Viên Lễ Tân</h1>
+            <p class="text-sm text-slate-500 mt-1">Danh sách tất cả tài khoản lễ tân đang hoạt động.</p>
+        </div>
+        <button onclick="document.getElementById('modalThemLeTan').classList.remove('hidden')"
+                class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl text-sm font-bold transition-all shadow-lg shadow-blue-100 flex items-center group">
+            <i class="fas fa-user-plus mr-2 group-hover:scale-110 transition-transform"></i>
+            Thêm Lễ Tân Mới
+        </button>
+    </div>
+
+    <div class="bg-white p-2 rounded-3xl border border-slate-100 shadow-xl shadow-slate-50">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead class="border-b border-slate-100">
+                    <tr class="text-xs uppercase tracking-widest text-slate-400 font-bold">
+                        <th class="px-6 py-5">Họ Tên</th>
+                        <th class="px-6 py-5">Số Điện Thoại</th>
+                        <th class="px-6 py-5">Tên Đăng Nhập</th>
+                        <th class="px-6 py-5 text-right">Thao Tác</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-50">
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr id="row-@item.Id" class="hover:bg-slate-50/50 transition-colors">
+                                <td class="px-6 py-5 font-semibold text-slate-800">@item.HoTen</td>
+                                <td class="px-6 py-5 font-medium text-slate-600">@item.Sdt</td>
+                                <td class="px-6 py-5">
+                                    <span class="px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-100">
+                                        @(item.TaiKhoan?.TenDangNhap ?? "N/A")
+                                    </span>
+                                </td>
+                                <td class="px-6 py-5 text-right space-x-2">
+                                    <a href="@Url.Action("SuaLeTan", "AdminDashboard", new { id = item.Id })"
+                                           class="p-2 text-slate-400 hover:text-blue-600 transition-colors inline-block">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button onclick="xacNhanXoa('@item.Id', '@item.HoTen')"
+                                            class="p-2 text-red-400 hover:text-red-600 transition-colors">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr><td colspan="4" class="px-6 py-20 text-center text-slate-400 italic">Chưa có dữ liệu lễ tân.</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="modalThemLeTan" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl w-full max-w-xl shadow-2xl border border-slate-100 overflow-hidden">
+        <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+            <h3 class="text-lg font-black text-slate-900">Thêm Nhân Viên Lễ Tân Mới</h3>
+            <button type="button" onclick="document.getElementById('modalThemLeTan').classList.add('hidden')" class="text-slate-400 hover:text-red-500">
+                <i class="fas fa-times text-lg"></i>
+            </button>
+        </div>
+        <form asp-action="ThemLeTan" method="post" class="p-8 space-y-5">
+            <div class="grid grid-cols-2 gap-5">
+                <div class="space-y-1.5">
+                    <label class="text-sm font-semibold text-slate-700 ml-1">Họ và Tên</label>
+                    <input type="text" name="HoTen" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-400 outline-none transition" required>
+                </div>
+                <div class="space-y-1.5">
+                    <label class="text-sm font-semibold text-slate-700 ml-1">Số Điện Thoại</label>
+                    <input type="text" name="Sdt" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-400 outline-none transition" required>
+                </div>
+            </div>
+            <div class="space-y-1.5">
+                <label class="text-sm font-semibold text-slate-700 ml-1">Địa Chỉ</label>
+                <input type="text" name="DiaChi" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-400 outline-none transition">
+            </div>
+            <div class="space-y-1.5">
+                <label class="text-sm font-semibold text-slate-700 ml-1">Giới Tính</label>
+                <select name="GioiTinh" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-400 outline-none bg-white transition cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2364748b%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E')] bg-[length:1.25rem] bg-[right_1rem_center] bg-no-repeat">
+                    <option value="Nam">Nam</option>
+                    <option value="Nữ">Nữ</option>
+                </select>
+            </div>
+            <div class="p-5 rounded-2xl border border-slate-100 bg-slate-50 space-y-4">
+                <label class="text-sm font-bold text-slate-800 flex items-center italic">
+                    <i class="fas fa-id-card mr-2 text-blue-500"></i> Thông Tin Tài Khoản
+                </label>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-1">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase ml-1">Tên đăng nhập</p>
+                        <input type="text" name="tenDangNhap" class="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-400 transition" required>
+                    </div>
+                    <div class="space-y-1">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase ml-1">Mật khẩu</p>
+                        <input type="password" name="matKhau" class="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-blue-400 transition" required>
+                    </div>
+                </div>
+            </div>
+            <div class="flex justify-end space-x-3 pt-4 border-t border-slate-100">
+                <button type="button" onclick="document.getElementById('modalThemLeTan').classList.add('hidden')" class="px-6 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold transition">Hủy Bỏ</button>
+                <button type="submit" class="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition">Xác Nhận Thêm</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function xacNhanXoa(id, hoTen) {
+        if (confirm("Bạn chắc chắn muốn xóa lễ tân " + hoTen + " chứ?")) {
+            window.location.href = "/AdminDashboard/XoaLeTan/" + id;
+        }
+    }
+</script>
