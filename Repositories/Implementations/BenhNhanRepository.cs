@@ -47,6 +47,6 @@ namespace QuanLyPhongKham.Repositories.Implementations
         {
             throw new NotImplementedException();
         }
-
+       
     }
 }

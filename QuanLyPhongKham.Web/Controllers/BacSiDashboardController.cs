@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using QuanLyPhongKham.Models.DTOs;
 using QuanLyPhongKham.Models.Enums;
+using QuanLyPhongKham.Services.Implementations;
 using QuanLyPhongKham.Services.Interfaces;
 
 namespace QuanLyPhongKham.Web.Controllers
@@ -9,13 +10,16 @@ namespace QuanLyPhongKham.Web.Controllers
     {
         private readonly IBacSiService _bacSiService;
         private readonly IBuoiKhamService _buoiKhamService;
+        private readonly IBenhNhanService _benhNhanService;
 
         public BacSiDashboardController(
             IBacSiService bacSiService,
-            IBuoiKhamService buoiKhamService)
+            IBuoiKhamService buoiKhamService,
+            IBenhNhanService benhNhanService)
         {
             _bacSiService = bacSiService;
             _buoiKhamService = buoiKhamService;
+            _benhNhanService = benhNhanService;
         }
 
         // ==================== LỊCH KHÁM ====================
@@ -162,6 +166,27 @@ namespace QuanLyPhongKham.Web.Controllers
                 TempData["Error"] = message;
 
             return RedirectToAction(nameof(HoSo));
+        }
+        //public IActionResult TieuSuBenhNhan(int id)
+        //{
+        //    var data = _benhNhanService.GetTieuSu(id);
+        //    return PartialView("TieuSuBenhNhan", data);
+        //}
+        public IActionResult TieuSuBenhNhan(int id)
+        {
+            try
+            {
+                var data = _benhNhanService.GetTieuSu(id);
+
+                if (data == null)
+                    return Content("DATA NULL");
+
+                return PartialView(data);
+            }
+            catch (Exception ex)
+            {
+                return Content(ex.ToString()); // QUAN TRỌNG
+            }
         }
     }
 }
