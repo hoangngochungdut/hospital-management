@@ -183,7 +183,6 @@ namespace QuanLyPhongKham.Web.Controllers
             var tatCaBacSi = _bacSiService.GetAll();
             return View(tatCaBacSi);
         }
-
         public IActionResult BenhNhan()
         {
             var tatCaBenhNhan = _benhNhanService.GetAll();

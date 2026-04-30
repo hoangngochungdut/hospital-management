@@ -74,10 +74,10 @@ namespace QuanLyLichKham.Controllers
 
             return tk.VaiTro switch
             {
-                "AD" => RedirectToAction("AdminDashboard", "AdminDashboard"),
-                "BS" => RedirectToAction("BacSiDashboard", "BacSiDashboard"),
-                "BN" => RedirectToAction("XemLichKham", "BenhNhanDashboard"),
-                "LT" => RedirectToAction("LeTanDashboard", "LeTanDashboard"),
+                "AD" => RedirectToAction("TongQuan", "AdminDashboard"),
+                "BS" => RedirectToAction("LichKham", "BacSiDashboard"),
+                "BN" => RedirectToAction("LichKham", "BenhNhanDashboard"),
+                "LT" => RedirectToAction("LichKham", "LeTanDashboard"),
                 _ => RedirectToAction("Login", "Account")
             };
         }
@@ -92,7 +92,7 @@ namespace QuanLyLichKham.Controllers
             }
 
             var tk = _taiKhoanService.GetByUsername(username);
-            Console.WriteLine("Id = " + tk.NguoiDungId);
+            
             if (tk == null || tk.MatKhauHash != password)
             {
                 ViewBag.ErrorMessage = "Sai tài khoản hoặc mật khẩu!";

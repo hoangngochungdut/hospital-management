@@ -12,6 +12,7 @@ namespace QuanLyPhongKham.Services.Implementations
         private readonly INguoiDungRepository _nguoiDungRepository;
         private readonly ITaiKhoanRepository _taiKhoanRepository;
 
+
         public BenhNhanService(
             IBenhNhanRepository benhNhanRepository,
             INguoiDungRepository nguoiDungRepo,

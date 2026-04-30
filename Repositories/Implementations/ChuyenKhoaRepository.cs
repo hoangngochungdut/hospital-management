@@ -48,5 +48,11 @@ public class ChuyenKhoaRepository : IChuyenKhoaRepository
             .OrderBy(x => x.TenKhoa)
             .ToList();
     }
-
 }
+
+
+
+
+
+
+
