@@ -59,11 +59,12 @@ builder.Services.AddScoped<IBacSiService, BacSiService>();
 builder.Services.AddScoped<IBenhNhanService, BenhNhanService>();
 builder.Services.AddScoped<ILeTanService, LeTanService>();
 builder.Services.AddScoped<IBuoiKhamService, BuoiKhamService>();
-builder.Services.AddScoped<TaiKhoanService>();
+builder.Services.AddScoped<IChuyenKhoaService, ChuyenKhoaService>();
+builder.Services.AddScoped<IPasswordGenerator, PasswordGenerator>();
+builder.Services.AddScoped<ITaiKhoanService, TaiKhoanService>();
+builder.Services.AddScoped<INguoiDungService, NguoiDungService>();
 builder.Services.AddScoped<AccountValidationService>();
-//builder.Services.AddScoped<BacSiService>();
-
-
+builder.Services.AddScoped<IEmailSender, EmailSender>();
 
 var app = builder.Build();
 

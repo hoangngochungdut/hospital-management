@@ -19,12 +19,12 @@
                 @TempData["SuccessMessage"]
             </div>
         }
-        @if (ViewBag.ErrorMessage != null)
+        @* @if (ViewBag.ErrorMessage != null)
         {
             <div style="color:red">
                 @ViewBag.ErrorMessage
             </div>
-        }
+        } *@
         <form asp-controller="Account" asp-action="Login" method="post" class="p-4 border rounded shadow-sm bg-white">
             <div class="mb-3">
                 <label class="form-label text-muted">Tên đăng nhập</label>
@@ -35,6 +35,13 @@
                 <input type="password" name="password" class="form-control" required />
             </div>
             <button type="submit" class="btn btn-primary w-100 mb-3 py-2">Đăng nhập</button>
+            <div class="text-center mb-3">
+                <a asp-controller="Account"
+                       asp-action="QuenMatKhau"
+                       class="text-danger text-decoration-none fw-bold">
+                    Quên mật khẩu?
+                </a>
+            </div>
             
             <!-- chuyển sang đăng kí -->
             <div class="text-center mt-3 pt-3 border-top">

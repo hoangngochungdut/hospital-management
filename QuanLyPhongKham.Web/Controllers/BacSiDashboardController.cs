@@ -8,13 +8,17 @@ namespace QuanLyPhongKham.Web.Controllers
     public class BacSiDashboardController : Controller
     {
         private readonly IBacSiService _bacSiService;
+        private readonly IChuyenKhoaService _chuyenKhoaService;
         private readonly IBuoiKhamService _buoiKhamService;
 
         public BacSiDashboardController(
             IBacSiService bacSiService,
-            IBuoiKhamService buoiKhamService)
+            IBuoiKhamService buoiKhamService,
+            IChuyenKhoaService chuyenKhoaService)
+
         {
             _bacSiService = bacSiService;
+            _chuyenKhoaService = chuyenKhoaService;
             _buoiKhamService = buoiKhamService;
         }
 
@@ -106,8 +110,9 @@ namespace QuanLyPhongKham.Web.Controllers
 
             var result = _bacSiService.GetHoSo(userId.Value);
 
-            ViewBag.DanhSachChuyenKhoa =
-                _bacSiService.GetDanhSachChuyenKhoa();
+            // ✅ gọi qua service
+            ViewBag.DanhSachChuyenKhoa = _chuyenKhoaService.GetAll ();
+
 
             return View(result);
         }

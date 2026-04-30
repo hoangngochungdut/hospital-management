@@ -1,0 +1,71 @@
+﻿@{
+    ViewData["Title"] = "Thêm chuyên khoa";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="max-w-3xl mx-auto mt-6 bg-white rounded-xl shadow-lg overflow-hidden">
+
+    <head>
+        <title>Thêm chuyên khoa</title>
+    </head>
+    <!-- HEADER -->
+    <div class="bg-blue-600 px-6 py-4">
+        <h2 class="text-white text-lg font-semibold">
+            Thêm chuyên khoa mới
+        </h2>
+    </div>
+
+    <!-- BODY -->
+    <div class="p-6 space-y-4">
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="bg-green-100 text-green-700 px-4 py-2 rounded">
+                @TempData["Success"]
+            </div>
+        }
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="bg-red-100 text-red-700 px-4 py-2 rounded">
+                @TempData["Error"]
+            </div>
+        }
+
+        <form asp-action="Add" asp-controller="ChuyenKhoa" method="post" class="space-y-4">
+            @Html.AntiForgeryToken()
+
+            <!-- tên chuyên khoa-->
+            <div>
+                <label class="block font-medium mb-1">Tên chuyên khoa *</label>
+                <input type="text"
+                       name="TenKhoa"
+                       class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" />
+            </div>
+
+           
+
+            <!-- Mô tả -->
+            <div>
+                <label class="block font-medium mb-1">Mô tả</label>
+                <textarea name="MoTa"
+                          rows="3"
+                          class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"></textarea>
+            </div>
+
+            <!-- BUTTON -->
+            <div class="pt-4 flex justify-end gap-3">
+                <a href="@Url.Action("ChuyenKhoa", "AdminDashboard")"
+                       class="px-5 py-2 bg-slate-200 rounded-lg">
+                    Quay lại
+                </a>
+
+                <button type="submit"
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg">
+                    Thêm
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>

@@ -1,10 +1,13 @@
 ﻿using QuanLyPhongKham.Models;
 using QuanLyPhongKham.Models.DTOs;
+using QuanLyPhongKham.Repositories.Implementations;
 using QuanLyPhongKham.Repositories.Interfaces;
 using QuanLyPhongKham.Services.Interfaces;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace QuanLyPhongKham.Services.Implementations
@@ -27,7 +30,10 @@ namespace QuanLyPhongKham.Services.Implementations
 
         public ICollection<BacSi> GetAll()
         {
-            return _bacSiRepo.GetAll();
+            return _bacSiRepo
+                .GetAllWithTaiKhoan()
+                .Where(bs => bs.TaiKhoan != null)
+                .ToList();
         }
 
         public XemHoSoBacSiResponse? GetHoSo(int nguoiDungId)
@@ -137,6 +143,63 @@ namespace QuanLyPhongKham.Services.Implementations
             }).ToList();
 
             return ketQua;
+        }
+
+        public BacSi? GetByIdWithTaiKhoan(int id)
+        {
+            return _bacSiRepo.GetByIdWithTaiKhoan(id);
+        }
+
+        public void Add(AddBacSiDto entity)
+        {
+            if (entity == null)
+                throw new ArgumentNullException(nameof(entity));
+
+            var bacSi = new BacSi
+            {
+                HoTen = entity.HoTen,
+                Sdt = entity.SoDienThoai,
+                Email = entity.Email,
+                ChuyenKhoaId = entity.ChuyenKhoaId,
+                DiaChi = entity.DiaChi,
+                //NgaySinh = entity.NgaySinh,
+                GioiTinh = entity.GioiTinh,
+                //TrangThai = true // mặc định active
+            };
+
+            _bacSiRepo.Add(bacSi);
+        }
+
+        public void Update(int id, CapNhatHoSoBacSiRequest bacsi)
+        {
+            var existing = _bacSiRepo.GetById(id);
+
+            if (existing == null)
+                throw new Exception("Không tìm thấy bác sĩ");
+
+            existing.HoTen = bacsi.HoTen;
+            existing.Sdt = bacsi.SoDienThoai;
+            existing.Email = bacsi.Email;
+            existing.DiaChi = bacsi.DiaChi;
+            existing.GioiTinh = bacsi.GioiTinh;
+            existing.ChuyenKhoaId = bacsi.ChuyenKhoaId;
+
+            _bacSiRepo.Update(existing);
+        }
+
+        public void Delete(int id)
+        {
+            var bacsi = _bacSiRepo.GetByIdWithTaiKhoan(id);
+
+            if (bacsi == null)
+            {
+                throw new Exception("Bệnh nhân không tồn tại");
+            }
+
+            if (bacsi.TaiKhoan != null)
+            {
+                _taiKhoanRepo.Delete(bacsi.TaiKhoan);
+            }
         }
     }
 }

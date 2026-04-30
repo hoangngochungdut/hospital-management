@@ -2,27 +2,52 @@
     ViewData["Title"] = "Đăng ký tài khoản";
 }
 
+@model QuanLyPhongKham.Models.DTOs.RegisterDto
+
 <div class="row justify-content-center mt-5">
     <div class="col-md-4">
         <h2 class="text-center mb-4">Tạo Tài Khoản</h2>
 
         <form asp-controller="Account" asp-action="Register" method="post" class="p-4 border rounded shadow-sm bg-white">
-            <div class="mb-3">
-                <label class="form-label text-muted">Tên đăng nhập</label>
-                <input type="text" name="username" class="form-control" required />
+            <div>
+                <label class="block font-medium mb-1">Tên đăng nhập</label>
+                <input asp-for="Username" class="form-control" />
+                <span asp-validation-for="Username" class="text-danger"></span>
             </div>
             
-            <div class="mb-3">
-                <label class="form-label text-muted">Họ và tên (Để lưu hồ sơ bệnh nhân)</label>
-                <input type="text" name="fullName" class="form-control" required />
+            <div>
+                <label class="block font-medium mb-1">Họ tên</label>
+                <input asp-for="FullName" class="form-control" />
+                <span asp-validation-for="FullName" class="text-danger"></span>
             </div>
 
-            <div class="mb-4">
-                <label class="form-label text-muted">Mật khẩu</label>
-                <input type="password" name="password" class="form-control" required />
+            <div>
+                <label class="block font-medium mb-1">Số điện thoại</label>
+                <input asp-for="PhoneNumber" class="form-control" />
+                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+            </div>
+
+            <div>
+                <label class="block font-medium mb-1">Email</label>
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+
+            <div>
+                <label class="block font-medium mb-1>Địa chỉ</labe>
+                <input asp-for="DiaChi" class="form-control" />
+                @* <span asp-validation-for="Email" class="text-danger"></span> *@
+            </div>
+
+            <div>
+                <label class="block font-medium mb-1">Mật khẩu</label>
+                <input asp-for="Password" type="password" class="form-control" />
+                <span asp-validation-for="Password" class="text-danger"></span>
             </div>
             
-            <button type="submit" class="btn btn-success w-100 mb-3 py-2">Xác nhận đăng ký</button>
+            <div>
+                <button type="submit" class="btn btn-success w-100 mb-3 py-2">Xác nhận đăng ký</button>
+            </div>
             
             <div class="text-center mt-3 pt-3 border-top">
                 <span class="text-muted">Đã có tài khoản?</span>

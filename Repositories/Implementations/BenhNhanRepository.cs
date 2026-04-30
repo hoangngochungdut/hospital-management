@@ -20,17 +20,21 @@ namespace QuanLyPhongKham.Repositories.Implementations
 
         public void Add(BenhNhan entity)
         {
-            throw new NotImplementedException();
-        }
-
-        public void Delete(BenhNhan entity)
-        {
-            throw new NotImplementedException();
+            _context.BenhNhans.Add(entity);
+            _context.SaveChanges();
         }
 
         public ICollection<BenhNhan> GetAll()
         {
-            throw new NotImplementedException();
+            return _context.BenhNhans
+                .ToList();
+        }
+
+        public ICollection<BenhNhan> GetAllWithTaiKhoan()
+        {
+            return _context.BenhNhans
+                .Include(x => x.TaiKhoan)
+                .ToList();
         }
 
         public async Task<List<BenhNhan>> GetAllAsync()
@@ -40,13 +44,28 @@ namespace QuanLyPhongKham.Repositories.Implementations
 
         public BenhNhan? GetById(int id)
         {
-            throw new NotImplementedException();
+            return _context.BenhNhans
+                .FirstOrDefault(x => x.Id == id);
         }
 
         public void Update(BenhNhan entity)
         {
-            throw new NotImplementedException();
+            _context.BenhNhans.Update(entity);
+            _context.SaveChanges();
         }
 
+        public void Delete(BenhNhan entity)
+        {
+            _context.BenhNhans.Remove(entity);
+            _context.SaveChanges();
+
+        }
+
+        public BenhNhan? GetByIdWithTaiKhoan(int id)
+        {
+            return _context.BenhNhans
+                .Include(x => x.TaiKhoan)
+                .FirstOrDefault(x => x.Id == id);
+        }
     }
 }

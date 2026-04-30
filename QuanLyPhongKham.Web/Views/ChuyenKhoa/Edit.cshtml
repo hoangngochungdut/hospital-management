@@ -1,0 +1,76 @@
+﻿@model QuanLyPhongKham.Models.ChuyenKhoa
+
+@{
+    ViewData["Title"] = "Chuyên khoa";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="max-w-3xl mx-auto mt-6 bg-white rounded-xl shadow-lg overflow-hidden">
+
+    <!-- HEADER -->
+    <div class="bg-blue-600 px-6 py-4">
+        <h2 class="text-white text-lg font-semibold">
+            Thông tin chuyên khoa
+        </h2>
+    </div>
+
+    <!-- BODY -->
+    <div class="p-6 space-y-4">
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="bg-green-100 text-green-700 px-4 py-2 rounded">
+                @TempData["Success"]
+            </div>
+        }
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="bg-red-100 text-red-700 px-4 py-2 rounded">
+                @TempData["Error"]
+            </div>
+        }
+
+        <form asp-action="Edit" asp-controller="ChuyenKhoa" method="post" class="space-y-4">
+            @Html.AntiForgeryToken()
+
+            <!-- tên chuyeen khoa-->
+            <div>
+                <label class="block font-medium mb-1">Tên chuyên khoa *</label>
+                <input type="text"
+                       name="TenKhoa"
+                       value="@Model?.TenKhoa"
+                       class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" />
+            </div>
+
+            <!-- Mô tả -->
+            <div>
+                <label class="block font-medium mb-1">Mô tả</label>
+                <textarea name="DiaChi"
+                          rows="3"
+                          class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400">@Model?.MoTa</textarea>
+            </div>
+
+
+
+            <!-- Button -->
+            <div class="pt-2">
+                <button type="submit"
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg">
+                    Lưu thông tin
+                </button>
+            
+                <div class="pt-6 border-t border-slate-200">
+                </div>
+
+                <div class="pt-6 border-t border-slate-100 flex flex-wrap gap-3 justify-end">
+                    <a href="@Url.Action("ChuyenKhoa", "AdminDashboard")" class="px-5 py-2.5 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition font-medium flex items-center">
+                        <i class="fas fa-times mr-2"></i> Quay lại
+                    </a>
+
+                </div>
+            </div>
+        </form>
+
+    </div>
+</div>

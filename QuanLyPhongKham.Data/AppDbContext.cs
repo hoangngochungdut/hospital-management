@@ -48,6 +48,12 @@ namespace QuanLyPhongKham.Data
                 .WithOne(t => t.NguoiDung)
                 .HasForeignKey<TaiKhoan>(t => t.NguoiDungId);
 
+            modelBuilder.Entity<BacSi>()
+                .HasOne(bs => bs.ChuyenKhoa)
+                .WithMany(ck => ck.BacSis)
+                .HasForeignKey(bs => bs.ChuyenKhoaId)
+                .OnDelete(DeleteBehavior.SetNull);
+
             // BenhNhan - TieuSuBenhAn
             modelBuilder.Entity<BenhNhan>()
                 .HasOne(b => b.TieuSuBenhAn)
@@ -80,7 +86,8 @@ namespace QuanLyPhongKham.Data
             modelBuilder.Entity<BuoiKham>()
                 .HasOne(b => b.BacSi)
                 .WithMany(b => b.BuoiKhams)
-                .HasForeignKey(b => b.BacSiId);
+                .HasForeignKey(b => b.BacSiId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 
