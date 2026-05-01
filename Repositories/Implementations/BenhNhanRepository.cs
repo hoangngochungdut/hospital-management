@@ -60,12 +60,12 @@ namespace QuanLyPhongKham.Repositories.Implementations
             _context.SaveChanges();
 
         }
-
         public BenhNhan? GetByIdWithTaiKhoan(int id)
         {
             return _context.BenhNhans
                 .Include(x => x.TaiKhoan)
                 .FirstOrDefault(x => x.Id == id);
         }
+
     }
 }

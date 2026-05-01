@@ -94,10 +94,12 @@ namespace QuanLyPhongKham.Repositories.Implementations
                 .ThenBy(b => b.Gio)
                 .ToList();
         }
-
+        // dung cho tieu su benh nhan nua
         public List<BuoiKham> GetByBenhNhanId(int benhNhanId)
         {
             return _context.BuoiKhams
+                // TSBN
+                .Include(b => b.BenhNhan)
                 .Include(b => b.BacSi)
                     .ThenInclude(bs => bs.ChuyenKhoa)
                 .Include(b => b.PhongKham)
@@ -139,5 +141,6 @@ namespace QuanLyPhongKham.Repositories.Implementations
                 .Select(b => b.Gio)
                 .ToListAsync();
         }
+        
     }
 }
