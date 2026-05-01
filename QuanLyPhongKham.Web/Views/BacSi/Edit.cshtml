@@ -1,0 +1,146 @@
+﻿@model QuanLyPhongKham.Models.DTOs.CapNhatHoSoBacSiRequest
+@* @model QuanLyPhongKham.Models.DTOs.ThongTinCaNhanBacSi *@
+@{
+    ViewData["Title"] = "Hồ sơ bác sĩ";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="max-w-3xl mx-auto mt-6 bg-white rounded-xl shadow-lg overflow-hidden">
+
+    <!-- HEADER -->
+    <div class="bg-blue-600 px-6 py-4">
+        <h2 class="text-white text-lg font-semibold">
+            Hồ sơ bác sĩ
+        </h2>
+    </div>
+
+    <!-- BODY -->
+    <div class="p-6 space-y-4">
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="bg-green-100 text-green-700 px-4 py-2 rounded">
+                @TempData["Success"]
+            </div>
+        }
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="bg-red-100 text-red-700 px-4 py-2 rounded">
+                @TempData["Error"]
+            </div>
+        }
+
+        <form asp-action="Edit" asp-controller="BacSi" method="post" class="space-y-4">
+            @Html.AntiForgeryToken()
+
+            <input type="hidden" name="id" value="@ViewBag.BacSiId" />
+
+            <!-- Họ tên -->
+            <div>
+                <label class="block font-medium mb-1">Họ tên</label>
+
+                <input asp-for="@Model.HoTen"
+                       type="text"
+                       class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" />
+
+                <span asp-validation-for="@Model.HoTen"
+                      class="text-red-500 text-sm"></span>
+            </div>
+
+            <!-- Giới tính -->
+            <div>
+                <label class="block font-medium mb-1">Giới tính</label>
+                <select name="GioiTinh"
+                        class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                    <option value="">--Chọn--</option>
+                    <option value="Nam" selected="@(Model.GioiTinh == "Nam")">Nam</option>
+                    <option value="Nữ" selected="@(Model.GioiTinh == "Nữ")">Nữ</option>
+                    <option value="Khác" selected="@(Model.GioiTinh == "Khác")">Khác</option>
+                </select>
+            </div>
+
+            <!-- Địa chỉ -->
+            <div>
+                <label class="block font-medium mb-1">Địa chỉ</label>
+                <textarea name="DiaChi"
+                          rows="3"
+                          class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400">@Model?.DiaChi</textarea>
+            </div>
+
+            <!-- SĐT -->
+            <div>
+                <label class="block font-medium mb-1">Số điện thoại</label>
+
+                <input asp-for="@Model.SoDienThoai"
+                       type="text"
+                       class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" />
+
+                <span asp-validation-for="@Model.SoDienThoai"
+                      class="text-red-500 text-sm"></span>
+            </div>
+
+            <!-- SĐT -->
+            <div>
+                <label class="block font-medium mb-1">Email</label>
+
+                <input asp-for="@Model.Email"
+                       type="text"
+                       class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" />
+
+                <span asp-validation-for="@Model.Email"
+                      class="text-red-500 text-sm"></span>
+            </div>
+
+            <!-- Chuyên khoa -->
+            <div>
+                <label class="block font-medium mb-1">Chuyên khoa</label>
+                <select name="ChuyenKhoaId"
+                        class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                    @foreach (var ck in ViewBag.DanhSachChuyenKhoa)
+                    {
+                        <option value="@ck.Id"
+                                selected="@(Model?.ChuyenKhoaId == ck.Id)">
+                            @ck.TenKhoa
+                        </option>
+                    }
+                </select>
+            </div>
+
+            <!-- Button -->
+            <div class="pt-2">
+                <div class="flex gap-3">
+                    <button type="submit"
+                            class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg">
+                        Lưu thông tin
+                    </button>
+                </div>
+
+                
+             </div>            
+        </form>
+
+        <!-- FORM RESET MẬT KHẨU -->
+        <div class="flex flex-wrap gap-3 items-center justify-end pt-6 border-t border-slate-100">
+
+            <!-- RESET PASSWORD FORM -->
+            <form asp-action="ResetMatKhau" asp-controller="BacSi" method="post">
+                <input type="hidden" name="bacSiId" value="@ViewBag.BacSiId" />
+
+                <button type="submit"
+                        class="bg-amber-500 hover:bg-amber-600 text-white px-5 py-2 rounded-lg transition">
+                    Reset mật khẩu
+                </button>
+            </form>
+
+            <!-- QUAY LẠI -->
+            <a href="@Url.Action("BacSi", "AdminDashboard")"
+                   class="px-5 py-2.5 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition font-medium flex items-center">
+                <i class="fas fa-times mr-2"></i>
+                Quay lại
+            </a>
+
+        </div>
+
+    </div>
+</div>

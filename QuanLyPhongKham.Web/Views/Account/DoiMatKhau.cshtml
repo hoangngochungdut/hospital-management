@@ -1,0 +1,56 @@
+﻿@{
+    ViewData["Title"] = "Đổi mật khẩu";
+}
+
+@* Đây là trang sau khi đã reset mật khẩu và buộc phải tạo mật khẩu mới *@
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-4">
+
+        <h2 class="text-center mb-4">Đổi Mật Khẩu</h2>
+
+        <!-- Error message -->
+        @if (ViewBag.ErrorMessage != null)
+        {
+            <div class="alert alert-danger text-center">
+                @ViewBag.ErrorMessage
+            </div>
+        }
+
+        <form asp-action="DoiMatKhau" method="post"
+              class="p-4 border rounded shadow-sm bg-white">
+
+            <!-- Info note -->
+            <div class="mb-3 text-center text-muted small">
+                Vui lòng đặt mật khẩu mới để tiếp tục sử dụng hệ thống
+            </div>
+
+            <!-- Mật khẩu mới -->
+            <div class="mb-3">
+                <label class="form-label text-muted">Mật khẩu mới</label>
+                <input type="password"
+                       name="MatKhauMoi"
+                       class="form-control"
+                       placeholder="Nhập mật khẩu mới"
+                       required />
+            </div>
+
+            <!-- Xác nhận mật khẩu -->
+            <div class="mb-4">
+                <label class="form-label text-muted">Xác nhận mật khẩu</label>
+                <input type="password"
+                       name="XacNhanMatKhauMoi"
+                       class="form-control"
+                       placeholder="Nhập lại mật khẩu"
+                       required />
+            </div>
+
+            <!-- Button -->
+            <button type="submit"
+                    class="btn btn-warning w-100 mb-3 py-2 text-white">
+                Xác nhận đổi mật khẩu
+            </button>
+
+        </form>
+    </div>
+</div>

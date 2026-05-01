@@ -7,8 +7,9 @@ namespace QuanLyPhongKham.Web.Controllers
     public class AdminDashboardController : Controller
     {
         private readonly IBacSiService _bacSiService;
-        private readonly IBuoiKhamService _buoiKhamService;
         private readonly IBenhNhanService _benhNhanService;
+        private readonly IChuyenKhoaService _chuyenKhoaService;
+        private readonly IBuoiKhamService _buoiKhamService;
         private readonly ILichTrucService _lichTrucService;
         private readonly IPhongKhamService _phongKhamService;
 
@@ -17,9 +18,11 @@ namespace QuanLyPhongKham.Web.Controllers
             IBacSiService bacSiService,
             IBenhNhanService benhNhanService,
             IPhongKhamService phongKhamService,
-            ILichTrucService lichTrucService)
+            ILichTrucService lichTrucService,
+            IChuyenKhoaService chuyenKhoaService)
         {
             _buoiKhamService = buoiKhamService;
+            _chuyenKhoaService = chuyenKhoaService;
             _bacSiService = bacSiService;
             _benhNhanService = benhNhanService;
             _phongKhamService = phongKhamService;
@@ -47,7 +50,7 @@ namespace QuanLyPhongKham.Web.Controllers
         [HttpGet]
         public async Task<IActionResult> LichTruc()
         {
-            ViewBag.DsChuyenKhoa = _bacSiService.GetDanhSachChuyenKhoa();
+            ViewBag.DsChuyenKhoa = _chuyenKhoaService.GetAll();
             var danhSachLich = await _lichTrucService.LayTatCaLichTrucAsync();
             return View(danhSachLich);
         }
@@ -159,6 +162,7 @@ namespace QuanLyPhongKham.Web.Controllers
             });
         }
 
+
         // ==================== AJAX ====================
         [HttpGet]
         public async Task<IActionResult> GetDataByKhoa(int chuyenKhoaId)
@@ -173,5 +177,24 @@ namespace QuanLyPhongKham.Web.Controllers
                 phongs = phongs.Select(p => new { p.Id, p.SoPhong, p.LoaiPhong })
             });
         }
+
+        public IActionResult BacSi()
+        {
+            var tatCaBacSi = _bacSiService.GetAll();
+            return View(tatCaBacSi);
+        }
+        public IActionResult BenhNhan()
+        {
+            var tatCaBenhNhan = _benhNhanService.GetAll();
+            return View(tatCaBenhNhan);
+        }
+
+        public IActionResult ChuyenKhoa()
+        {
+            var tatCaChuyenKhoa = _chuyenKhoaService.GetAll();
+            return View(tatCaChuyenKhoa);
+        }
+
+        
     }
 }

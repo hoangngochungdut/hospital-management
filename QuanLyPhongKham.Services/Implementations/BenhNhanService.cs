@@ -1,4 +1,4 @@
-﻿using QuanLyPhongKham.Models;
+using QuanLyPhongKham.Models;
 using QuanLyPhongKham.Models.DTOs;
 using QuanLyPhongKham.Repositories.Interfaces;
 using QuanLyPhongKham.Services.Interfaces;
@@ -7,36 +7,35 @@ namespace QuanLyPhongKham.Services.Implementations
 {
     public class BenhNhanService : IBenhNhanService
     {
-        private readonly INguoiDungRepository _nguoiDungRepo;
-        private readonly ITaiKhoanRepository _taiKhoanRepo;
-        private readonly IBenhNhanRepository _benhNhanRepo;
-        private readonly IBuoiKhamRepository _buoiKhamRepo;
-        private readonly IKetQuaKhamRepository _ketQuaRepo;
-        private readonly ITieuSuBenhAnRepository _tieuSuRepo;
+        private readonly IBenhNhanRepository _benhNhanRepository;
+        private readonly INguoiDungRepository _nguoiDungRepository;
+        private readonly ITaiKhoanRepository _taiKhoanRepository;
+        private readonly IBuoiKhamRepository _buoiKhamRepository;
+        private readonly IKetQuaKhamRepository _ketQuaRepository;
+        private readonly ITieuSuBenhAnRepository _tieuSuRepository;
 
         public BenhNhanService(
-            INguoiDungRepository nguoiDungRepo,
-            ITaiKhoanRepository taiKhoanRepo,
-            IBenhNhanRepository benhNhanRepo,
-            IBuoiKhamRepository buoiKhamRepo,
-            IKetQuaKhamRepository ketQuaRepo,
-            ITieuSuBenhAnRepository tieuSuRepo)
+            IBenhNhanRepository benhNhanRepository,
+            INguoiDungRepository nguoiDungRepository,
+            ITaiKhoanRepository taiKhoanRepository,
+            IBuoiKhamRepository buoiKhamRepository,
+            IKetQuaKhamRepository ketQuaRepository,
+            ITieuSuBenhAnRepository tieuSuRepository)
         {
-            _nguoiDungRepo = nguoiDungRepo;
-            _taiKhoanRepo = taiKhoanRepo;
-            _benhNhanRepo = benhNhanRepo;
-            _buoiKhamRepo = buoiKhamRepo;   
-            _ketQuaRepo = ketQuaRepo;
-            _tieuSuRepo = tieuSuRepo;
+            _benhNhanRepository = benhNhanRepository;
+            _nguoiDungRepository = nguoiDungRepository;
+            _taiKhoanRepository = taiKhoanRepository;
+            _buoiKhamRepository = buoiKhamRepository;
+            _ketQuaRepository = ketQuaRepository;
+            _tieuSuRepository = tieuSuRepository;
         }
-        
 
         // =========================
-        // LẤY HỒ SƠ
+        // HỒ SƠ
         // =========================
         public XemHoSoBenhNhanResponse? GetHoSo(int nguoiDungId)
         {
-            var nguoiDung = _nguoiDungRepo.GetById(nguoiDungId);
+            var nguoiDung = _nguoiDungRepository.GetById(nguoiDungId);
             if (nguoiDung == null) return null;
 
             return new XemHoSoBenhNhanResponse
@@ -47,16 +46,13 @@ namespace QuanLyPhongKham.Services.Implementations
                 DiaChi = nguoiDung.DiaChi,
                 SoDienThoai = nguoiDung.Sdt
             };
-        }   
+        }
 
-        // =========================
-        // CẬP NHẬT HỒ SƠ
-        // =========================
         public (bool Success, string Message) CapNhatHoSo(int nguoiDungId, CapNhatHoSoBenhNhanRequest request)
         {
             try
             {
-                var nguoiDung = _nguoiDungRepo.GetById(nguoiDungId);
+                var nguoiDung = _nguoiDungRepository.GetById(nguoiDungId);
                 if (nguoiDung == null)
                     return (false, "Không tìm thấy người dùng");
 
@@ -65,7 +61,7 @@ namespace QuanLyPhongKham.Services.Implementations
                 nguoiDung.DiaChi = request.DiaChi;
                 nguoiDung.Sdt = request.SoDienThoai;
 
-                _nguoiDungRepo.Update(nguoiDung);
+                _nguoiDungRepository.Update(nguoiDung);
 
                 return (true, "Cập nhật hồ sơ thành công!");
             }
@@ -74,20 +70,31 @@ namespace QuanLyPhongKham.Services.Implementations
                 return (false, $"Lỗi: {ex.Message}");
             }
         }
+
+        // =========================
+        // DANH SÁCH
+        // =========================
         public async Task<IEnumerable<BenhNhan>> GetAllAsync()
         {
-            // Gọi thằng Repo lên làm việc
-            return await _benhNhanRepo.GetAllAsync();
+            return await _benhNhanRepository.GetAllAsync();
+        }
+
+        public ICollection<BenhNhan> GetAll()
+        {
+            return _benhNhanRepository
+                .GetAllWithTaiKhoan()
+                .Where(x => x.TaiKhoan != null)
+                .ToList();
         }
 
         // =========================
-        // ĐỔI MẬT KHẨU
+        // MẬT KHẨU
         // =========================
         public async Task<(bool Success, string Message)> DoiMatKhau(int nguoiDungId, DoiMatKhauRequest request)
         {
             try
             {
-                var taiKhoan = _taiKhoanRepo.GetByNguoiDungId(nguoiDungId);
+                var taiKhoan = _taiKhoanRepository.GetByNguoiDungId(nguoiDungId);
                 if (taiKhoan == null)
                     return (false, "Không tìm thấy tài khoản");
 
@@ -96,7 +103,7 @@ namespace QuanLyPhongKham.Services.Implementations
 
                 taiKhoan.MatKhauHash = request.MatKhauMoi;
 
-                _taiKhoanRepo.Update(taiKhoan);
+                _taiKhoanRepository.Update(taiKhoan);
 
                 return (true, "Đổi mật khẩu thành công!");
             }
@@ -105,21 +112,24 @@ namespace QuanLyPhongKham.Services.Implementations
                 return (false, $"Lỗi: {ex.Message}");
             }
         }
-        // TSBN
+
+        // =========================
+        // TIỂU SỬ
+        // =========================
         public TieuSuBenhNhan GetTieuSu(int benhNhanId)
         {
             var hoSo = GetHoSo(benhNhanId) ?? new XemHoSoBenhNhanResponse();
 
-            var buoiKhams = _buoiKhamRepo.GetByBenhNhanId(benhNhanId)
+            var buoiKhams = _buoiKhamRepository.GetByBenhNhanId(benhNhanId)
                              ?? new List<BuoiKham>();
 
-            var tieuSu = _tieuSuRepo.GetByBenhNhanId(benhNhanId);
+            var tieuSu = _tieuSuRepository.GetByBenhNhanId(benhNhanId);
 
             var lichSu = new List<LichSuKhamDTO>();
 
             foreach (var bk in buoiKhams)
             {
-                var ketQua = _ketQuaRepo.GetByBuoiKhamId(bk.Id);
+                var ketQua = _ketQuaRepository.GetByBuoiKhamId(bk.Id);
 
                 lichSu.Add(new LichSuKhamDTO
                 {
@@ -135,7 +145,76 @@ namespace QuanLyPhongKham.Services.Implementations
                 TienSuBenh = tieuSu?.MoTa ?? "Chưa có",
                 LichSuKham = lichSu
             };
-        
-    }
+        }
+
+        // =========================
+        // CRUD
+        // =========================
+        public BenhNhan? GetById(int id)
+        {
+            return _benhNhanRepository.GetById(id);
+        }
+
+        public BenhNhan? GetByIdWithTaiKhoan(int id)
+        {
+            return _benhNhanRepository.GetByIdWithTaiKhoan(id);
+        }
+
+        public void Add(AddBenhNhanDto entity)
+        {
+            if (entity == null)
+                throw new ArgumentNullException(nameof(entity));
+
+            var existing = _taiKhoanRepository.GetByUsername(entity.TenDangNhap);
+            if (existing != null)
+                throw new Exception("Tên đăng nhập đã tồn tại");
+
+            var taiKhoan = new TaiKhoan
+            {
+                TenDangNhap = entity.TenDangNhap,
+                MatKhauHash = entity.MatKhau,
+                VaiTro = "BN"
+            };
+
+            var benhNhan = new BenhNhan
+            {
+                HoTen = entity.HoTen,
+                GioiTinh = entity.GioiTinh,
+                Sdt = entity.SoDienThoai,
+                Email = entity.Email,
+                DiaChi = entity.DiaChi,
+                TaiKhoan = taiKhoan
+            };
+
+            _benhNhanRepository.Add(benhNhan);
+        }
+
+        public void Update(int id, CapNhatHoSoBenhNhanRequest request)
+        {
+            if (request == null)
+                throw new ArgumentNullException(nameof(request));
+
+            var bn = _benhNhanRepository.GetById(id);
+            if (bn == null)
+                throw new Exception("Không tìm thấy bệnh nhân");
+
+            bn.HoTen = request.HoTen;
+            bn.GioiTinh = request.GioiTinh;
+            bn.DiaChi = request.DiaChi;
+            bn.Sdt = request.SoDienThoai;
+            bn.Email = request.Email;
+
+            _benhNhanRepository.Update(bn);
+        }
+
+        public void Delete(int id)
+        {
+            var bn = _benhNhanRepository.GetByIdWithTaiKhoan(id);
+            if (bn == null)
+                throw new Exception("Bệnh nhân không tồn tại");
+
+            if (bn.TaiKhoan != null)
+                _taiKhoanRepository.Delete(bn.TaiKhoan);
+        }
     }
 }

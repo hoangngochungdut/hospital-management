@@ -48,5 +48,16 @@ namespace QuanLyPhongKham.Repositories.Implementations
                 .Include(n => n.TaiKhoan)
                 .FirstOrDefault(n => n.TaiKhoan != null && n.TaiKhoan.Id == taiKhoanId);
         }
+
+
+        public bool ExistedByEmail(string email)
+        {
+            return _context.NguoiDungs.Any(t => t.Email == email);
+        }
+
+        public bool ExistedByPhoneNumber(string phonenumber)
+        {
+            return _context.NguoiDungs.Any(t => t.Sdt == phonenumber);
+        }
     }
 }
