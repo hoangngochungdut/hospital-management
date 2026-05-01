@@ -5,12 +5,19 @@
     Layout = "~/Views/Shared/_BenhNhanLayout.cshtml";
     ViewData["Title"] = "Lịch Khám Của Tôi";
 
-    // PHÂN LOẠI VÀ SẮP XẾP DỮ LIỆU NGAY TỪ ĐẦU
-    // 1. Chưa khám: Xếp TĂNG DẦN (Gần nhất hiện trước, 18 trước 28)
-    var lichChuaKham = Model.Where(x => x.TrangThai == TrangThaiBuoiKham.ChuaXacNhan || x.TrangThai == TrangThaiBuoiKham.XacNhan)
+    // LẤY NGÀY HIỆN TẠI
+    var today = DateOnly.FromDateTime(DateTime.Now);
+
+    // PHÂN LOẠI VÀ SẮP XẾP DỮ LIỆU
+    // 1. Thêm mới: Ca khám trong đúng ngày hôm nay
+    var lichHomNay = Model.Where(x => x.Ngay == today && (x.TrangThai == TrangThaiBuoiKham.ChuaXacNhan || x.TrangThai == TrangThaiBuoiKham.XacNhan))
+                          .OrderBy(x => x.Gio).ToList();
+
+    // 2. Chưa khám (Sắp tới): Các ngày sau hôm nay
+    var lichSapToi = Model.Where(x => x.Ngay > today && (x.TrangThai == TrangThaiBuoiKham.ChuaXacNhan || x.TrangThai == TrangThaiBuoiKham.XacNhan))
                             .OrderBy(x => x.Ngay).ThenBy(x => x.Gio).ToList();
 
-    // 2. Đã khám (Lịch sử): Xếp GIẢM DẦN (Vừa khám xong hiện trước)
+    // 3. Đã khám (Lịch sử): Xếp GIẢM DẦN (Vừa khám xong hiện trước)
     var lichDaKham = Model.Where(x => x.TrangThai == TrangThaiBuoiKham.HoanThanh || x.TrangThai == TrangThaiBuoiKham.Huy)
                           .OrderByDescending(x => x.Ngay).ThenByDescending(x => x.Gio).ToList();
 }
@@ -49,17 +56,18 @@
         }
         else
         {
-            @* ================= PHẦN 1: LỊCH CHƯA KHÁM (SẮP TỚI) ================= *@
+            @* ================= PHẦN 1 (MỚI THÊM): LỊCH HÔM NAY ================= *@
             <div class="mb-10">
-                <h3 class="text-lg font-black text-blue-700 uppercase tracking-wider mb-4 flex items-center gap-2">
-                    <span>🕒 Lịch sắp tới (Chưa khám)</span>
-                    <span class="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded-full">@lichChuaKham.Count()</span>
+                <h3 class="text-lg font-black text-emerald-600 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <span class="w-3 h-3 bg-emerald-500 rounded-full animate-ping"></span>
+                    <span>Ca khám hôm nay</span>
+                    <span class="bg-emerald-100 text-emerald-800 text-xs px-2 py-0.5 rounded-full">@lichHomNay.Count()</span>
                 </h3>
                 
-                <div class="bg-white p-6 rounded-3xl shadow-md border border-slate-200 overflow-x-auto">
-                    @if (!lichChuaKham.Any())
+                <div class="bg-white p-6 rounded-3xl shadow-md border-2 border-emerald-100 overflow-x-auto">
+                    @if (!lichHomNay.Any())
                     {
-                        <p class="text-slate-400 text-center py-6 italic text-sm">Bạn không có lịch khám nào sắp tới.</p>
+                        <p class="text-slate-400 text-center py-4 italic text-sm">Hôm nay bạn không có lịch khám nào.</p>
                     }
                     else
                     {
@@ -71,7 +79,7 @@
                                 <th class="py-4 px-4">Trạng Thái</th>
                                 <th class="py-4 px-4 w-1/3">Thông tin & Phản hồi</th>
                             </tr>
-                            @foreach (var item in lichChuaKham)
+                            @foreach (var item in lichHomNay)
                             {
                                 <tr class="border-b border-slate-50 hover:bg-slate-50 transition-colors align-top">
                                     <td class="py-4 px-4">
@@ -118,7 +126,76 @@
                 </div>
             </div>
 
-            @* ================= PHẦN 2: LỊCH ĐÃ KHÁM (LỊCH SỬ) ================= *@
+            @* ================= PHẦN 2: LỊCH CHƯA KHÁM (SẮP TỚI) ================= *@
+            <div class="mb-10">
+                <h3 class="text-lg font-black text-blue-700 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <span>📅 Lịch sắp tới (Chưa khám)</span>
+                    <span class="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded-full">@lichSapToi.Count()</span>
+                </h3>
+                
+                <div class="bg-white p-6 rounded-3xl shadow-md border border-slate-200 overflow-x-auto">
+                    @if (!lichSapToi.Any())
+                    {
+                        <p class="text-slate-400 text-center py-6 italic text-sm">Bạn không có lịch khám nào sắp tới.</p>
+                    }
+                    else
+                    {
+                        <table class="w-full text-left border-collapse min-w-[800px]">
+                            <tr class="border-b-2 border-slate-100 text-slate-500 uppercase text-xs tracking-wider">
+                                <th class="py-4 px-4">Thời gian</th>
+                                <th class="py-4 px-4">Bác Sĩ & Chuyên Khoa</th>
+                                <th class="py-4 px-4">Phòng</th>
+                                <th class="py-4 px-4">Trạng Thái</th>
+                                <th class="py-4 px-4 w-1/3">Thông tin & Phản hồi</th>
+                            </tr>
+                            @foreach (var item in lichSapToi)
+                            {
+                                <tr class="border-b border-slate-50 hover:bg-slate-50 transition-colors align-top">
+                                    <td class="py-4 px-4">
+                                        <div class="font-bold text-slate-700 text-base">@item.Ngay.ToString("dd/MM/yyyy")</div>
+                                        <div class="text-blue-600 font-black text-sm">@item.Gio.ToString("HH:mm")</div>
+                                    </td>
+                                    <td class="py-4 px-4">
+                                        <div class="font-bold text-sm text-slate-800">BS. @item.BacSi?.HoTen</div>
+                                        <div class="text-[11px] text-slate-500 font-medium mt-1">Khoa: @(item.BacSi?.ChuyenKhoa?.TenKhoa ?? "Đang cập nhật")</div>
+                                    </td>
+                                    <td class="py-4 px-4">
+                                        <span class="bg-slate-100 text-slate-600 px-3 py-1.5 rounded-lg text-xs font-bold border border-slate-200">P.@item.PhongKham?.SoPhong</span>
+                                    </td>
+                                    <td class="py-4 px-4">
+                                        @if (item.TrangThai == TrangThaiBuoiKham.ChuaXacNhan)
+                                        {
+                                            <span class="bg-yellow-50 border border-yellow-200 text-yellow-700 px-3 py-1 rounded-full text-xs font-bold">⏳ Chờ xác nhận</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="bg-blue-50 border border-blue-200 text-blue-700 px-3 py-1 rounded-full text-xs font-bold">✅ Đã xác nhận</span>
+                                        }
+                                    </td>
+                                    <td class="py-4 px-4">
+                                        @if (!string.IsNullOrEmpty(item.ThongBaoChoBenhNhan))
+                                        {
+                                            <div class="mb-3 p-2 bg-red-50 border border-red-200 text-red-700 text-xs rounded-lg animate-pulse">
+                                                <span class="font-bold">🔔 Tin nhắn:</span> @item.ThongBaoChoBenhNhan
+                                            </div>
+                                        }
+                                        <div class="flex gap-2 mb-3">
+                                            <button type="button" onclick="openBnMoveModal(@item.Id, @item.BacSiId, @item.PhongKhamId)" class="px-3 py-1.5 bg-orange-100 text-orange-600 rounded-lg text-[11px] font-bold hover:bg-orange-200 border border-orange-200 transition-all shadow-sm">
+                                                🕒 Yêu cầu dời lịch
+                                            </button>
+                                            <button type="button" onclick="openBnCancelModal(@item.Id)" class="px-3 py-1.5 bg-red-100 text-red-600 rounded-lg text-[11px] font-bold hover:bg-red-200 border border-red-200 transition-all shadow-sm">
+                                                ❌ Hủy lịch
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </table>
+                    }
+                </div>
+            </div>
+
+            @* ================= PHẦN 3: LỊCH ĐÃ KHÁM (LỊCH SỬ) ================= *@
             <div>
                 <h3 class="text-lg font-black text-slate-500 uppercase tracking-wider mb-4 flex items-center gap-2">
                     <span>📜 Lịch sử khám bệnh</span>

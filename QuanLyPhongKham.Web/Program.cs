@@ -54,9 +54,10 @@ builder.Services.AddScoped<ILichTrucRepository, LichTrucRepository>();
 builder.Services.AddScoped<IPhongKhamRepository, PhongKhamRepository>();
 builder.Services.AddScoped<IKetQuaKhamRepository, KetQuaKhamRepository>();
 builder.Services.AddScoped<ITieuSuBenhAnRepository, TieuSuBenhAnRepository>();
+
 builder.Services.AddScoped<IPhongKhamService, PhongKhamService>();
 builder.Services.AddScoped<ILichTrucService, LichTrucService>();
-
+builder.Services.AddScoped<IKetQuaKhamRepository, KetQuaKhamRepository>();
 builder.Services.AddScoped<IBacSiService, BacSiService>();
 builder.Services.AddScoped<IBenhNhanService, BenhNhanService>();
 builder.Services.AddScoped<ILeTanService, LeTanService>();

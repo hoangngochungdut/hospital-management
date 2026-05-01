@@ -22,6 +22,7 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
+        <!-- CỘT TRÁI: FORM TẠO MỚI -->
         <div class="bg-white p-6 rounded-2xl shadow-lg border border-slate-100 h-fit">
             <h2 class="text-xl font-black text-blue-700 mb-6 uppercase border-b pb-3">Tạo Phân Công Mới</h2>
             
@@ -89,8 +90,17 @@
             </form>
         </div>
 
+        <!-- CỘT PHẢI: DANH SÁCH -->
         <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-lg border border-slate-100">
-            <h2 class="text-xl font-black text-slate-800 mb-6 uppercase border-b pb-3">Danh Sách Đã Xếp Lịch</h2>
+            <div class="flex justify-between items-center mb-6 border-b pb-3">
+                <h2 class="text-xl font-black text-slate-800 uppercase">Danh Sách Đã Xếp Lịch</h2>
+                
+                <!-- 🔥 NÚT XÓA HÀNG LOẠT (MỚI) -->
+                <button type="button" id="btnXoaHangLoat" class="hidden bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl font-bold shadow-lg shadow-red-100 transition-all flex items-center gap-2 text-sm">
+                    <i class="fas fa-trash-alt"></i>
+                    <span>Xóa <span id="countLich">0</span> lịch đang lọc</span>
+                </button>
+            </div>
             
             <div class="overflow-x-auto">
                 <table id="TableLichTruc" class="w-full text-left border-collapse">
@@ -108,7 +118,8 @@
                         {
                             foreach (var item in Model)
                             {
-                                <tr class="hover:bg-slate-50 border-b transition-all">
+                                <!-- 🔥 THÊM CLASS row-lich-truc VÀ data-id ĐỂ JS BẮT ĐƯỢC ID -->
+                                <tr class="hover:bg-slate-50 border-b transition-all row-lich-truc" data-id="@item.Id">
                                     <td class="p-4 text-blue-700 font-bold whitespace-nowrap">@item.Ngay.ToString("dd/MM/yyyy")</td>
                                     
                                     <td class="p-4">
@@ -148,7 +159,7 @@
         $(document).ready(function () {
             
         // 👉 KÍCH HOẠT THANH TÌM KIẾM THÔNG MINH
-        $('#TableLichTruc').DataTable({
+        let table = $('#TableLichTruc').DataTable({
         "language": {
         "search": "🔍 Lọc lịch nhanh (Ngày, Bác sĩ, Phòng...):",
         "lengthMenu": "Hiển thị _MENU_ lịch",
@@ -163,11 +174,61 @@
         "previous": "Trước"
         }
         },
-        "pageLength": 10, // Hiển thị 10 dòng 1 trang
-        "ordering": false // Tắt sắp xếp mặc định để giữ nguyên thứ tự ngày
+        "pageLength": 10,
+        "ordering": false
         });
 
-        // KÍCH HOẠT LỊCH FLATPICKR
+        // ==========================================
+        // 🔥 LOGIC XÓA HÀNG LOẠT THÔNG MINH 🔥
+        // ==========================================
+        function updateBulkDeleteButton() {
+        // Lấy các IDs từ những dòng ĐANG HIỂN THỊ (sau khi lọc bằng search box)
+        let visibleIds = [];
+        table.rows({ search: 'applied' }).nodes().to$().each(function() {
+        let id = $(this).data('id');
+        if (id) visibleIds.push(id);
+        });
+
+        if (visibleIds.length > 0) {
+        $('#btnXoaHangLoat').removeClass('hidden').fadeIn(200);
+        $('#countLich').text(visibleIds.length);
+        } else {
+        $('#btnXoaHangLoat').fadeOut(200);
+        }
+        return visibleIds;
+        }
+
+        // Lắng nghe sự kiện Tìm kiếm để cập nhật nút Xóa
+        table.on('search.dt', function () {
+        updateBulkDeleteButton();
+        });
+
+        // Xử lý khi bấm nút Xóa Hàng Loạt
+        $('#btnXoaHangLoat').click(function () {
+        let ids = updateBulkDeleteButton();
+
+        if (confirm(`⚠️ Ông có chắc chắn muốn xóa toàn bộ ${ids.length} lịch trực đang hiển thị này không?`)) {
+        $.ajax({
+        url: '/AdminDashboard/XoaLichHangLoat',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(ids),
+        success: function (res) {
+        if (res.success) {
+        alert("✅ " + res.message);
+        location.reload();
+        } else {
+        alert("❌ " + res.message);
+        }
+        },
+        error: function() { alert("❌ Lỗi kết nối hệ thống!"); }
+        });
+        }
+        });
+
+        // ==========================================
+        // LOGIC CŨ: FLATPICKR & AJAX LOAD KHOA
+        // ==========================================
         calendar = flatpickr("#LichToDung", {
         mode: "multiple",
         dateFormat: "Y-m-d",
@@ -176,7 +237,6 @@
         inline: true
         });
 
-        // LOGIC TẢI BÁC SĨ & PHÒNG THEO KHOA
         $('#SelectKhoa').change(function () {
         let khoaId = $(this).val();
         let selectBs = $('#SelectBacSi');
@@ -185,7 +245,7 @@
         if (khoaId) {
         selectBs.prop('disabled', true).html('<option>⏳ Đang tải...</option>');
         selectPhong.prop('disabled', true).html('<option>⏳ Đang tải...</option>');
-                                            
+                                                            
         $.get('/AdminDashboard/GetDataByKhoa?chuyenKhoaId=' + khoaId, function (res) {
         if (res.success) {
         let bsHtml = '<option value="">-- Chọn Bác Sĩ --</option>';
@@ -201,7 +261,7 @@
         });
         selectPhong.html(phongHtml).prop('disabled', false).removeClass('bg-slate-100 cursor-not-allowed');
         } else {
-        alert("Có lỗi xảy ra khi lấy dữ liệu!");
+        alert("Có lỗi xảy ra!");
         }
         });
         } else {
@@ -209,9 +269,11 @@
         selectPhong.prop('disabled', true).addClass('bg-slate-100 cursor-not-allowed').html('<option value="">-- Chọn khoa trước --</option>');
         }
         });
+
+        updateBulkDeleteButton(); // Kiểm tra nút khi load trang lần đầu
         });
 
-        // LOGIC CHỌN NGÀY NHANH
+        // CHỌN NGÀY NHANH
         function selectPreset(type) {
         let dates = [];
         let today = new Date();
@@ -221,7 +283,6 @@
         let current = new Date(today);
         let dayOfWeek = current.getDay();
         let daysToSunday = dayOfWeek === 0 ? 0 : 7 - dayOfWeek;
-                        
         for (let i = 0; i <= daysToSunday; i++) {
         dates.push(new Date(current));
         current.setDate(current.getDate() + 1);
@@ -232,7 +293,6 @@
         let dayOfWeek = current.getDay();
         let daysToNextMonday = dayOfWeek === 0 ? 1 : 8 - dayOfWeek;
         current.setDate(current.getDate() + daysToNextMonday);
-
         for (let i = 0; i < 7; i++) {
         dates.push(new Date(current));
         current.setDate(current.getDate() + 1);
@@ -251,17 +311,12 @@
         for (let i = 0; i < 30; i++) {
         let d = new Date(today);
         d.setDate(today.getDate() + i);
-        if (daysToSelect.includes(d.getDay())) {
-        dates.push(d);
+        if (daysToSelect.includes(d.getDay())) dates.push(d);
         }
         }
-        }
-
         calendar.setDate(dates);
         }
 
-        function clearCalendar() {
-        calendar.clear();
-        }
+        function clearCalendar() { calendar.clear(); }
     </script>
 }

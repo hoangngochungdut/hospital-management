@@ -1,22 +1,34 @@
-﻿using QuanLyPhongKham.Data;
+﻿using QuanLyPhongKham.Data; // Đổi lại namespace DbContext của ông nếu khác
 using QuanLyPhongKham.Models;
 using QuanLyPhongKham.Repositories.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-public class KetQuaKhamRepository : IKetQuaKhamRepository
+namespace QuanLyPhongKham.Repositories.Implementations
 {
-    private readonly AppDbContext _context;
-
-    public KetQuaKhamRepository(AppDbContext context)
+    public class KetQuaKhamRepository : IKetQuaKhamRepository
     {
-        _context = context;
-    }
+        private readonly AppDbContext _context; // Hoặc tên DbContext mà ông đang dùng
 
-    public KetQuaKham? GetByBuoiKhamId(int buoiKhamId)
-    {
-        return _context.KetQuaKhams
-            .FirstOrDefault(x => x.BuoiKhamId == buoiKhamId);
+        public KetQuaKhamRepository(AppDbContext context)
+        {
+            _context = context;
+        }
+
+        public KetQuaKham GetById(int buoiKhamId)
+        {
+            // Vì BuoiKhamId là khóa chính nên dùng Find hoặc FirstOrDefault đều được
+            return _context.KetQuaKhams.FirstOrDefault(k => k.BuoiKhamId == buoiKhamId);
+        }
+
+        public bool Add(KetQuaKham entity)
+        {
+            _context.KetQuaKhams.Add(entity);
+            return _context.SaveChanges() > 0;
+        }
+
+        public bool Update(KetQuaKham entity)
+        {
+            _context.KetQuaKhams.Update(entity);
+            return _context.SaveChanges() > 0;
+        }
     }
 }

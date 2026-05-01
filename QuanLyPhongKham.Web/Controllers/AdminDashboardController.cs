@@ -96,6 +96,18 @@ namespace QuanLyPhongKham.Web.Controllers
 
             return RedirectToAction("LichTruc");
         }
+        [HttpPost]
+        public async Task<IActionResult> XoaLichHangLoat([FromBody] List<int> ids)
+        {
+            if (ids == null || ids.Count == 0)
+                return Json(new { success = false, message = "Không có lịch nào được chọn!" });
+
+            var result = await _lichTrucService.XoaLichTheoDanhSachIdAsync(ids);
+            if (result)
+                return Json(new { success = true, message = $"Đã xóa thành công {ids.Count} lịch trực!" });
+
+            return Json(new { success = false, message = "Lỗi khi xóa lịch trực!" });
+        }
 
         // ==================== LỊCH KHÁM ====================
         [HttpGet]
@@ -114,7 +126,7 @@ namespace QuanLyPhongKham.Web.Controllers
         [HttpPost]
         public IActionResult DoiTrangThai(int id, int trangThaiMoi)
         {
-            _buoiKhamService.CapNhatTrangThai(
+            _buoiKhamService.XulyCaKham(
                 id,
                 (TrangThaiBuoiKham)trangThaiMoi,
                 "Admin cập nhật"
@@ -127,7 +139,7 @@ namespace QuanLyPhongKham.Web.Controllers
         [HttpPost]
         public IActionResult XoaLich(int id)
         {
-            bool success = _buoiKhamService.CapNhatTrangThai(
+            bool success = _buoiKhamService.XulyCaKham (
                 id,
                 TrangThaiBuoiKham.Huy,
                 "Admin xóa ca khám"

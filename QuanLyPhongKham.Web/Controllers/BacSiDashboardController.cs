@@ -12,20 +12,21 @@ namespace QuanLyPhongKham.Web.Controllers
         private readonly IChuyenKhoaService _chuyenKhoaService;
         private readonly IBuoiKhamService _buoiKhamService;
         private readonly IBenhNhanService _benhNhanService;
+        private readonly ILichTrucService _lichTrucService;
 
         public BacSiDashboardController(
             IBacSiService bacSiService,
             IBuoiKhamService buoiKhamService,
             IBenhNhanService benhNhanService,
-            IChuyenKhoaService chuyenKhoaService)
-
+            IChuyenKhoaService chuyenKhoaService,
+            ILichTrucService lichTrucService) 
         {
             _bacSiService = bacSiService;
             _chuyenKhoaService = chuyenKhoaService;
             _buoiKhamService = buoiKhamService;
             _benhNhanService = benhNhanService;
+            _lichTrucService = lichTrucService;
         }
-
         // ==================== LỊCH KHÁM ====================
         [HttpGet]
         public IActionResult LichKham()
@@ -41,17 +42,25 @@ namespace QuanLyPhongKham.Web.Controllers
         }
 
         [HttpPost]
-        public IActionResult DoiTrangThai(int id, int trangThaiMoi, string? ghiChu)
+        public IActionResult DoiTrangThai(int id, int trangThaiMoi, string? ghiChu, string? ketQuaKhamBenh)
         {
             try
             {
-                _buoiKhamService.CapNhatTrangThai(
+                bool isSuccess = _buoiKhamService.XulyCaKham(
                     id,
                     (TrangThaiBuoiKham)trangThaiMoi,
-                    ghiChu
+                    ghiChu,
+                    ketQuaKhamBenh
                 );
 
-                TempData["ThongBao"] = "✅ Cập nhật trạng thái thành công!";
+                if (isSuccess)
+                {
+                    TempData["ThongBao"] = "✅ Xử lý ca khám thành công!";
+                }
+                else
+                {
+                    TempData["ThongBao"] = "❌ Lỗi: Không tìm thấy ca khám!";
+                }
             }
             catch (Exception ex)
             {
@@ -115,8 +124,7 @@ namespace QuanLyPhongKham.Web.Controllers
             var result = _bacSiService.GetHoSo(userId.Value);
 
             // ✅ gọi qua service
-            ViewBag.DanhSachChuyenKhoa = _chuyenKhoaService.GetAll ();
-
+            ViewBag.DanhSachChuyenKhoa = _chuyenKhoaService.GetAll();
 
             return View(result);
         }
@@ -172,11 +180,7 @@ namespace QuanLyPhongKham.Web.Controllers
 
             return RedirectToAction(nameof(HoSo));
         }
-        //public IActionResult TieuSuBenhNhan(int id)
-        //{
-        //    var data = _benhNhanService.GetTieuSu(id);
-        //    return PartialView("TieuSuBenhNhan", data);
-        //}
+
         public IActionResult TieuSuBenhNhan(int id)
         {
             try
@@ -190,8 +194,27 @@ namespace QuanLyPhongKham.Web.Controllers
             }
             catch (Exception ex)
             {
-                return Content(ex.ToString()); // QUAN TRỌNG
+                return Content(ex.ToString()); 
             }
+        }
+        public async Task<IActionResult> LichTruc()
+        {
+            // 1. Lấy NguoiDungId từ Session (Và đây CHÍNH LÀ BacSiId)
+            int? sessionUserId = HttpContext.Session.GetInt32("UserId");
+
+            // Nếu chưa đăng nhập thì đá ra trang Login
+            if (sessionUserId == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            // 2. Chốt luôn ID! Không cần query tìm kiếm lằng nhằng nữa
+            int bacSiIdChuan = sessionUserId.Value;
+
+            // 3. Đưa thẳng ID vào Service lấy lịch trực
+            var danhSachLichTruc = await _lichTrucService.LayLichTrucTuHomNayAsync(bacSiIdChuan);
+
+            return View(danhSachLichTruc);
         }
     }
 }

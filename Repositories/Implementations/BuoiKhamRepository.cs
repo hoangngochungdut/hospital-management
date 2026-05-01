@@ -103,6 +103,7 @@ namespace QuanLyPhongKham.Repositories.Implementations
                 .Include(b => b.BacSi)
                     .ThenInclude(bs => bs.ChuyenKhoa)
                 .Include(b => b.PhongKham)
+                .Include(b => b.KetQuaKham)
                 .Where(b => b.BenhNhanId == benhNhanId)
                 .OrderByDescending(b => b.Ngay)
                 .ThenByDescending(b => b.Gio)

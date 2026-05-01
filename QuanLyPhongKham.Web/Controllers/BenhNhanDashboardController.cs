@@ -130,7 +130,7 @@ namespace QuanLyPhongKham.Web.Controllers
         {
             try
             {
-                _buoiKhamService.CapNhatTrangThai(
+                _buoiKhamService.XulyCaKham(
                     id,
                     TrangThaiBuoiKham.Huy,
                     lyDo

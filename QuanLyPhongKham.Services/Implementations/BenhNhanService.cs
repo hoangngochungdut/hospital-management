@@ -129,7 +129,7 @@ namespace QuanLyPhongKham.Services.Implementations
 
             foreach (var bk in buoiKhams)
             {
-                var ketQua = _ketQuaRepository.GetByBuoiKhamId(bk.Id);
+                var ketQua = _ketQuaRepository.GetById(bk.Id);
 
                 lichSu.Add(new LichSuKhamDTO
                 {

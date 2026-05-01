@@ -38,18 +38,22 @@
                         <i class="fas fa-user-md w-5"></i>
                         <span>Thông Tin Cá Nhân</span>
                     </a>
-                
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-4 mt-6 mb-2">Chính</p>
-                    <a href="@Url.Action("LichKham", "BacSiDashboard")" class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all @(currentController == "BacSiDashboard" && currentAction == "LichKham" ? activeClass : inactiveClass)">
-                        <i class="fas fa-calendar-alt w-5"></i>
-                        <span> Lịch khám</span>
-                    </a>
-                    @* <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all @inactiveClass">
-                        <i class="fas fa-file-invoice-dollar w-5"></i>
-                        <span>Xem tiểu sử</span>
-                    </a> *@
-                </nav>
 
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-4 mt-6 mb-2">Chính</p>
+    
+                    <!-- Nút Lịch Khám -->
+                    <a href="@Url.Action("LichKham", "BacSiDashboard")" class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all @(currentController == "BacSiDashboard" && currentAction == "LichKham" ? activeClass : inactiveClass)">
+                        <i class="fas fa-calendar-check w-5"></i>
+                        <span>Lịch khám</span>
+                    </a>
+    
+                    <!-- Nút Xem Lịch Trực (Đã sửa điều kiện thành LichTruc và đổi nhẹ icon cho đỡ trùng) -->
+                    <a href="@Url.Action("LichTruc", "BacSiDashboard")" class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all @(currentController == "BacSiDashboard" && currentAction == "LichTruc" ? activeClass : inactiveClass)">
+                        <i class="fas fa-calendar-alt w-5"></i>
+                        <span>Xem Lịch Trực</span>
+                    </a>
+                </nav>
+                
                 <div class="p-4 border-t border-slate-100">
                     <a href="#" onclick="handleLogout(event)" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-red-500 hover:bg-red-50 transition cursor-pointer">
                         <i class="fas fa-sign-out-alt w-5"></i>
