@@ -234,23 +234,62 @@ namespace QuanLyPhongKham.Services.Implementations
         {
             var lich = _buoiKhamRepo.GetById(id);
 
-            if (lich == null ||
-                lich.TrangThai == TrangThaiBuoiKham.HoanThanh ||
-                lich.TrangThai == TrangThaiBuoiKham.Huy)
+            if (lich == null) throw new Exception("Không tìm thấy lịch.");
+
+            if (lich.TrangThai != TrangThaiBuoiKham.ChuaXacNhan)
             {
-                throw new Exception("Không thể thay đổi lịch đã kết thúc.");
+                throw new Exception("Chỉ được đổi ngày/giờ đối với lịch CHƯA XÁC NHẬN.");
             }
 
             var ngayCu = lich.Ngay;
-
             lich.Ngay = ngayMoi;
             lich.Gio = gioMoi;
-            lich.TrangThai = TrangThaiBuoiKham.XacNhan;
 
-            lich.ThongBaoChoBenhNhan =
-                $"🔄 Bác sĩ dời lịch từ {ngayCu:dd/MM} sang {ngayMoi:dd/MM} lúc {gioMoi:HH:mm}. Lý do: {lyDo}";
+            lich.ThongBaoChoBenhNhan = $"🔄 Bác sĩ dời lịch từ {ngayCu:dd/MM} sang {ngayMoi:dd/MM} lúc {gioMoi:HH:mm}. Lý do: {lyDo}";
 
             return _buoiKhamRepo.Update(lich);
+        }
+        public bool DoiBacSi(int id, int bacSiMoiId, string lyDo)
+        {
+            var lich = _buoiKhamRepo.GetById(id);
+            if (lich == null) throw new Exception("Không tìm thấy lịch.");
+
+            // 🔥 NỚI LỎNG: Chỉ chặn khi lịch đã Hoàn Thành hoặc Hủy. Còn Chưa Xác Nhận hay Đã Xác Nhận đều đổi được.
+            if (lich.TrangThai == TrangThaiBuoiKham.HoanThanh || lich.TrangThai == TrangThaiBuoiKham.Huy)
+            {
+                throw new Exception("Không thể đổi bác sĩ cho lịch đã kết thúc (Hoàn thành / Hủy).");
+            }
+
+            // 1. Lấy thông tin Bác sĩ hiện tại và Bác sĩ mới để đối chiếu
+            var bacSiCu = _bacSiRepo.GetById(lich.BacSiId.Value);
+            var bacSiMoi = _bacSiRepo.GetById(bacSiMoiId);
+
+            if (bacSiMoi == null) throw new Exception("Bác sĩ mới không tồn tại trong hệ thống.");
+
+            // 2. Bắt buộc CÙNG CHUYÊN KHOA
+            if (bacSiCu.ChuyenKhoaId != bacSiMoi.ChuyenKhoaId)
+            {
+                throw new Exception("Lỗi: Chỉ được phép chuyển ca khám cho bác sĩ CÙNG CHUYÊN KHOA!");
+            }
+
+            // 3. Đổi ID bác sĩ và cập nhật thông báo
+            lich.BacSiId = bacSiMoiId;
+
+            // (Lưu ý: Hành động đổi bác sĩ này KHÔNG LÀM THAY ĐỔI trạng thái hiện tại của lịch khám, 
+            // nghĩa là đang 'Chưa xác nhận' đổi xong vẫn là 'Chưa xác nhận' cho bác sĩ mới xử lý tiếp)
+
+            lich.ThongBaoChoBenhNhan = $"🔄 Lịch khám của bạn đã được chuyển sang cho BS. {bacSiMoi.HoTen}. Lý do: {lyDo}";
+
+            return _buoiKhamRepo.Update(lich);
+        }
+        // Hàm xóa cứng lịch khám
+        public bool XoaLichKham(int id)
+        {
+            var lich = _buoiKhamRepo.GetById(id);
+            if (lich == null) throw new Exception("Không tìm thấy lịch để xóa.");
+
+            // Gọi hàm Delete trong Repository để xóa hẳn dòng này trong DB
+            return _buoiKhamRepo.Delete(id);
         }
 
         public bool BenhNhanYeuCauDoiLich(int id, DateOnly ngayMoi, TimeOnly gioMoi, string lyDo)

@@ -48,6 +48,11 @@
                         <i class="fas fa-file-invoice-dollar w-5"></i>
                         <span>Thanh Toán</span>
                     </a>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-4 mt-6 mb-2">Chính</p>
+                    <a href="@Url.Action("QuanLyLichKham", "LeTanDashboard")" class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all @(currentController == "LeTanDashboard" && (currentAction == "LichKham" || currentAction == "DatLich") ? activeClass : inactiveClass)">
+                        <i class="fas fa-calendar-alt w-5"></i>
+                        <span>Quản Lý Lịch Khám</span>
+                    </a>
                 </nav>
 
                 <div class="p-4 border-t border-slate-100">

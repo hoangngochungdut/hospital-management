@@ -25,9 +25,7 @@ namespace QuanLyPhongKham.Web.Controllers
         [HttpGet]
         public async Task<IActionResult> LichKham()
         {
-            ViewBag.DsChuyenKhoa =
-                await _buoiKhamService.LayTatCaChuyenKhoaAsync();
-
+            ViewBag.DsChuyenKhoa = await _buoiKhamService.LayTatCaChuyenKhoaAsync();
             return View();
         }
 
@@ -45,8 +43,7 @@ namespace QuanLyPhongKham.Web.Controllers
 
             if (!TimeOnly.TryParse(Gio, out var gioParsed))
             {
-                TempData["ThongBao"] =
-                    $"❌ Không đọc được giờ ({Gio})!";
+                TempData["ThongBao"] = $"❌ Không đọc được giờ ({Gio})!";
                 return RedirectToAction("LichKham");
             }
 
@@ -60,12 +57,10 @@ namespace QuanLyPhongKham.Web.Controllers
 
             try
             {
-                var result = await _buoiKhamService
-                    .DatLichKhamAsync(request, currentId.Value, "BenhNhan");
+                var result = await _buoiKhamService.DatLichKhamAsync(request, currentId.Value, "BenhNhan");
 
                 if (result)
-                    TempData["ThongBao"] =
-                        "✅ Đặt lịch thành công! Chờ xác nhận.";
+                    TempData["ThongBao"] = "✅ Đặt lịch thành công! Chờ xác nhận.";
             }
             catch (Exception ex)
             {
@@ -81,9 +76,7 @@ namespace QuanLyPhongKham.Web.Controllers
         {
             try
             {
-                var data = await _buoiKhamService
-                    .LayBacSiVaPhongTheoKhoaAsync(chuyenKhoaId);
-
+                var data = await _buoiKhamService.LayBacSiVaPhongTheoKhoaAsync(chuyenKhoaId);
                 return Json(new { success = true, data });
             }
             catch (Exception ex)
@@ -98,10 +91,7 @@ namespace QuanLyPhongKham.Web.Controllers
             try
             {
                 var date = DateOnly.Parse(ngay);
-
-                var gioTrong = await _buoiKhamService
-                    .LayCacGioKhamTrongAsync(bacSiId, phongKhamId, date);
-
+                var gioTrong = await _buoiKhamService.LayCacGioKhamTrongAsync(bacSiId, phongKhamId, date);
                 return Json(new { success = true, gioTrong });
             }
             catch (Exception ex)
@@ -119,8 +109,7 @@ namespace QuanLyPhongKham.Web.Controllers
             if (currentId == null)
                 return RedirectToAction("Login", "Account");
 
-            var lich = _buoiKhamService
-                .GetByBenhNhanId(currentId.Value);
+            var lich = _buoiKhamService.GetByBenhNhanId(currentId.Value);
 
             return View(lich);
         }
@@ -130,12 +119,7 @@ namespace QuanLyPhongKham.Web.Controllers
         {
             try
             {
-                _buoiKhamService.XulyCaKham(
-                    id,
-                    TrangThaiBuoiKham.Huy,
-                    lyDo
-                );
-
+                _buoiKhamService.XulyCaKham(id, TrangThaiBuoiKham.Huy, lyDo);
                 TempData["ThongBao"] = "✅ Đã hủy lịch!";
             }
             catch (Exception ex)
@@ -155,9 +139,7 @@ namespace QuanLyPhongKham.Web.Controllers
                 var time = TimeOnly.Parse(gioMoi);
 
                 _buoiKhamService.BenhNhanYeuCauDoiLich(id, date, time, lyDo);
-
-                TempData["ThongBao"] =
-                    "✅ Đã gửi yêu cầu dời lịch!";
+                TempData["ThongBao"] = "✅ Đã gửi yêu cầu dời lịch!";
             }
             catch (Exception ex)
             {
@@ -252,9 +234,7 @@ namespace QuanLyPhongKham.Web.Controllers
             if (id == null)
                 return RedirectToAction("Login", "Account");
 
-            var (success, message) =
-                _benhNhanService.CapNhatHoSo(id.Value, request);
-
+            var (success, message) = _benhNhanService.CapNhatHoSo(id.Value, request);
             TempData[success ? "Success" : "Error"] = message;
 
             return RedirectToAction(nameof(ThongTinCaNhan));
@@ -275,9 +255,7 @@ namespace QuanLyPhongKham.Web.Controllers
             if (id == null)
                 return RedirectToAction("Login", "Account");
 
-            var (success, message) =
-                await _benhNhanService.DoiMatKhau(id.Value, request);
-
+            var (success, message) = await _benhNhanService.DoiMatKhau(id.Value, request);
             TempData[success ? "Success" : "Error"] = message;
 
             return RedirectToAction(nameof(HoSo));

@@ -8,11 +8,11 @@
     // Lấy ngày hiện tại để so sánh
     var today = DateOnly.FromDateTime(DateTime.Now);
 
-    // 1. Ca khám hôm nay: Đúng ngày hiện tại + Chưa hoàn thành/hủy
+    // 1. Ca khám hôm nay
     var lichHomNay = Model.Where(x => x.Ngay == today && (x.TrangThai == TrangThaiBuoiKham.ChuaXacNhan || x.TrangThai == TrangThaiBuoiKham.XacNhan))
                           .OrderBy(x => x.Gio).ToList();
 
-    // 2. Ca khám sắp tới: Ngày mai trở đi + Chưa hoàn thành/hủy
+    // 2. Ca khám sắp tới
     var lichSapToi = Model.Where(x => x.Ngay > today && (x.TrangThai == TrangThaiBuoiKham.ChuaXacNhan || x.TrangThai == TrangThaiBuoiKham.XacNhan))
                           .OrderBy(x => x.Ngay).ThenBy(x => x.Gio).ToList();
 
@@ -158,8 +158,11 @@
     public Microsoft.AspNetCore.Html.IHtmlContent RenderTable(List<QuanLyPhongKham.Models.BuoiKham> list)
     {
         var html = new System.Text.StringBuilder();
+        var today = DateOnly.FromDateTime(DateTime.Now);
+
         html.Append("<table class='w-full text-left'>");
         html.Append("<tr class='border-b border-slate-100 bg-slate-50 text-slate-500 text-xs uppercase tracking-widest'><th class='py-4 px-5'>Thời gian</th><th class='py-4 px-5'>Bệnh nhân</th><th class='py-4 px-5 text-center'>Phòng</th><th class='py-4 px-5'>Trạng thái</th><th class='py-4 px-5'>Thao tác</th></tr>");
+        
         foreach (var item in list)
         {
             html.Append("<tr class='border-b border-slate-50 hover:bg-slate-50 transition-all align-top group'>");
@@ -167,21 +170,62 @@
             html.Append($"<td class='py-5 px-5'><div class='flex items-center gap-2'><a href='/BacSiDashboard/HoSoBenhNhan?benhNhanId={item.BenhNhanId}' class='font-bold text-slate-800 hover:text-blue-600 transition-colors text-lg'>{item.BenhNhan?.HoTen}</a><i class='fa fa-eye text-blue-500 cursor-pointer hover:text-blue-700 text-lg' onclick='xemTieuSu({item.BenhNhanId})'></i></div><div class='text-xs text-slate-500 font-medium mt-1'>SĐT: {item.BenhNhan?.Sdt}</div></td>");
             html.Append($"<td class='py-5 px-5 text-center'><span class='bg-slate-100 text-slate-600 px-3 py-1.5 rounded-lg text-[11px] font-black border border-slate-200'>P.{item.PhongKham?.SoPhong}</span></td>");
             html.Append("<td class='py-5 px-5'>");
-            if (item.TrangThai == TrangThaiBuoiKham.ChuaXacNhan) html.Append("<span class='bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-[10px] font-black uppercase'>Chờ xác nhận</span>");
-            else html.Append("<span class='bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-[10px] font-black uppercase'>Đã xác nhận</span>");
-            html.Append("</td><td class='py-5 px-5 w-[350px]'><div class='flex flex-col gap-2'><div class='flex gap-2'>");
-            html.Append("<form action='/BacSiDashboard/DoiTrangThai' method='POST' class='flex-1'><input type='hidden' name='id' value='" + item.Id + "' /><input type='hidden' name='ghiChu' class='ghiChuInput' value='' />");
-            if (item.TrangThai == TrangThaiBuoiKham.ChuaXacNhan) html.Append("<button type='submit' name='trangThaiMoi' value='" + (int)TrangThaiBuoiKham.XacNhan + "' class='w-full bg-blue-600 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-blue-700 shadow-sm transition-all uppercase'>Xác nhận</button>");
-            else html.Append("<button type='button' onclick='openNoteModal(this, \"✅ Hoàn thành ca khám\", \"Nhập dặn dò cho bệnh nhân:\", 2)' class='w-full bg-green-600 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-green-700 shadow-sm transition-all uppercase'>Hoàn thành</button>");
-            html.Append("</form><form action='/BacSiDashboard/DoiTrangThai' method='POST' class='flex-none'><input type='hidden' name='id' value='" + item.Id + "' /><input type='hidden' name='ghiChu' class='ghiChuInput' value='' /><button type='button' onclick='openNoteModal(this, \"❌ Hủy lịch khám\", \"Nhập lý do hủy (sẽ thông báo cho bệnh nhân):\", 3)' class='bg-red-50 text-red-600 border border-red-200 px-4 py-2 rounded-xl text-xs font-bold hover:bg-red-600 hover:text-white transition-all uppercase'>Hủy</button></form></div>");
-            html.Append("<form action='/BacSiDashboard/DoiLichKham' method='POST'><input type='hidden' name='id' value='" + item.Id + "' /><input type='hidden' name='ngayMoi' class='ngayMoiInput' value='' /><input type='hidden' name='gioMoi' class='gioMoiInput' value='' /><input type='hidden' name='lyDoDoi' class='lyDoDoiInput' value='' /><button type='button' onclick='openMoveModal(this)' class='w-full bg-slate-100 text-slate-600 border border-slate-200 px-3 py-2 rounded-xl text-[11px] font-black hover:bg-slate-200 transition-all uppercase tracking-wider'>🕒 Bác sĩ dời lịch</button></form></div></td></tr>");
+            
+            if (item.TrangThai == TrangThaiBuoiKham.ChuaXacNhan)
+                html.Append("<span class='bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-[10px] font-black uppercase'>Chờ xác nhận</span>");
+            else
+                html.Append("<span class='bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-[10px] font-black uppercase'>Đã xác nhận</span>");
+            
+            html.Append("</td><td class='py-5 px-5 w-[250px]'>");
+
+            // ================= LOGIC NÚT BẤM ĐÃ FIX CHUẨN =================
+            if (item.TrangThai == TrangThaiBuoiKham.ChuaXacNhan)
+            {
+                // 1. NẾU CHƯA XÁC NHẬN: Dù là hôm nay hay tương lai, CHỈ ĐƯỢC PHÉP DỜI LỊCH (Khóa cứng nút Hoàn Thành)
+                html.Append("<div class='flex flex-col gap-2'>");
+                html.Append("<form action='/BacSiDashboard/DoiLichKham' method='POST'>");
+                html.Append($"<input type='hidden' name='id' value='{item.Id}' />");
+                html.Append("<input type='hidden' name='ngayMoi' class='ngayMoiInput' value='' />");
+                html.Append("<input type='hidden' name='gioMoi' class='gioMoiInput' value='' />");
+                html.Append("<input type='hidden' name='lyDoDoi' class='lyDoDoiInput' value='' />");
+                html.Append("<button type='button' onclick='openMoveModal(this)' class='w-full bg-slate-100 text-slate-700 border border-slate-200 px-3 py-2 rounded-xl text-[11px] font-black hover:bg-slate-200 transition-all uppercase tracking-wider'>🕒 Dời lịch</button>");
+                html.Append("</form>");
+                html.Append("</div>");
+            }
+            else if (item.TrangThai == TrangThaiBuoiKham.XacNhan)
+            {
+                // 2. NẾU ĐÃ XÁC NHẬN: Kiểm tra xem có phải ngày hôm nay không
+                if (item.Ngay == today)
+                {
+                    // Đã xác nhận + Hôm nay -> Mới hiện nút HOÀN THÀNH (và JS sẽ chặn nếu chưa đủ 15p)
+                    DateTime thoiGianKham = item.Ngay.ToDateTime(item.Gio);
+                    string isoTime = thoiGianKham.ToString("s");
+
+                    html.Append("<form action='/BacSiDashboard/HoanThanhKham' method='POST' class='w-full'>");
+                    html.Append($"<input type='hidden' name='id' value='{item.Id}' />");
+                    html.Append("<input type='hidden' name='ghiChu' class='ghiChuInput' value='' />");
+                    html.Append("<input type='hidden' name='ketQuaKhamBenh' class='ketQuaInput' value='' />");
+                    html.Append($"<button type='button' onclick='checkAndOpenNoteModal(this, \"{isoTime}\")' class='w-full bg-green-500 text-white px-4 py-2.5 rounded-xl text-xs font-bold hover:bg-green-600 shadow-sm transition-all uppercase'><i class=\"fas fa-stethoscope mr-1\"></i> Hoàn thành</button>");
+                    html.Append("</form>");
+                }
+                else if (item.Ngay > today)
+                {
+                    // Đã xác nhận + Lịch ở tương lai -> KHÔNG CHO DỜI LỊCH (Chốt sổ)
+                    html.Append("<span class='text-slate-400 text-[11px] italic text-center w-full block py-2'>Đã chốt lịch, không thể dời</span>");
+                }
+            }
+            // ==============================================================
+
+            html.Append("</td></tr>");
         }
         html.Append("</table>");
         return new Microsoft.AspNetCore.Html.HtmlString(html.ToString());
     }
 }
 
-@* --- MODALS & SCRIPTS GIỮ NGUYÊN --- *@
+@* ================= MODALS ================= *@
+
+<!-- Modal Tiểu sử -->
 <div id="tieuSuModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center transition-all p-4">
     <div class="bg-white rounded-[24px] shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col relative">
         <button type="button" onclick="closeTieuSuModal()" class="absolute top-4 right-5 text-slate-400 hover:text-red-500 font-bold text-3xl z-50">&times;</button>
@@ -189,62 +233,123 @@
     </div>
 </div>
 
+<!-- Modal Dời Lịch -->
 <div id="moveModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center transition-all">
     <div class="bg-white rounded-[24px] shadow-2xl w-full max-w-md overflow-hidden">
-        <div class="bg-orange-500 p-5 text-white flex justify-between items-center"><h3 class="font-black text-lg uppercase">🕒 Dời lịch khám</h3><button type="button" onclick="closeModal('moveModal')" class="text-orange-200 hover:text-white font-bold text-2xl">&times;</button></div>
+        <div class="bg-orange-500 p-5 text-white flex justify-between items-center">
+            <h3 class="font-black text-lg uppercase">🕒 Dời lịch khám</h3>
+            <button type="button" onclick="closeModal('moveModal')" class="text-orange-200 hover:text-white font-bold text-2xl">&times;</button>
+        </div>
         <div class="p-6 space-y-5">
             <div class="grid grid-cols-2 gap-4">
                 <div><label class="block text-xs font-black text-slate-500 uppercase mb-2">Ngày dời sang</label><input type="date" id="moveModalDate" class="w-full border-2 border-slate-200 rounded-xl p-3" required /></div>
                 <div><label class="block text-xs font-black text-slate-500 uppercase mb-2">Giờ khám mới</label><input type="time" id="moveModalTime" class="w-full border-2 border-slate-200 rounded-xl p-3" required /></div>
             </div>
             <div><label class="block text-xs font-black text-slate-500 uppercase mb-2">Lý do dời lịch</label><textarea id="moveModalReason" rows="3" class="w-full border-2 border-slate-200 rounded-xl p-3" required></textarea></div>
-            <div class="pt-2 flex justify-end gap-3"><button type="button" onclick="closeModal('moveModal')" class="px-6 py-2.5 bg-slate-100 font-bold rounded-xl uppercase text-xs">Hủy</button><button type="button" id="btnSubmitMove" class="px-6 py-2.5 bg-orange-500 text-white font-bold rounded-xl uppercase text-xs">Lưu lịch mới</button></div>
+            <div class="pt-2 flex justify-end gap-3">
+                <button type="button" onclick="closeModal('moveModal')" class="px-6 py-2.5 bg-slate-100 font-bold rounded-xl uppercase text-xs">Hủy</button>
+                <button type="button" id="btnSubmitMove" class="px-6 py-2.5 bg-orange-500 text-white font-bold rounded-xl uppercase text-xs">Lưu lịch mới</button>
+            </div>
         </div>
     </div>
 </div>
 
+<!-- Modal Nhập Kết Quả Khám -->
 <div id="noteModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center transition-all">
     <div class="bg-white rounded-[24px] shadow-2xl w-full max-w-md overflow-hidden">
-        <div class="bg-blue-600 p-5 text-white flex justify-between items-center" id="noteModalHeader"><h3 id="noteModalTitle" class="font-black text-lg uppercase">Nhập thông tin</h3><button type="button" onclick="closeModal('noteModal')" class="text-white/70 hover:text-white font-bold text-2xl">&times;</button></div>
+        <div class="bg-green-600 p-5 text-white flex justify-between items-center">
+            <h3 id="noteModalTitle" class="font-black text-lg uppercase">Nhập thông tin</h3>
+            <button type="button" onclick="closeModal('noteModal')" class="text-white/70 hover:text-white font-bold text-2xl">&times;</button>
+        </div>
         <div class="p-6">
-            <div id="divKetQuaKham" class="mb-4 hidden"><label class="block text-sm font-bold text-blue-700 mb-2">Kết quả chẩn đoán (Tên bệnh):</label><input type="text" id="modalKetQuaInput" class="w-full border-2 border-slate-200 rounded-xl p-3" /></div>
-            <p id="noteModalDesc" class="text-sm font-bold text-slate-500 mb-2">Điền chi tiết:</p><textarea id="noteModalInput" rows="3" class="w-full border-2 border-slate-200 rounded-xl p-3"></textarea>
-            <div class="pt-6 flex justify-end gap-3"><button type="button" onclick="closeModal('noteModal')" class="px-6 py-2.5 bg-slate-100 font-bold rounded-xl uppercase text-xs">Đóng</button><button type="button" id="btnSubmitNote" class="px-6 py-2.5 bg-blue-600 text-white font-bold rounded-xl uppercase text-xs">Xác nhận</button></div>
+            <div class="mb-4">
+                <label class="block text-sm font-bold text-green-700 mb-2">Kết quả chẩn đoán (Tên bệnh):</label>
+                <input type="text" id="modalKetQuaInput" class="w-full border-2 border-slate-200 rounded-xl p-3 focus:border-green-500" placeholder="VD: Sâu răng, Viêm họng..." />
+            </div>
+            <p id="noteModalDesc" class="text-sm font-bold text-slate-500 mb-2">Điền chi tiết dặn dò / Đơn thuốc:</p>
+            <textarea id="noteModalInput" rows="3" class="w-full border-2 border-slate-200 rounded-xl p-3 focus:border-green-500"></textarea>
+            
+            <div class="pt-6 flex justify-end gap-3">
+                <button type="button" onclick="closeModal('noteModal')" class="px-6 py-2.5 bg-slate-100 font-bold rounded-xl uppercase text-xs">Đóng</button>
+                <button type="button" id="btnSubmitNote" class="px-6 py-2.5 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl uppercase text-xs transition-colors">Xác nhận</button>
+            </div>
         </div>
     </div>
 </div>
 
+@* ================= SCRIPTS ================= *@
 @section Scripts {
     <script>
-        let currentForm = null; let targetValue = null;
+        let currentForm = null;
+
+        function closeModal(modalId) {
+            $('#' + modalId).addClass('hidden').removeClass('flex');
+        }
+
+        // --- KỊCH BẢN TIỂU SỬ BỆNH NHÂN ---
         function xemTieuSu(benhNhanId) {
             $('#tieuSuModal').removeClass('hidden').addClass('flex');
             $('#tieuSuModalContent').html('<div class="p-10 text-center"><p class="animate-pulse">⏳ Đang tải...</p></div>');
-            fetch(`/BacSiDashboard/TieuSuBenhNhan?id=${benhNhanId}`).then(res => res.text()).then(html => { $('#tieuSuModalContent').html(html); });
+            fetch(`/BacSiDashboard/TieuSuBenhNhan?id=${benhNhanId}`)
+                .then(res => res.text())
+                .then(html => { $('#tieuSuModalContent').html(html); });
         }
         function closeTieuSuModal() { $('#tieuSuModal').addClass('hidden').removeClass('flex'); }
-        function openNoteModal(btn, title, desc, val) {
-            currentForm = $(btn).closest('form'); targetValue = val;
-            $('#noteModalTitle').text(title); $('#noteModalDesc').text(desc); $('#noteModalInput').val(''); $('#modalKetQuaInput').val('');
-            if(val == 3) { $('#divKetQuaKham').addClass('hidden'); $('#noteModalHeader').removeClass('bg-blue-600').addClass('bg-red-600'); $('#btnSubmitNote').removeClass('bg-blue-600').addClass('bg-red-600'); }
-            else { $('#divKetQuaKham').removeClass('hidden'); $('#noteModalHeader').removeClass('bg-red-600').addClass('bg-blue-600'); $('#btnSubmitNote').removeClass('bg-red-600').addClass('bg-blue-600'); }
+
+        // --- HÀM KIỂM TRA THỜI GIAN VÀ MỞ MODAL HOÀN THÀNH ---
+        function checkAndOpenNoteModal(btn, isoTime) {
+            let thoiGianKham = new Date(isoTime);
+            // Thêm 15 phút vào giờ khám
+            let thoiGianChoPhep = new Date(thoiGianKham.getTime() + 15 * 60000);
+            let now = new Date();
+
+            // Nếu thời gian hiện tại vẫn nhỏ hơn (chưa tới) thời gian cho phép
+            if (now < thoiGianChoPhep) {
+                let gioKham = thoiGianKham.getHours().toString().padStart(2, '0') + ':' + thoiGianKham.getMinutes().toString().padStart(2, '0');
+                let gioPhep = thoiGianChoPhep.getHours().toString().padStart(2, '0') + ':' + thoiGianChoPhep.getMinutes().toString().padStart(2, '0');
+                
+                alert(`⛔ CHƯA ĐẾN GIỜ NHẬP KẾT QUẢ!\n\nCa khám của bệnh nhân bắt đầu lúc ${gioKham}.\nBác sĩ vui lòng chờ qua ${gioPhep} (đủ 15 phút) để có thể Hoàn Thành ca khám này.`);
+                return; // Dừng lại, không mở modal
+            }
+
+            // Nếu đã đủ 15 phút thì chạy tiếp mở modal như bình thường
+            currentForm = $(btn).closest('form');
+            $('#noteModalTitle').text("✅ Khám & Ghi Kết Quả");
+            $('#noteModalDesc').text("Nhập dặn dò/ghi chú cho bệnh nhân:");
+            $('#noteModalInput').val('');
+            $('#modalKetQuaInput').val('');
             $('#noteModal').removeClass('hidden').addClass('flex');
         }
-        function openMoveModal(btn) { currentForm = $(btn).closest('form'); $('#moveModal').removeClass('hidden').addClass('flex'); }
-        function closeModal(modalId) { $('#' + modalId).addClass('hidden').removeClass('flex'); }
+
         $('#btnSubmitNote').click(function() {
-            let txtDanDo = $('#noteModalInput').val(); let txtKetQua = $('#modalKetQuaInput').val();
-            if (targetValue == 2 && txtKetQua.trim() === "") { alert("Vui lòng nhập Kết quả!"); return; }
-            if (txtDanDo.trim() === "") { alert("Vui lòng nhập Ghi chú!"); return; }
+            let txtDanDo = $('#noteModalInput').val();
+            let txtKetQua = $('#modalKetQuaInput').val();
+            
+            if (txtKetQua.trim() === "") { alert("Vui lòng nhập Kết quả chẩn đoán!"); return; }
+            if (txtDanDo.trim() === "") { alert("Vui lòng nhập Chi tiết dặn dò/ghi chú!"); return; }
+            
             currentForm.find('.ghiChuInput').val(txtDanDo);
-            $('<input>').attr({ type: 'hidden', name: 'trangThaiMoi', value: targetValue }).appendTo(currentForm);
-            if (targetValue == 2) { $('<input>').attr({ type: 'hidden', name: 'ketQuaKhamBenh', value: txtKetQua }).appendTo(currentForm); }
+            currentForm.find('.ketQuaInput').val(txtKetQua);
             currentForm.submit();
         });
+
+        // --- KỊCH BẢN DỜI LỊCH ---
+        function openMoveModal(btn) {
+            currentForm = $(btn).closest('form');
+            $('#moveModal').removeClass('hidden').addClass('flex');
+        }
+
         $('#btnSubmitMove').click(function() {
-            let ngay = $('#moveModalDate').val(); let gio = $('#moveModalTime').val(); let lyDo = $('#moveModalReason').val();
-            if (!ngay || !gio || !lyDo) { alert("Vui lòng điền đủ thông tin!"); return; }
-            currentForm.find('.ngayMoiInput').val(ngay); currentForm.find('.gioMoiInput').val(gio); currentForm.find('.lyDoDoiInput').val(lyDo); currentForm.submit();
+            let ngay = $('#moveModalDate').val();
+            let gio = $('#moveModalTime').val();
+            let lyDo = $('#moveModalReason').val();
+            
+            if (!ngay || !gio || !lyDo) { alert("Vui lòng điền đủ thông tin để dời lịch!"); return; }
+            
+            currentForm.find('.ngayMoiInput').val(ngay);
+            currentForm.find('.gioMoiInput').val(gio);
+            currentForm.find('.lyDoDoiInput').val(lyDo);
+            currentForm.submit();
         });
     </script>
 }

@@ -66,5 +66,9 @@ namespace QuanLyPhongKham.Services.Interfaces
             int soSao,
             string nhanXet
         );
+        bool DoiBacSi(int id,
+            int bacSiMoiId,
+            string lyDo);
+        bool XoaLichKham(int id);
     }
 }
