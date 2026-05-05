@@ -179,6 +179,34 @@ namespace QuanLyPhongKham.Web.Controllers
 
             return View(ds);
         }
+        // 🔥 THÊM MỚI: API Lấy thông tin chi tiết Bác sĩ
+        [HttpGet]
+        public IActionResult GetThongTinBacSi(int id)
+        {
+            try
+            {
+                // Dùng lại hàm GetHoSo ông đã viết ở BacSiService
+                var bacSi = _bacSiService.GetHoSo(id);
+
+                if (bacSi == null) return Json(new { success = false });
+
+                return Json(new
+                {
+                    success = true,
+                    data = new
+                    {
+                        hoTen = "BS. " + bacSi.HoTen,
+                        gioiTinh = string.IsNullOrEmpty(bacSi.GioiTinh) ? "Chưa cập nhật" : bacSi.GioiTinh,
+                        sdt = string.IsNullOrEmpty(bacSi.SoDienThoai) ? "Chưa cập nhật" : bacSi.SoDienThoai,
+                        diaChi = string.IsNullOrEmpty(bacSi.DiaChi) ? "Chưa cập nhật" : bacSi.DiaChi
+                    }
+                });
+            }
+            catch
+            {
+                return Json(new { success = false });
+            }
+        }
 
         // ==================== HỒ SƠ ====================
         [HttpGet]
