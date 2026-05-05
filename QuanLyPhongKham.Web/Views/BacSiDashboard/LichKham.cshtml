@@ -391,31 +391,7 @@
             currentForm.find('.lyDoDoiInput').val(lyDo);
             currentForm.submit();
         });
-        
-        //         function xemTieuSu(id, loai) {
-        //     Tạo ra ID chính xác: ví dụ "tieusu-saptoi-5" hoặc "tieusu-lichsu-5"
-        //     let divId = "tieusu-" + loai + "-" + id;
-        //     let div = document.getElementById(divId);
-
-        //     if (!div) {
-        //         console.error("Không tìm thấy thẻ div: " + divId);
-        //         return;
-        //     }
-
-        //     Nếu đang ẩn thì hiện, đang hiện thì ẩn
-        //     if (div.style.display === "none" || div.classList.contains('hidden')) {
-        //         fetch(`/BacSiDashboard/TieuSuBenhNhan?id=${id}`)
-        //             .then(res => res.text())
-        //             .then(html => {
-        //                 div.innerHTML = html;
-        //                 div.style.display = "block"; Hiện ra
-        //                 div.classList.remove('hidden'); Xóa class ẩn nếu có
-        //             });
-        //     } else {
-        //         div.style.display = "none"; Ẩn đi
-        //         div.classList.add('hidden');
-        //     }
-        // }
+      
                 function xemTieuSu(buoiKhamId, benhNhanId, loai) {
 
             let divId = "tieusu-" + loai + "-" + buoiKhamId;
