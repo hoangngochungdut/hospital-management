@@ -8,15 +8,15 @@
     // Lấy ngày hiện tại để so sánh
     var today = DateOnly.FromDateTime(DateTime.Now);
 
-    // 1. Ca khám hôm nay
-    var lichHomNay = Model.Where(x => x.Ngay == today && (x.TrangThai == TrangThaiBuoiKham.ChuaXacNhan || x.TrangThai == TrangThaiBuoiKham.XacNhan))
-                          .OrderBy(x => x.Gio).ToList();
+    // Lấy cả ca hôm nay VÀ CÁC CA QUÁ HẠN MÀ BÁC SĨ QUÊN BẤM HOÀN THÀNH (Ngay <= today)
+    var lichHomNay = Model.Where(x => x.Ngay <= today && (x.TrangThai == TrangThaiBuoiKham.ChuaXacNhan || x.TrangThai == TrangThaiBuoiKham.XacNhan))
+                          .OrderBy(x => x.Ngay).ThenBy(x => x.Gio).ToList();
 
-    // 2. Ca khám sắp tới
+    // Ca khám sắp tới (Chỉ lấy tương lai)
     var lichSapToi = Model.Where(x => x.Ngay > today && (x.TrangThai == TrangThaiBuoiKham.ChuaXacNhan || x.TrangThai == TrangThaiBuoiKham.XacNhan))
                           .OrderBy(x => x.Ngay).ThenBy(x => x.Gio).ToList();
 
-    // 3. Lịch sử: Đã xong hoặc đã hủy
+    // Lịch sử: Đã xong hoặc đã hủy
     var lichSuKham = Model.Where(x => x.TrangThai == TrangThaiBuoiKham.HoanThanh || x.TrangThai == TrangThaiBuoiKham.Huy)
                           .OrderByDescending(x => x.Ngay).ThenByDescending(x => x.Gio).ToList();
 }
@@ -46,11 +46,11 @@
             </div>
         </div>
 
-        @* ================= PHẦN 1: CA KHÁM HÔM NAY ================= *@
+        @* ================= PHẦN 1: CA KHÁM CẦN XỬ LÝ (HÔM NAY + QUÁ HẠN) ================= *@
         <div class="mb-10">
             <h3 class="text-lg font-black text-emerald-600 uppercase tracking-wider mb-4 flex items-center gap-2">
                 <span class="w-3 h-3 bg-emerald-500 rounded-full animate-pulse"></span>
-                <span>Ca khám hôm nay</span>
+                <span>Ca khám cần xử lý</span>
                 <span class="bg-emerald-100 text-emerald-800 text-xs px-2.5 py-0.5 rounded-full ml-1">@lichHomNay.Count</span>
             </h3>
 
@@ -58,7 +58,7 @@
                 @if (!lichHomNay.Any())
                 {
                     <div class="text-center py-10">
-                        <p class="text-slate-400 italic">Hôm nay hiện chưa có ca khám nào.</p>
+                        <p class="text-slate-400 italic">Hiện không có ca khám nào cần xử lý.</p>
                     </div>
                 }
                 else
@@ -165,39 +165,53 @@
         
         foreach (var item in list)
         {
-            html.Append("<tr class='border-b border-slate-50 hover:bg-slate-50 transition-all align-top group'>");
-            html.Append($"<td class='py-5 px-5'><div class='text-slate-800 font-bold text-base'>{item.Ngay.ToString("dd/MM/yyyy")}</div><div class='text-blue-600 font-black text-sm mt-0.5'>{item.Gio.ToString("HH:mm")}</div></td>");
+            // Bôi đỏ nhẹ những ca quá hạn để bác sĩ chú ý
+            string rowClass = item.Ngay < today ? "bg-red-50/50 border-b border-red-50 hover:bg-red-50" : "border-b border-slate-50 hover:bg-slate-50";
+
+            html.Append($"<tr class='{rowClass} transition-all align-top group'>");
+            
+            html.Append($"<td class='py-5 px-5'>");
+            if (item.Ngay < today)
+            {
+                html.Append($"<div class='text-[10px] font-black text-red-500 uppercase mb-1'>⚠️ Quá hạn</div>");
+            }
+            html.Append($"<div class='text-slate-800 font-bold text-base'>{item.Ngay.ToString("dd/MM/yyyy")}</div><div class='text-blue-600 font-black text-sm mt-0.5'>{item.Gio.ToString("HH:mm")}</div></td>");
+            
             html.Append($"<td class='py-5 px-5'><div class='flex items-center gap-2'><a href='/BacSiDashboard/HoSoBenhNhan?benhNhanId={item.BenhNhanId}' class='font-bold text-slate-800 hover:text-blue-600 transition-colors text-lg'>{item.BenhNhan?.HoTen}</a><i class='fa fa-eye text-blue-500 cursor-pointer hover:text-blue-700 text-lg' onclick='xemTieuSu({item.BenhNhanId})'></i></div><div class='text-xs text-slate-500 font-medium mt-1'>SĐT: {item.BenhNhan?.Sdt}</div></td>");
-            html.Append($"<td class='py-5 px-5 text-center'><span class='bg-slate-100 text-slate-600 px-3 py-1.5 rounded-lg text-[11px] font-black border border-slate-200'>P.{item.PhongKham?.SoPhong}</span></td>");
+            html.Append($"<td class='py-5 px-5 text-center'><span class='bg-white text-slate-600 px-3 py-1.5 rounded-lg text-[11px] font-black border border-slate-200 shadow-sm'>P.{item.PhongKham?.SoPhong}</span></td>");
             html.Append("<td class='py-5 px-5'>");
             
             if (item.TrangThai == TrangThaiBuoiKham.ChuaXacNhan)
-                html.Append("<span class='bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-[10px] font-black uppercase'>Chờ xác nhận</span>");
+                html.Append("<span class='bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-[10px] font-black uppercase shadow-sm'>Chờ xác nhận</span>");
             else
-                html.Append("<span class='bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-[10px] font-black uppercase'>Đã xác nhận</span>");
+                html.Append("<span class='bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-[10px] font-black uppercase shadow-sm'>Đã xác nhận</span>");
             
             html.Append("</td><td class='py-5 px-5 w-[250px]'>");
 
-            // ================= LOGIC NÚT BẤM ĐÃ FIX CHUẨN =================
+            // ================= LOGIC NÚT BẤM =================
             if (item.TrangThai == TrangThaiBuoiKham.ChuaXacNhan)
             {
-                // 1. NẾU CHƯA XÁC NHẬN: Dù là hôm nay hay tương lai, CHỈ ĐƯỢC PHÉP DỜI LỊCH (Khóa cứng nút Hoàn Thành)
+                // CHƯA XÁC NHẬN: CHỈ ĐƯỢC PHÉP DỜI LỊCH VÀ HỦY LỊCH
                 html.Append("<div class='flex flex-col gap-2'>");
+                
+                // Form Dời lịch
                 html.Append("<form action='/BacSiDashboard/DoiLichKham' method='POST'>");
                 html.Append($"<input type='hidden' name='id' value='{item.Id}' />");
                 html.Append("<input type='hidden' name='ngayMoi' class='ngayMoiInput' value='' />");
                 html.Append("<input type='hidden' name='gioMoi' class='gioMoiInput' value='' />");
                 html.Append("<input type='hidden' name='lyDoDoi' class='lyDoDoiInput' value='' />");
-                html.Append("<button type='button' onclick='openMoveModal(this)' class='w-full bg-slate-100 text-slate-700 border border-slate-200 px-3 py-2 rounded-xl text-[11px] font-black hover:bg-slate-200 transition-all uppercase tracking-wider'>🕒 Dời lịch</button>");
+                html.Append("<button type='button' onclick='openMoveModal(this)' class='w-full bg-white text-slate-700 border border-slate-200 px-3 py-2 rounded-xl text-[11px] font-black hover:bg-slate-100 transition-all uppercase tracking-wider shadow-sm'>🕒 Dời lịch</button>");
                 html.Append("</form>");
+
+                // Form Hủy Lịch (MỚI THÊM)
+                html.Append($"<button type='button' onclick='openCancelModal({item.Id})' class='w-full bg-red-50 text-red-600 border border-red-200 px-3 py-2 rounded-xl text-[11px] font-black hover:bg-red-100 transition-all uppercase tracking-wider shadow-sm'>❌ Hủy ca khám</button>");
+
                 html.Append("</div>");
             }
             else if (item.TrangThai == TrangThaiBuoiKham.XacNhan)
             {
-                // 2. NẾU ĐÃ XÁC NHẬN: Kiểm tra xem có phải ngày hôm nay không
-                if (item.Ngay == today)
+                if (item.Ngay <= today)
                 {
-                    // Đã xác nhận + Hôm nay -> Mới hiện nút HOÀN THÀNH (và JS sẽ chặn nếu chưa đủ 15p)
                     DateTime thoiGianKham = item.Ngay.ToDateTime(item.Gio);
                     string isoTime = thoiGianKham.ToString("s");
 
@@ -208,9 +222,8 @@
                     html.Append($"<button type='button' onclick='checkAndOpenNoteModal(this, \"{isoTime}\")' class='w-full bg-green-500 text-white px-4 py-2.5 rounded-xl text-xs font-bold hover:bg-green-600 shadow-sm transition-all uppercase'><i class=\"fas fa-stethoscope mr-1\"></i> Hoàn thành</button>");
                     html.Append("</form>");
                 }
-                else if (item.Ngay > today)
+                else
                 {
-                    // Đã xác nhận + Lịch ở tương lai -> KHÔNG CHO DỜI LỊCH (Chốt sổ)
                     html.Append("<span class='text-slate-400 text-[11px] italic text-center w-full block py-2'>Đã chốt lịch, không thể dời</span>");
                 }
             }
@@ -251,6 +264,28 @@
                 <button type="button" id="btnSubmitMove" class="px-6 py-2.5 bg-orange-500 text-white font-bold rounded-xl uppercase text-xs">Lưu lịch mới</button>
             </div>
         </div>
+    </div>
+</div>
+
+<!-- Modal Hủy Lịch (MỚI THÊM) -->
+<div id="cancelModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center transition-all">
+    <div class="bg-white rounded-[24px] shadow-2xl w-full max-w-md overflow-hidden">
+        <form action="/BacSiDashboard/HuyLichKham" method="POST">
+            <input type="hidden" id="cancelModalId" name="id" />
+            <div class="bg-red-500 p-5 text-white flex justify-between items-center">
+                <h3 class="font-black text-lg uppercase">❌ Từ chối / Hủy ca khám</h3>
+                <button type="button" onclick="closeModal('cancelModal')" class="text-red-200 hover:text-white font-bold text-2xl">&times;</button>
+            </div>
+            <div class="p-6">
+                <label class="block text-xs font-black text-slate-500 uppercase mb-2">Lý do hủy (bắt buộc)</label>
+                <textarea name="lyDo" rows="3" class="w-full border-2 border-slate-200 rounded-xl p-3" placeholder="Ví dụ: Bác sĩ có lịch mổ đột xuất..." required></textarea>
+                
+                <div class="pt-4 flex justify-end gap-3">
+                    <button type="button" onclick="closeModal('cancelModal')" class="px-6 py-2.5 bg-slate-100 font-bold rounded-xl uppercase text-xs">Đóng</button>
+                    <button type="submit" class="px-6 py-2.5 bg-red-500 text-white font-bold rounded-xl uppercase text-xs hover:bg-red-600 shadow-md transition-all">Xác nhận Hủy</button>
+                </div>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -351,5 +386,11 @@
             currentForm.find('.lyDoDoiInput').val(lyDo);
             currentForm.submit();
         });
+
+        // --- KỊCH BẢN HỦY LỊCH MỚI THÊM ---
+        function openCancelModal(id) {
+            $('#cancelModalId').val(id);
+            $('#cancelModal').removeClass('hidden').addClass('flex');
+        }
     </script>
 }

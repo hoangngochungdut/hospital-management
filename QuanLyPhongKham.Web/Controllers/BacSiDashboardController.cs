@@ -83,7 +83,24 @@ namespace QuanLyPhongKham.Web.Controllers
 
             return RedirectToAction("LichKham");
         }
+        [HttpPost]
+        public IActionResult HuyLichKham(int id, string lyDo)
+        {
+            try
+            {
+                // Xử lý chuyển trạng thái sang Hủy và lưu lý do
+                bool isSuccess = _buoiKhamService.XulyCaKham(id, TrangThaiBuoiKham.Huy, lyDo, null);
 
+                if (isSuccess) TempData["ThongBao"] = "✅ Đã từ chối và hủy ca khám!";
+                else TempData["ThongBao"] = "❌ Lỗi: Không tìm thấy ca khám!";
+            }
+            catch (Exception ex)
+            {
+                TempData["ThongBao"] = "❌ Lỗi hủy lịch: " + ex.Message;
+            }
+
+            return RedirectToAction("LichKham");
+        }
         // ==================== HỒ SƠ ====================
         [HttpGet]
         public IActionResult ThongTinCaNhan()
