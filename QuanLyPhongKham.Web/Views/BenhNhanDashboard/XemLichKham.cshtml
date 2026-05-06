@@ -56,7 +56,7 @@
         }
         else
         {
-            @* ================= PHẦN 1 (MỚI THÊM): LỊCH HÔM NAY ================= *@
+            @* ================= PHẦN 1: LỊCH HÔM NAY ================= *@
             <div class="mb-10">
                 <h3 class="text-lg font-black text-emerald-600 uppercase tracking-wider mb-4 flex items-center gap-2">
                     <span class="w-3 h-3 bg-emerald-500 rounded-full animate-ping"></span>
@@ -111,7 +111,6 @@
                                             </div>
                                         }
                                         
-                                        @* ĐÃ SỬA: CHỈ CHƯA XÁC NHẬN MỚI CHO PHÉP HỦY / DỜI *@
                                         @if (item.TrangThai == TrangThaiBuoiKham.ChuaXacNhan)
                                         {
                                             <div class="flex gap-2">
@@ -189,7 +188,6 @@
                                             </div>
                                         }
                                         
-                                        @* ĐÃ SỬA: CHỈ CHƯA XÁC NHẬN MỚI CHO PHÉP HỦY / DỜI *@
                                         @if (item.TrangThai == TrangThaiBuoiKham.ChuaXacNhan)
                                         {
                                             <div class="flex gap-2">
@@ -268,8 +266,24 @@
                                         }
                                         else if (item.TrangThai == TrangThaiBuoiKham.HoanThanh)
                                         {
-                                            <div class="mb-3 text-xs text-slate-700 bg-blue-50 p-2 rounded-lg border border-blue-100">
-                                                <span class="font-bold text-blue-800">Kết luận:</span> @(item.GhiChuKetQua ?? "Chưa có ghi chú")
+                                            <!-- BỔ SUNG: KẾT QUẢ CHẨN ĐOÁN -->
+                                            <div class="mb-2 text-xs text-slate-800 bg-emerald-50 p-2.5 rounded-lg border border-emerald-200 shadow-sm">
+                                                <div class="font-bold text-emerald-700 flex items-center gap-1.5 mb-1">
+                                                    <i class="fas fa-stethoscope"></i> Chẩn đoán / Kết quả:
+                                                </div>
+                                                <div class="pl-5 leading-relaxed">
+                                                    @(item.KetQuaKham?.KetQua ?? "Đang cập nhật kết quả...")
+                                                </div>
+                                            </div>
+
+                                            <!-- LỜI DẶN -->
+                                            <div class="mb-4 text-xs text-slate-700 bg-blue-50 p-2.5 rounded-lg border border-blue-100 shadow-sm">
+                                                <div class="font-bold text-blue-800 flex items-center gap-1.5 mb-1">
+                                                    <i class="fas fa-notes-medical"></i> Lời dặn của bác sĩ:
+                                                </div>
+                                                <div class="pl-5 leading-relaxed">
+                                                    @(item.GhiChuKetQua ?? "Chưa có lời dặn")
+                                                </div>
                                             </div>
 
                                             if (item.DiemDanhGia == null)
@@ -290,8 +304,8 @@
                                             }
                                             else
                                             {
-                                                <div class="bg-orange-50 border border-orange-100 p-2 rounded-lg">
-                                                    <div class="text-xs mb-1" title="@item.DiemDanhGia Sao">
+                                                <div class="bg-orange-50 border border-orange-100 p-2.5 rounded-lg shadow-sm">
+                                                    <div class="text-xs mb-1.5" title="@item.DiemDanhGia Sao">
                                                         @string.Concat(Enumerable.Repeat("⭐", item.DiemDanhGia.Value))
                                                     </div>
                                                     <p class="text-[11px] text-slate-600 italic">"@item.NhanXetCuaBenhNhan"</p>

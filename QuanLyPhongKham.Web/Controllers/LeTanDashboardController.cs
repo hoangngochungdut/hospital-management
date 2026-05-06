@@ -83,7 +83,7 @@ namespace QuanLyPhongKham.Web.Controllers
                 TempData["ThongBao"] = "❌ Lỗi xác nhận: " + ex.Message;
             }
 
-            return RedirectToAction("LichKham");
+            return RedirectToAction("QuanLyLichKham");
         }
 
         [HttpPost]
@@ -107,9 +107,8 @@ namespace QuanLyPhongKham.Web.Controllers
         [HttpGet]
         public async Task<IActionResult> QuanLyLichKham()
         {
-            // Lấy toàn bộ danh sách để Lễ tân điều phối
             var danhSachLich = await _buoiKhamService.LayToanBoLichKhamAdminAsync();
-            return View(danhSachLich); // Trả về file QuanLyLichKham.cshtml
+            return View(danhSachLich); 
         }
 
         // ==================== AJAX ====================
