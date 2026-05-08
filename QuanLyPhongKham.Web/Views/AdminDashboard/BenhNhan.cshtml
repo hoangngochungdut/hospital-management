@@ -7,6 +7,8 @@
 }
 
 <div class="bg-white p-6 rounded-xl shadow border border-slate-200">
+
+    <!-- HEADER -->
     <div class="flex items-center justify-between mb-4">
         <h2 class="text-xl font-bold">Danh sách bệnh nhân</h2>
 
@@ -17,6 +19,7 @@
         </a>
     </div>
 
+    <!-- THÔNG BÁO -->
     @if (TempData["Success"] != null)
     {
         <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
@@ -31,6 +34,23 @@
         </div>
     }
 
+    <!-- BỘ LỌC -->
+    <div class="bg-slate-50 border border-slate-200 rounded-lg p-4 mb-5">
+
+        <div>
+            <label class="block text-sm font-medium text-slate-600 mb-1">
+                Tên bệnh nhân
+            </label>
+
+            <input type="text"
+                   id="filterTen"
+                   placeholder="Nhập tên bệnh nhân..."
+                   class="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-400" />
+        </div>
+
+    </div>
+
+    <!-- BẢNG -->
     <table class="w-full text-left">
         <thead>
             <tr class="border-b bg-slate-800 text-white">
@@ -44,35 +64,37 @@
         <tbody>
             @foreach (var bn in Model ?? new List<BenhNhan>())
             {
-                <tr class="border-b hover:bg-slate-50 transition-colors">
+                <tr class="border-b hover:bg-slate-50 transition-colors patient-row">
 
-                    <td class="py-3 px-2 font-bold text-blue-600">
+                    <!-- HỌ TÊN -->
+                    <td class="py-3 px-2 font-bold text-blue-600 patient-name">
                         @bn.HoTen
                     </td>
 
+                    <!-- ĐỊA CHỈ -->
                     <td class="py-3 px-2">
-                        @(string.IsNullOrWhiteSpace(bn.DiaChi) ? "Chưa có địa chỉ" : bn.DiaChi)
+                        @(string.IsNullOrWhiteSpace(bn.DiaChi)
+                            ? "Chưa có địa chỉ"
+                            : bn.DiaChi)
                     </td>
 
+                    <!-- SĐT -->
                     <td class="py-3 px-2">
-                        @(string.IsNullOrWhiteSpace(bn.Sdt) ? "Chưa có SĐT" : bn.Sdt)
+                        @(string.IsNullOrWhiteSpace(bn.Sdt)
+                            ? "Chưa có SĐT"
+                            : bn.Sdt)
                     </td>
 
+                    <!-- THAO TÁC -->
                     <td class="py-3 px-2">
                         <div class="flex items-center space-x-2">
-                            <a asp-controller="BenhNhan"
-                                   asp-action="LichKham"
-                                   asp-route-id="@bn.Id"
-                                   class="bg-yellow-50 text-yellow-600 border border-yellow-200 hover:bg-yellow-500 hover:text-white px-3 py-1.5 rounded text-sm transition-all font-medium">
-                                Lịch khám
-                            </a>
 
-                            <!-- Nút sửa -->
+                            <!-- Nút chi tiết -->
                             <a asp-controller="BenhNhan"
-                                   asp-action="Edit"
+                                   asp-action="ChiTiet"
                                    asp-route-id="@bn.Id"
-                                   class="bg-yellow-50 text-yellow-600 border border-yellow-200 hover:bg-yellow-500 hover:text-white px-3 py-1.5 rounded text-sm transition-all font-medium">
-                                Sửa
+                                   class="bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-500 hover:text-white px-3 py-1.5 rounded text-sm transition-all font-medium">
+                                Chi tiết
                             </a>
 
                             <!-- Nút xóa -->
@@ -98,3 +120,32 @@
         </tbody>
     </table>
 </div>
+
+<!-- SCRIPT FILTER -->
+<script>
+    const filterTen = document.getElementById("filterTen");
+
+    const rows = document.querySelectorAll(".patient-row");
+
+    function filterPatients() {
+
+        const tenValue = filterTen.value.toLowerCase();
+
+        rows.forEach(row => {
+
+            const ten = row.querySelector(".patient-name")
+                .innerText.toLowerCase();
+
+            const matchTen = ten.includes(tenValue);
+
+            if (matchTen) {
+                row.style.display = "";
+            }
+            else {
+                row.style.display = "none";
+            }
+        });
+    }
+
+    filterTen.addEventListener("input", filterPatients);
+</script>

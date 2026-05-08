@@ -27,6 +27,24 @@ namespace QuanLyPhongKham.Web.Controllers
         }
 
         [HttpGet]
+        public IActionResult ChiTiet(int id)
+        {
+            var bacSi = _bacSiService.GetByIdWithTaiKhoan(id);
+            if (bacSi == null)
+            {
+                return NotFound();
+            }
+
+            CapNhatHoSoBacSiRequest capNhatHoSoBacSi = new(bacSi);
+
+            ViewBag.DanhSachChuyenKhoa = _chuyenKhoaService.GetAll();
+            ViewBag.BacSiId = id;
+            ViewBag.TenChuyenKhoa = bacSi.ChuyenKhoa?.TenKhoa;
+            Console.WriteLine("Bac si id đang chon = " + ViewBag.BacSiId);
+            return View(capNhatHoSoBacSi);
+        }
+
+        [HttpGet]
         public IActionResult LichKham(int id)
         {
             //int? currentBacSiId = HttpContext.Session.GetInt32("UserId");

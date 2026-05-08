@@ -1,0 +1,104 @@
+﻿@model QuanLyPhongKham.Models.DTOs.CapNhatHoSoBenhNhanRequest
+
+@{
+    ViewData["Title"] = "Hồ sơ bệnh nhân";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="max-w-3xl mx-auto mt-6 bg-white rounded-xl shadow-lg overflow-hidden">
+
+    <!-- HEADER -->
+    <div class="bg-blue-600 px-6 py-4">
+        <h2 class="text-white text-lg font-semibold">
+            Hồ sơ bệnh nhân
+        </h2>
+    </div>
+
+    <!-- BODY -->
+    <div class="p-6 space-y-5">
+
+        <!-- Họ tên -->
+        <div>
+            <label class="block text-sm font-medium text-slate-500 mb-1">
+                Họ tên
+            </label>
+
+            <div class="w-full border border-slate-200 rounded-lg px-3 py-2 bg-slate-50">
+                @Model.HoTen
+            </div>
+        </div>
+
+        <!-- Giới tính -->
+        <div>
+            <label class="block text-sm font-medium text-slate-500 mb-1">
+                Giới tính
+            </label>
+
+            <div class="w-full border border-slate-200 rounded-lg px-3 py-2 bg-slate-50">
+                @Model.GioiTinh
+            </div>
+        </div>
+
+        <!-- Địa chỉ -->
+        <div>
+            <label class="block text-sm font-medium text-slate-500 mb-1">
+                Địa chỉ
+            </label>
+
+            <div class="w-full border border-slate-200 rounded-lg px-3 py-2 bg-slate-50 min-h-[80px]">
+                @Model.DiaChi
+            </div>
+        </div>
+
+        <!-- Số điện thoại -->
+        <div>
+            <label class="block text-sm font-medium text-slate-500 mb-1">
+                Số điện thoại
+            </label>
+
+            <div class="w-full border border-slate-200 rounded-lg px-3 py-2 bg-slate-50">
+                @Model.SoDienThoai
+            </div>
+        </div>
+
+        <!-- Email -->
+        <div>
+            <label class="block text-sm font-medium text-slate-500 mb-1">
+                Email
+            </label>
+
+            <div class="w-full border border-slate-200 rounded-lg px-3 py-2 bg-slate-50">
+                @Model.Email
+            </div>
+        </div>
+
+        <!-- ACTION -->
+        <div class="flex justify-end pt-6 border-t border-slate-100">
+
+            
+            <!-- Quay lại -->
+            <a asp-controller="AdminDashboard"
+                   asp-action="BenhNhan"
+                   class="bg-red-50 text-red-600 border border-red-200 hover:bg-red-500 hover:text-white px-3 py-1.5 rounded text-sm transition-all font-medium">
+                Quay lại
+            </a>
+
+            <!-- Nút lịch khám -->
+            <a asp-controller="BenhNhan"
+                   asp-action="LichKham"
+                   asp-route-id="@ViewBag.BenhNhanId"
+                   class="bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-500 hover:text-white px-3 py-1.5 rounded text-sm transition-all font-medium">
+                Lịch khám
+            </a>
+
+            <!-- Nút sửa -->
+            <a asp-controller="BenhNhan"
+                   asp-action="Edit"
+                   asp-route-id="@ViewBag.BenhNhanId"
+                   class="bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-500 hover:text-white px-3 py-1.5 rounded text-sm transition-all font-medium">
+                Sửa
+            </a>
+        </div>
+
+    </div>
+</div>

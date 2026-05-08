@@ -60,6 +60,21 @@
                 </select>
             </div>
 
+            <!-- Chuyên khoa -->
+            <div>
+                <label class="block font-medium mb-1">Chuyên khoa</label>
+                <select name="ChuyenKhoaId"
+                        class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                    @foreach (var ck in ViewBag.DanhSachChuyenKhoa)
+                    {
+                        <option value="@ck.Id"
+                                selected="@(Model?.ChuyenKhoaId == ck.Id)">
+                            @ck.TenKhoa
+                        </option>
+                    }
+                </select>
+            </div>
+
             <!-- Địa chỉ -->
             <div>
                 <label class="block font-medium mb-1">Địa chỉ</label>
@@ -80,7 +95,7 @@
                       class="text-red-500 text-sm"></span>
             </div>
 
-            <!-- SĐT -->
+            <!-- Email -->
             <div>
                 <label class="block font-medium mb-1">Email</label>
 
@@ -92,20 +107,6 @@
                       class="text-red-500 text-sm"></span>
             </div>
 
-            <!-- Chuyên khoa -->
-            <div>
-                <label class="block font-medium mb-1">Chuyên khoa</label>
-                <select name="ChuyenKhoaId"
-                        class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400">
-                    @foreach (var ck in ViewBag.DanhSachChuyenKhoa)
-                    {
-                        <option value="@ck.Id"
-                                selected="@(Model?.ChuyenKhoaId == ck.Id)">
-                            @ck.TenKhoa
-                        </option>
-                    }
-                </select>
-            </div>
 
             <!-- Button -->
             <div class="pt-2">
@@ -134,9 +135,10 @@
             </form>
 
             <!-- QUAY LẠI -->
-            <a href="@Url.Action("BacSi", "AdminDashboard")"
-                   class="px-5 py-2.5 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition font-medium flex items-center">
-                <i class="fas fa-times mr-2"></i>
+            <a asp-controller="BacSi"
+                   asp-action="ChiTiet"
+                   asp-route-id="@ViewBag.BacSiId"
+                   class="bg-red-50 text-red-600 border border-red-200 hover:bg-red-500 hover:text-white px-3 py-1.5 rounded text-sm transition-all font-medium">
                 Quay lại
             </a>
 

@@ -18,6 +18,21 @@ namespace QuanLyPhongKham.Web.Controllers
         }
 
         [HttpGet]
+        public IActionResult ChiTiet(int id)
+        {
+            var benhnhan = _benhNhanService.GetByIdWithTaiKhoan(id);
+            if (benhnhan == null)
+            {
+                return NotFound();
+            }
+
+            CapNhatHoSoBenhNhanRequest capNhatHoSoBenhNhan = new(benhnhan);
+
+            ViewBag.BenhNhanId = id;
+            return View(capNhatHoSoBenhNhan);
+        }
+
+        [HttpGet]
         public IActionResult LichKham(int id)
         {
             //int? currentId = HttpContext.Session.GetInt32("UserId");
