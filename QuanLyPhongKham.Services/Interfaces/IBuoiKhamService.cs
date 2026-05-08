@@ -41,12 +41,12 @@ namespace QuanLyPhongKham.Services.Interfaces
 
         // ==================== TRẠNG THÁI & DỜI LỊCH ====================
 
-        bool CapNhatTrangThai(
-            int id,
-            TrangThaiBuoiKham trangThaiMoi,
-            string? ghiChu = null
-        );
-
+        //bool CapNhatTrangThai(
+        //    int id,
+        //    TrangThaiBuoiKham trangThaiMoi,
+        //    string? ghiChu = null
+        //);
+        bool XulyCaKham(int id, TrangThaiBuoiKham trangThaiMoi, string? ghiChu = null, string? ketQuaKhamBenh = null);
         bool DoiLichKham(
             int id,
             DateOnly ngayMoi,
@@ -66,5 +66,9 @@ namespace QuanLyPhongKham.Services.Interfaces
             int soSao,
             string nhanXet
         );
+        bool DoiBacSi(int id,
+            int bacSiMoiId,
+            string lyDo);
+        bool XoaLichKham(int id);
     }
 }

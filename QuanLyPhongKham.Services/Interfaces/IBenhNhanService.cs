@@ -1,26 +1,39 @@
-﻿using QuanLyPhongKham.Models;
+using QuanLyPhongKham.Models;
 using QuanLyPhongKham.Models.DTOs;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace QuanLyPhongKham.Services.Interfaces
 {
-    public  interface IBenhNhanService
+    public interface IBenhNhanService
     {
-        // Lấy hồ sơ bệnh nhân theo NguoiDungId
+        // =========================
+        // HỒ SƠ
+        // =========================
         XemHoSoBenhNhanResponse? GetHoSo(int nguoiDungId);
-        //doi mat khau 
-        Task<IEnumerable<BenhNhan>> GetAllAsync();
         (bool Success, string Message) CapNhatHoSo(int nguoiDungId, CapNhatHoSoBenhNhanRequest request);
+
+        // =========================
+        // MẬT KHẨU
+        // =========================
         Task<(bool Success, string Message)> DoiMatKhau(int nguoiDungId, DoiMatKhauRequest request);
+
+        // =========================
+        // LẤY DANH SÁCH
+        // =========================
+        Task<IEnumerable<BenhNhan>> GetAllAsync();
         ICollection<BenhNhan> GetAll();
-        public void Add(AddBenhNhanDto entity);
-        public BenhNhan? GetById(int id);
+
+        // =========================
+        // TIỂU SỬ BỆNH NHÂN
+        // =========================
+        TieuSuBenhNhan GetTieuSu(int benhNhanId);
+
+        // =========================
+        // CRUD
+        // =========================
+        void Add(AddBenhNhanDto entity);
+        BenhNhan? GetById(int id);
         BenhNhan? GetByIdWithTaiKhoan(int id);
-        public void Update(int id, CapNhatHoSoBenhNhanRequest request);
-        public void Delete(int id);
-
-
+        void Update(int id, CapNhatHoSoBenhNhanRequest request);
+        void Delete(int id);
     }
 }

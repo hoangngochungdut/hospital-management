@@ -99,9 +99,26 @@ namespace QuanLyPhongKham.Repositories.Implementations
                     BacSiTen = "BS. " + l.BacSi.HoTen,
                     PhongId = l.PhongKhamId,
                     PhongTen = "Phòng " + l.PhongKham.SoPhong,
+                    LoaiPhong = l.PhongKham.LoaiPhong,
                     Ngay = l.Ngay.ToString("yyyy-MM-dd")
                 })
                 .ToListAsync();
+        }
+        public async Task<List<LichTruc>> GetLichTrucTuNgayAsync(int bacSiId, DateOnly tuNgay)
+        {
+            return await _context.LichTrucs
+                           .Include(l => l.PhongKham) // Nhớ Include để View lấy được Số phòng
+                           .Where(l => l.BacSiId == bacSiId && l.Ngay >= tuNgay)
+                           .OrderBy(l => l.Ngay)
+                           .ToListAsync();
+        }
+        public async Task<bool> XoaNhieuLichTrucAsync(List<int> ids)
+        {
+            var lichTrucs = await _context.LichTrucs.Where(l => ids.Contains(l.Id)).ToListAsync();
+            if (!lichTrucs.Any()) return false;
+
+            _context.LichTrucs.RemoveRange(lichTrucs);
+            return await _context.SaveChangesAsync() > 0;
         }
     }
 }

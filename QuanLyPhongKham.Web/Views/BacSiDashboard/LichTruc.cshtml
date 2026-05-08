@@ -1,0 +1,111 @@
+﻿@model IEnumerable<QuanLyPhongKham.Models.LichTruc>
+
+@{
+    Layout = "~/Views/Shared/_BacSiLayout.cshtml";
+    ViewData["Title"] = "Lịch Trực Của Tôi";
+
+    var today = DateOnly.FromDateTime(DateTime.Now);
+
+    // Phân loại dữ liệu theo đúng thuộc tính "Ngay" của Model
+    var trucHomNay = Model.Where(x => x.Ngay == today).ToList();
+    var trucSapToi = Model.Where(x => x.Ngay > today).ToList();
+}
+
+<div class="bg-slate-50 min-h-screen py-8 px-4">
+    <div class="max-w-7xl mx-auto">
+
+        <div class="flex justify-between items-center mb-8 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+            <div>
+                <h2 class="text-3xl font-black text-slate-800 uppercase tracking-tight">Lịch Trực Công Tác</h2>
+                <p class="text-slate-500 font-medium mt-1">Theo dõi thời gian và phòng trực của bạn</p>
+            </div>
+            <div class="text-right bg-blue-600 p-4 rounded-2xl shadow-lg shadow-blue-200">
+                <p class="text-[11px] text-blue-100 font-black uppercase tracking-widest mb-1 text-center">Hôm nay</p>
+                <p class="text-2xl text-white font-black">@DateTime.Now.ToString("dd/MM/yyyy")</p>
+            </div>
+        </div>
+
+        @* ================= PHẦN 1: TRỰC HÔM NAY ================= *@
+        <div class="mb-10">
+            <h3 class="text-lg font-black text-emerald-600 uppercase tracking-wider mb-4 flex items-center gap-2">
+                <span class="w-3 h-3 bg-emerald-500 rounded-full animate-pulse"></span>
+                <span>Ca Trực Hôm Nay</span>
+                <span class="bg-emerald-100 text-emerald-800 text-xs px-2.5 py-0.5 rounded-full ml-1">@trucHomNay.Count</span>
+            </h3>
+
+            <div class="bg-white p-2 rounded-2xl shadow-md border-2 border-emerald-100 overflow-hidden">
+                @if (!trucHomNay.Any())
+                {
+                    <div class="text-center py-10">
+                        <div class="text-5xl mb-3 opacity-50">☕</div>
+                        <p class="text-slate-400 font-bold">Hôm nay bác sĩ không có ca trực nào. Chúc một ngày nghỉ ngơi vui vẻ!</p>
+                    </div>
+                }
+                else
+                {
+                    @RenderBangLichTruc(trucHomNay, true)
+                }
+            </div>
+        </div>
+
+        @* ================= PHẦN 2: TRỰC SẮP TỚI ================= *@
+        <div class="mb-10">
+            <h3 class="text-lg font-black text-blue-700 uppercase tracking-wider mb-4 flex items-center gap-2">
+                <span>📅 Lịch Trực Sắp Tới</span>
+                <span class="bg-blue-100 text-blue-800 text-xs px-2.5 py-0.5 rounded-full ml-1">@trucSapToi.Count</span>
+            </h3>
+
+            <div class="bg-white p-2 rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                @if (!trucSapToi.Any())
+                {
+                    <div class="text-center py-10">
+                        <p class="text-slate-400 italic">Chưa có lịch phân công trực trong thời gian tới.</p>
+                    </div>
+                }
+                else
+                {
+                    @RenderBangLichTruc(trucSapToi, false)
+                }
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@* Helper Render Bảng Lịch Trực Đồng Bộ Code *@
+@functions {
+    public Microsoft.AspNetCore.Html.IHtmlContent RenderBangLichTruc(List<QuanLyPhongKham.Models.LichTruc> list, bool laHomNay)
+    {
+        var html = new System.Text.StringBuilder();
+        html.Append("<table class='w-full text-left'>");
+        html.Append("<tr class='border-b border-slate-100 bg-slate-50 text-slate-500 text-xs uppercase tracking-widest'><th class='py-4 px-6'>Ngày Trực</th><th class='py-4 px-6'>Phòng Phụ Trách</th><th class='py-4 px-6 text-right'>Trạng Thái</th></tr>");
+        
+        foreach (var item in list)
+        {
+            var bgClass = laHomNay ? "hover:bg-emerald-50/50" : "hover:bg-blue-50/50";
+            
+            html.Append($"<tr class='border-b border-slate-50 transition-all align-middle group {bgClass}'>");
+            
+            // Cột Ngày
+            html.Append($"<td class='py-5 px-6'><div class='text-slate-800 font-bold text-lg'>{item.Ngay.ToString("dd/MM/yyyy")}</div><div class='text-slate-400 font-medium text-xs mt-1'>{item.Ngay.ToString("dddd")}</div></td>");
+            
+            // 🔥 ĐÃ FIX LỖI CS0023: Dùng toán tử 3 ngôi (Ternary Operator) cho an toàn tuyệt đối 🔥
+            string tenPhong = item.PhongKham != null ? item.PhongKham.SoPhong.ToString() : "Chưa xếp";
+            html.Append($"<td class='py-5 px-6'><div class='flex items-center gap-3'><span class='w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 shadow-sm'><i class='fa fa-door-open'></i></span><span class='font-black text-slate-700 text-lg'>Phòng {tenPhong}</span></div></td>");
+            
+            // Cột Trạng Thái
+            html.Append("<td class='py-5 px-6 text-right'>");
+            if (laHomNay)
+            {
+                html.Append("<span class='bg-emerald-100 text-emerald-700 px-4 py-1.5 rounded-full text-xs font-black uppercase shadow-sm border border-emerald-200'>Đang trực</span>");
+            }
+            else
+            {
+                html.Append("<span class='bg-slate-100 text-slate-500 px-4 py-1.5 rounded-full text-xs font-black uppercase border border-slate-200'>Sắp tới</span>");
+            }
+            html.Append("</td></tr>");
+        }
+        html.Append("</table>");
+        return new Microsoft.AspNetCore.Html.HtmlString(html.ToString());
+    }
+}

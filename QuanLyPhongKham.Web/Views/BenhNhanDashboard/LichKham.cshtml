@@ -138,10 +138,10 @@
         // CHỌN KHOA -> TẢI DATA
         $('#ChuyenKhoaId').change(function () {
         let khoaId = $(this).val();
-                
+                                    
         $('#BacSiId').html('<option value="">-- Chọn khoa trước --</option>').prop('disabled', true).addClass('bg-slate-50 text-slate-400 cursor-not-allowed').removeClass('bg-white text-slate-900 border-blue-200');
         $('#PhongKhamId').html('<option value="">-- Chọn khoa trước --</option>').prop('disabled', true).addClass('bg-slate-50 text-slate-400 cursor-not-allowed').removeClass('bg-white text-slate-900 border-blue-200');
-                
+                                    
         datePicker.clear();
         datePicker.set("enable", [ function() { return false; } ]);
 
@@ -156,15 +156,19 @@
         $.get('/BuoiKham/GetLichKhamKhaDung?chuyenKhoaId=' + khoaId, function (res) {
         if (res.success && res.data.length > 0) {
         danhSachLich = res.data;
-                            
+                                                                                
         let listBs = [...new Map(danhSachLich.map(item => [item.bacSiId, item])).values()];
         let bsHtml = '<option value="">-- Chọn Bác Sĩ --</option>';
         listBs.forEach(b => { bsHtml += `<option value="${b.bacSiId}">BS. ${b.bacSiTen.replace(/^BS\.\s*/i, "")}</option>`; });
         $('#BacSiId').html(bsHtml).prop('disabled', false).removeClass('bg-slate-50 text-slate-400 cursor-not-allowed').addClass('bg-white text-slate-900 border-blue-200');
 
+        // 🔥 ĐÃ SỬA: Hiển thị Phòng kèm loại ⭐ VIP/Thường 🔥
         let listPhong = [...new Map(danhSachLich.map(item => [item.phongId, item])).values()];
         let pHtml = '<option value="">-- Chọn Phòng --</option>';
-        listPhong.forEach(p => { pHtml += `<option value="${p.phongId}">${p.phongTen}</option>`; });
+        listPhong.forEach(p => {
+        let labelLoai = (p.loaiPhong && p.loaiPhong.toUpperCase() === "VIP") ? "⭐ VIP" : "Thường";
+        pHtml += `<option value="${p.phongId}">${p.phongTen} (${labelLoai})</option>`;
+        });
         $('#PhongKhamId').html(pHtml).prop('disabled', false).removeClass('bg-slate-50 text-slate-400 cursor-not-allowed').addClass('bg-white text-slate-900 border-blue-200');
 
         capNhatLich();
@@ -207,19 +211,15 @@
         }
         }
 
-        // --- THUẬT TOÁN SINH GIỜ THEO ID KHOA ---
+        // LOGIC THỜI GIAN THEO KHOA (GIỮ NGUYÊN CỦA ÔNG)
         function xacDinhPhutMoiCa() {
         let khoaId = parseInt($('#ChuyenKhoaId').val());
         switch (khoaId) {
-        case 2: // Răng
-        case 6: // Răng Hàm Mặt
-        case 5: // Nhi
-        case 7: // Tai Mũi Họng
-        return 30;
-        case 8: // Da Liễu
-        return 20;
-        default:
-        return 60; // Nội (1), Ngoại (3), Nội tổng quát (4)...
+        case 8: return 15; // Da Liễu
+        case 7: return 20; // Tai Mũi Họng
+        case 1: case 3: case 4: case 5: return 30; // Nội, Ngoại, Nhi...
+        case 2: case 6: return 60; // Răng
+        default: return 30;
         }
         }
 
@@ -247,7 +247,7 @@
 
         $.get(`/BuoiKham/GetGioTrong?bacSiId=${bsId}&phongKhamId=${pId}&ngay=${ngay}`, function (res) {
         $('#ContainerGio').empty();
-                    
+                                            
         let phutMoiCa = xacDinhPhutMoiCa();
         const tatCaCaKham = taoDanhSachCaKham(phutMoiCa);
 
@@ -269,7 +269,7 @@
         $(document).on('click', '.btn-gio', function () {
         $('.btn-gio').removeClass('bg-blue-600 text-white border-blue-600 scale-105 shadow-md').addClass('bg-white text-blue-700 border-blue-200');
         $(this).removeClass('bg-white text-blue-700 border-blue-200').addClass('bg-blue-600 text-white border-blue-600 scale-105 shadow-md');
-                
+                                    
         let caKham = $(this).data('time');
         let gioCut = caKham.split(' - ')[0];
         $('#GioKhamValue').val(gioCut + ":00");

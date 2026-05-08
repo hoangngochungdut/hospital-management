@@ -1,0 +1,238 @@
+﻿@using QuanLyPhongKham.Models.Enums
+@model IEnumerable<QuanLyPhongKham.Models.BuoiKham>
+
+@{
+    Layout = "~/Views/Shared/_LeTanLayout.cshtml";
+    ViewData["Title"] = "Quản lý Lịch Khám";
+}
+
+<div class="bg-slate-50 min-h-screen py-10 px-4">
+    <div class="max-w-7xl mx-auto">
+        
+        <!-- HEADER -->
+        <div class="flex flex-col md:flex-row justify-between items-center mb-6 bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+            <div>
+                <h2 class="text-3xl font-black text-slate-800 uppercase tracking-tight">Quản Lý Lịch Khám</h2>
+                <p class="text-slate-500 mt-1 italic">Theo dõi, xác nhận và quản lý trạng thái đặt lịch của bệnh nhân.</p>
+            </div>
+            
+            <div class="mt-4 md:mt-0 flex gap-3">
+                <a href="@Url.Action("LichKham", "LeTanDashboard")" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold transition-all shadow-md hover:shadow-lg flex items-center">
+                    <i class="fas fa-plus mr-2"></i> Đặt lịch hộ
+                </a>
+            </div>
+        </div>
+
+        @if (TempData["ThongBao"] != null)
+        {
+            var msg = TempData["ThongBao"].ToString();
+            var isSuccess = msg.Contains("✅");
+            <div class="mb-6 p-4 rounded-xl font-bold border flex items-center shadow-sm @(isSuccess ? "bg-green-50 border-green-200 text-green-700" : "bg-red-50 border-red-200 text-red-700")">
+                @msg
+            </div>
+        }
+
+        <!-- BỘ LỌC TÌM KIẾM (JS FILTER) -->
+        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 mb-6 flex flex-col md:flex-row gap-4 items-center">
+            <div class="font-bold text-slate-700 flex items-center gap-2 w-full md:w-auto pr-4 md:border-r border-slate-200">
+                <i class="fas fa-filter text-blue-500"></i> Bộ lọc:
+            </div>
+            <div class="flex-1 w-full grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div class="relative">
+                    <i class="fas fa-user-injured absolute left-3 top-3 text-slate-400"></i>
+                    <input type="text" id="filterBenhNhan" placeholder="Tên / SĐT Bệnh nhân..." class="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-xl text-sm outline-none focus:border-blue-500 transition-colors" />
+                </div>
+                <div class="relative">
+                    <i class="fas fa-user-md absolute left-3 top-3 text-slate-400"></i>
+                    <input type="text" id="filterBacSi" placeholder="Tên Bác sĩ..." class="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-xl text-sm outline-none focus:border-blue-500 transition-colors" />
+                </div>
+                <div class="relative">
+                    <i class="fas fa-stethoscope absolute left-3 top-3 text-slate-400"></i>
+                    <input type="text" id="filterKhoa" placeholder="Chuyên khoa / Số phòng..." class="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-xl text-sm outline-none focus:border-blue-500 transition-colors" />
+                </div>
+            </div>
+        </div>
+
+        <!-- TABLE DANH SÁCH -->
+        <div class="bg-white rounded-3xl shadow-lg border border-slate-100 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-100 text-slate-500 text-xs uppercase tracking-widest border-b border-slate-200">
+                            <th class="p-4 font-black w-1/4">Bệnh Nhân</th>
+                            <th class="p-4 font-black w-1/4">Bác Sĩ & Chuyên Khoa</th>
+                            <th class="p-4 font-black">Thời Gian</th>
+                            <th class="p-4 font-black text-center">Trạng Thái</th>
+                            <th class="p-4 font-black text-right">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-sm" id="tableBody">
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var item in Model)
+                            {
+                                <tr class="border-b border-slate-50 hover:bg-slate-50 transition-colors filter-row align-top">
+                                    <!-- CỘT BỆNH NHÂN -->
+                                    <td class="p-4 col-benhnhan">
+                                        <div class="font-bold text-slate-800 text-base">@item.BenhNhan?.HoTen</div>
+                                        <div class="text-xs text-slate-500 font-medium mt-1">SĐT: @item.BenhNhan?.Sdt</div>
+                                    </td>
+
+                                    <!-- CỘT BÁC SÍ + KHOA + PHÒNG -->
+                                    <td class="p-4 col-bacsi">
+                                        <div class="font-bold text-blue-700 text-base">BS. @item.BacSi?.HoTen</div>
+                                        <div class="text-xs text-slate-500 font-bold mt-1">
+                                            Khoa: @(item.BacSi?.ChuyenKhoa?.TenKhoa ?? "Đang cập nhật")
+                                        </div>
+                                        <div class="text-[10px] bg-slate-100 inline-block px-2 py-0.5 rounded-md text-slate-600 mt-1.5 border border-slate-200 font-black tracking-wider">
+                                            P.@item.PhongKham?.SoPhong
+                                        </div>
+                                    </td>
+
+                                    <!-- CỘT THỜI GIAN -->
+                                    <td class="p-4">
+                                        <div class="font-black text-slate-700 text-lg">@item.Gio.ToString("HH:mm")</div>
+                                        <div class="text-xs text-slate-400 font-medium mt-0.5">@item.Ngay.ToString("dd/MM/yyyy")</div>
+                                    </td>
+                                    
+                                    <!-- CỘT TRẠNG THÁI -->
+                                    <td class="p-4 text-center">
+                                        @switch (item.TrangThai)
+                                        {
+                                            case TrangThaiBuoiKham.ChuaXacNhan:
+                                                <span class="bg-yellow-100 text-yellow-700 border border-yellow-200 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shadow-sm">⏳ Chờ xác nhận</span>
+                                                break;
+                                            case TrangThaiBuoiKham.XacNhan:
+                                                <span class="bg-blue-100 text-blue-700 border border-blue-200 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shadow-sm">✅ Đã xác nhận</span>
+                                                break;
+                                            case TrangThaiBuoiKham.HoanThanh:
+                                                <span class="bg-green-100 text-green-700 border border-green-200 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shadow-sm">🎉 Hoàn thành</span>
+                                                break;
+                                            case TrangThaiBuoiKham.Huy:
+                                                <span class="bg-red-100 text-red-700 border border-red-200 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shadow-sm">❌ Đã hủy</span>
+                                                break;
+                                        }
+                                    </td>
+
+                                    <!-- CỘT THAO TÁC (ĐÃ XÓA NÚT THÙNG RÁC) -->
+                                    <td class="p-4 text-right flex justify-end gap-2 items-center">
+                                        @if (item.TrangThai == TrangThaiBuoiKham.ChuaXacNhan)
+                                        {
+                                            <form asp-action="XacNhanLich" method="post" class="inline">
+                                                <input type="hidden" name="id" value="@item.Id" />
+                                                <button type="submit" onclick="return confirm('Bạn chắc chắn muốn XÁC NHẬN lịch này?');" class="bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white px-3 py-2 rounded-lg font-bold text-xs transition-all border border-blue-200 uppercase">
+                                                    Xác nhận
+                                                </button>
+                                            </form>
+                                            
+                                            <button type="button" onclick="openHuyModal(@item.Id)" class="bg-red-50 text-red-600 hover:bg-red-600 hover:text-white px-3 py-2 rounded-lg font-bold text-xs transition-all border border-red-200 uppercase">
+                                                Hủy
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <!-- Nếu trạng thái khác (Xác nhận, Hủy, Hoàn thành), chỉ hiện chữ Không khả dụng -->
+                                            <span class="text-slate-300 text-[11px] font-bold italic block w-full text-right py-2">Không khả dụng</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr id="noDataRow">
+                                <td colspan="5" class="p-10 text-center text-slate-400 italic">
+                                    Không có dữ liệu lịch khám nào trong hệ thống.
+                                </td>
+                            </tr>
+                        }
+                        
+                        <tr id="noFilterResult" class="hidden">
+                            <td colspan="5" class="p-10 text-center text-slate-400 italic font-bold">
+                                🔍 Không tìm thấy kết quả nào phù hợp với bộ lọc.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL LÝ DO HỦY LỊCH -->
+<div id="HuyModal" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center backdrop-blur-sm transition-opacity">
+    <div class="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl transform scale-95 transition-transform duration-300">
+        <h3 class="text-xl font-black text-red-600 mb-2">Hủy / Từ chối lịch khám</h3>
+        <p class="text-sm text-slate-500 mb-6">Vui lòng nhập lý do để thông báo cho bệnh nhân.</p>
+        
+        <form asp-action="HuyLichKham" method="post">
+            <input type="hidden" id="huyLichId" name="id" />
+            
+            <textarea name="lyDo" rows="3" required placeholder="Ví dụ: Bác sĩ bận đột xuất, Hết phòng khám..."
+                      class="w-full border-2 border-slate-200 p-3 rounded-xl outline-none focus:border-red-500 mb-6 text-sm"></textarea>
+            
+            <div class="flex justify-end gap-3">
+                <button type="button" onclick="closeHuyModal()" class="px-5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-xl transition-all text-sm uppercase">
+                    Đóng
+                </button>
+                <button type="submit" class="px-5 py-2 bg-red-500 hover:bg-red-600 text-white font-bold rounded-xl transition-all shadow-md text-sm uppercase">
+                    Xác nhận Hủy
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // === LOGIC MỞ ĐÓNG MODAL ===
+        function openHuyModal(id) {
+            $('#huyLichId').val(id);
+            $('#HuyModal').removeClass('hidden');
+            setTimeout(() => { $('#HuyModal > div').removeClass('scale-95').addClass('scale-100'); }, 10);
+        }
+
+        function closeHuyModal() {
+            $('#HuyModal > div').removeClass('scale-100').addClass('scale-95');
+            setTimeout(() => {
+                $('#HuyModal').addClass('hidden');
+                $('#huyLichId').val('');
+            }, 200);
+        }
+
+        // === LOGIC THANH LỌC ===
+        $(document).ready(function () {
+            function filterTable() {
+                let valBN = $('#filterBenhNhan').val().toLowerCase();
+                let valBS = $('#filterBacSi').val().toLowerCase();
+                let valKhoa = $('#filterKhoa').val().toLowerCase();
+                
+                let visibleCount = 0;
+
+                $('.filter-row').each(function () {
+                    let textBN = $(this).find('.col-benhnhan').text().toLowerCase();
+                    let textBS = $(this).find('.col-bacsi').text().toLowerCase();
+
+                    let matchBN = textBN.indexOf(valBN) > -1;
+                    let matchBS = textBS.indexOf(valBS) > -1;
+                    let matchKhoa = textBS.indexOf(valKhoa) > -1;
+
+                    if (matchBN && matchBS && matchKhoa) {
+                        $(this).show();
+                        visibleCount++;
+                    } else {
+                        $(this).hide();
+                    }
+                });
+
+                if (visibleCount === 0 && $('.filter-row').length > 0) {
+                    $('#noFilterResult').removeClass('hidden');
+                } else {
+                    $('#noFilterResult').addClass('hidden');
+                }
+            }
+
+            $('#filterBenhNhan, #filterBacSi, #filterKhoa').on('keyup', filterTable);
+        });
+    </script>
+}

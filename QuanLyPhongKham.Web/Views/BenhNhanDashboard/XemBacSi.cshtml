@@ -8,23 +8,45 @@
 <div class="bg-slate-50 min-h-screen py-10 px-4">
     <div class="max-w-6xl mx-auto">
         
-        <div class="mb-8">
-            <h2 class="text-3xl font-black text-slate-800 uppercase tracking-tight">Đội ngũ Bác sĩ</h2>
-            <p class="text-slate-500 mt-2">Xem thông tin và đánh giá thực tế từ các bệnh nhân đi trước để dễ dàng lựa chọn.</p>
+        <!-- HEADER VÀ Ô TÌM KIẾM -->
+        <div class="mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+            <div>
+                <h2 class="text-3xl font-black text-slate-800 uppercase tracking-tight">Đội ngũ Bác sĩ</h2>
+                <p class="text-slate-500 mt-2">Xem thông tin và đánh giá thực tế từ các bệnh nhân đi trước để dễ dàng lựa chọn.</p>
+            </div>
+            
+            <!-- Ô INPUT TÌM KIẾM -->
+            <div class="relative w-full md:w-96">
+                <i class="fas fa-search absolute left-4 top-3.5 text-slate-400"></i>
+                <input type="text" id="searchInput" placeholder="Tìm tên bác sĩ, hoặc chuyên khoa..."
+                       class="w-full bg-white border border-slate-200 text-slate-700 font-medium text-sm rounded-xl outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 block pl-10 p-3 shadow-sm transition-all" />
+            </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="doctorGrid">
             @foreach (var bs in Model)
             {
-                <div class="bg-white rounded-3xl shadow-lg border border-slate-100 overflow-hidden flex flex-col transition-all hover:shadow-xl hover:-translate-y-1">
+                /* THÊM class 'doctor-card' VÀ CÁC THUỘC TÍNH data-* ĐỂ JAVASCRIPT LỌC */
+                <div class="doctor-card bg-white rounded-3xl shadow-lg border border-slate-100 overflow-hidden flex flex-col transition-all hover:shadow-xl hover:-translate-y-1"
+                     data-name="@bs.TenBacSi.ToLower()"
+                     data-khoa="@bs.TenChuyenKhoa.ToLower()">
                     
                     <div class="p-6 border-b border-slate-100 relative overflow-hidden">
                         <div class="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-bl-full -z-10"></div>
                         
-                        <h3 class="text-xl font-bold text-slate-800">BS. @bs.TenBacSi</h3>
-                        <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider inline-block mt-2">
-                            Khoa @bs.TenChuyenKhoa
-                        </span>
+                        <!-- Tên bác sĩ thành nút bấm (Clickable) -->
+                        <h3 class="text-xl font-bold text-slate-800 cursor-pointer hover:text-blue-600 transition-colors inline-flex items-center gap-2"
+                            onclick="xemThongTinBacSi(@bs.BacSiId, '@bs.TenChuyenKhoa')"
+                            title="Xem chi tiết hồ sơ bác sĩ">
+                            BS. @bs.TenBacSi
+                            <i class="fas fa-info-circle text-sm text-blue-400 hover:text-blue-600"></i>
+                        </h3>
+                        
+                        <div class="block mt-2">
+                            <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider inline-block">
+                                Khoa @bs.TenChuyenKhoa
+                            </span>
+                        </div>
 
                         <div class="mt-5 flex items-center gap-4 bg-slate-50 p-3 rounded-2xl border border-slate-100">
                             <div class="text-4xl font-black text-orange-500">@bs.DiemTrungBinh</div>
@@ -80,9 +102,138 @@
                     </div>
                 </div>
             }
+            
+            <!-- THÔNG BÁO KHI TÌM KHÔNG THẤY -->
+            <div id="noResultsMessage" class="hidden text-center py-16 w-full col-span-full bg-white rounded-3xl border border-slate-100 shadow-sm">
+                <div class="text-5xl mb-4 opacity-50">🔍</div>
+                <h3 class="text-xl font-black text-slate-700">Không tìm thấy bác sĩ</h3>
+                <p class="text-slate-500 mt-2">Vui lòng thử tìm với tên hoặc chuyên khoa khác!</p>
+            </div>
+            
         </div>
     </div>
 </div>
+
+<!-- ================= MODAL XEM HỒ SƠ BÁC SĨ ================= -->
+<div id="bacSiModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+    <div class="bg-white rounded-[24px] shadow-2xl w-full max-w-md overflow-hidden transform transition-all scale-95 opacity-0 duration-300" id="bacSiModalContent">
+        <div class="bg-blue-600 p-5 text-white flex justify-between items-center">
+            <h3 class="font-black text-lg uppercase tracking-tight">Hồ Sơ Bác Sĩ</h3>
+            <button onclick="closeBacSiModal()" class="text-white/70 hover:text-white text-2xl font-bold">&times;</button>
+        </div>
+        <div class="p-6" id="bacSiModalBody">
+            <!-- Loading Spinner hiển thị trong lúc chờ gọi API -->
+            <div class="flex justify-center py-8">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            </div>
+        </div>
+        <div class="p-4 bg-slate-50 border-t flex justify-end gap-3">
+            <button onclick="closeBacSiModal()" class="px-6 py-2.5 bg-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-300 transition-all uppercase text-xs">Đóng lại</button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // HÀM LOẠI BỎ DẤU TIẾNG VIỆT ĐỂ TÌM KIẾM CHÍNH XÁC HƠN
+        function removeAccents(str) {
+            return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D');
+        }
+
+        // TÍNH NĂNG TÌM KIẾM TRỰC TIẾP TRÊN TRANG (FRONTEND)
+        $(document).ready(function() {
+            $('#searchInput').on('input', function() {
+                let keyword = removeAccents($(this).val().toLowerCase().trim());
+                let hasResult = false;
+
+                $('.doctor-card').each(function() {
+                    // Lấy dữ liệu từ data-name và data-khoa đã gắn ở HTML
+                    let name = removeAccents($(this).data('name'));
+                    let khoa = removeAccents($(this).data('khoa'));
+
+                    // Kiểm tra xem từ khóa có nằm trong tên hoặc chuyên khoa không
+                    if (name.includes(keyword) || khoa.includes(keyword)) {
+                        $(this).removeClass('hidden').addClass('flex');
+                        hasResult = true;
+                    } else {
+                        $(this).removeClass('flex').addClass('hidden');
+                    }
+                });
+
+                // Hiển thị/Ẩn thông báo "Không tìm thấy"
+                if (hasResult) {
+                    $('#noResultsMessage').addClass('hidden');
+                } else {
+                    $('#noResultsMessage').removeClass('hidden');
+                }
+            });
+        });
+
+        // Hàm mở Modal và gọi API lấy dữ liệu Bác sĩ
+        function xemThongTinBacSi(id, tenKhoa) {
+            $('#bacSiModal').removeClass('hidden').addClass('flex');
+            setTimeout(() => {
+                $('#bacSiModalContent').removeClass('scale-95 opacity-0').addClass('scale-100 opacity-100');
+            }, 10);
+
+            $('#bacSiModalBody').html('<div class="flex justify-center py-8"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>');
+
+            $.get('/BenhNhanDashboard/GetThongTinBacSi?id=' + id, function(res) {
+                if (res.success) {
+                    let d = res.data;
+                    let html = `
+                        <div class="text-center mb-6">
+                            <div class="w-20 h-20 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-3xl font-black mx-auto mb-3 shadow-inner">
+                                👨‍⚕️
+                            </div>
+                            <h4 class="text-xl font-black text-slate-800">${d.hoTen}</h4>
+                            <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-[10px] font-black uppercase mt-2 inline-block border border-blue-200">${tenKhoa}</span>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-4 p-3 bg-slate-50 rounded-xl border border-slate-100 hover:bg-white hover:shadow-sm transition-all">
+                                <div class="w-8 h-8 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center">
+                                    <i class="fas fa-venus-mars text-sm"></i>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-black text-slate-400 uppercase">Giới tính</p>
+                                    <p class="font-bold text-slate-700 text-sm">${d.gioiTinh}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-4 p-3 bg-slate-50 rounded-xl border border-slate-100 hover:bg-white hover:shadow-sm transition-all">
+                                <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-500 flex items-center justify-center">
+                                    <i class="fas fa-phone-alt text-sm"></i>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-black text-slate-400 uppercase">Số điện thoại</p>
+                                    <p class="font-bold text-slate-700 text-sm">${d.sdt}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-4 p-3 bg-slate-50 rounded-xl border border-slate-100 hover:bg-white hover:shadow-sm transition-all">
+                                <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-500 flex items-center justify-center">
+                                    <i class="fas fa-map-marker-alt text-sm"></i>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-black text-slate-400 uppercase">Địa chỉ công tác</p>
+                                    <p class="font-bold text-slate-700 text-sm">${d.diaChi}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    $('#bacSiModalBody').html(html);
+                } else {
+                    $('#bacSiModalBody').html('<div class="text-center text-red-500 py-6"><i class="fas fa-exclamation-triangle text-3xl mb-2"></i><p class="font-bold">Không thể tải thông tin bác sĩ!</p></div>');
+                }
+            });
+        }
+
+        function closeBacSiModal() {
+            $('#bacSiModalContent').removeClass('scale-100 opacity-100').addClass('scale-95 opacity-0');
+            setTimeout(() => {
+                $('#bacSiModal').addClass('hidden').removeClass('flex');
+            }, 300);
+        }
+    </script>
+}
 
 <style>
     .custom-scrollbar::-webkit-scrollbar {

@@ -6,6 +6,7 @@
         public string BacSiTen { get; set; }
         public int PhongId { get; set; }
         public string PhongTen { get; set; }
+        public string? LoaiPhong { get; set; }
         public string Ngay { get; set; } 
     }
 }

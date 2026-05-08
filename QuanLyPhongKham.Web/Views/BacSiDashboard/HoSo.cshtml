@@ -1,4 +1,4 @@
-﻿@model QuanLyPhongKham.Models.DTOs.XemHoSoBacSiResponse
+@model QuanLyPhongKham.Models.DTOs.XemHoSoBacSiResponse
 
 @{
     ViewData["Title"] = "Hồ sơ của tôi";
@@ -14,8 +14,7 @@
         </h2>
     </div>
 
-    <!-- BODY -->
-    <div class="p-6 space-y-4">
+    <div class="p-6 space-y-6">
 
         @if (TempData["Success"] != null)
         {
@@ -31,23 +30,19 @@
             </div>
         }
 
+        <!-- ================= FORM CẬP NHẬT ================= -->
         <form asp-action="CapNhatHoSo" asp-controller="BacSiDashboard" method="post" class="space-y-4">
             @Html.AntiForgeryToken()
 
-            <!-- Họ tên -->
             <div>
                 <label class="block font-medium mb-1">Họ tên *</label>
-                <input type="text"
-                       name="HoTen"
-                       value="@Model?.HoTen"
-                       class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" />
+                <input type="text" name="HoTen" value="@Model?.HoTen"
+                       class="w-full border rounded-lg px-3 py-2" />
             </div>
 
-            <!-- Giới tính -->
             <div>
                 <label class="block font-medium mb-1">Giới tính</label>
-                <select name="GioiTinh"
-                        class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                <select name="GioiTinh" class="w-full border rounded-lg px-3 py-2">
                     <option value="">--Chọn--</option>
                     <option value="Nam" selected="@(Model?.GioiTinh == "Nam")">Nam</option>
                     <option value="Nữ" selected="@(Model?.GioiTinh == "Nữ")">Nữ</option>
@@ -55,28 +50,21 @@
                 </select>
             </div>
 
-            <!-- SĐT -->
             <div>
-                <label class="block font-medium mb-1">Số điện thoại</label>
-                <input type="text"
-                       name="SoDienThoai"
-                       value="@Model?.SoDienThoai"
-                       class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" />
+                <label class="block font-medium mb-1">SĐT</label>
+                <input type="text" name="SoDienThoai" value="@Model?.SoDienThoai"
+                       class="w-full border rounded-lg px-3 py-2" />
             </div>
 
-            <!-- Địa chỉ -->
             <div>
                 <label class="block font-medium mb-1">Địa chỉ</label>
-                <textarea name="DiaChi"
-                          rows="3"
-                          class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400">@Model?.DiaChi</textarea>
+                <textarea name="DiaChi" rows="3"
+                          class="w-full border rounded-lg px-3 py-2">@Model?.DiaChi</textarea>
             </div>
 
-            <!-- Chuyên khoa -->
             <div>
                 <label class="block font-medium mb-1">Chuyên khoa</label>
-                <select name="ChuyenKhoaId"
-                        class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                <select name="ChuyenKhoaId" class="w-full border rounded-lg px-3 py-2">
                     @foreach (var ck in ViewBag.DanhSachChuyenKhoa)
                     {
                         <option value="@ck.Id"
@@ -87,53 +75,31 @@
                 </select>
             </div>
 
-            <!-- Button -->
-            <div class="pt-2">
-                <button type="submit"
-                        class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg">
-                    Lưu thông tin
-                </button>
-            
-            <div class="pt-6 border-t border-slate-200">
-                <h3 class="text-amber-600 font-bold mb-4 flex items-center text-lg">
-                    <i class="fas fa-key mr-2"></i> Đổi mật khẩu
-                </h3>
-                
-                <div class="space-y-4">
-                    <div class="grid grid-cols-1 md:grid-cols-3 items-center">
-                        <label class="text-slate-500 font-medium mb-1 md:mb-0">Mật khẩu cũ</label>
-                        <input type="password" name="MatKhauCu" placeholder="Mật khẩu cũ"
-                               class="md:col-span-2 w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-amber-100 focus:border-amber-500 outline-none transition" />
-                    </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-3 items-center">
-                        <label class="text-slate-500 font-medium mb-1 md:mb-0">Mật khẩu mới</label>
-                        <input type="password" name="MatKhauMoi" placeholder="Mật khẩu mới"
-                               class="md:col-span-2 w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-amber-100 focus:border-amber-500 outline-none transition" />
-                    </div>
+            <button type="submit"
+                    class="bg-blue-600 text-white px-5 py-2 rounded-lg">
+                Lưu thông tin
+            </button>
+        </form>
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 items-center">
-                        <label class="text-slate-500 font-medium mb-1 md:mb-0">Xác nhận MK mới</label>
-                        <input type="password" name="XacNhanMatKhauMoi" placeholder="Xác nhận mật khẩu"
-                               class="md:col-span-2 w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-amber-100 focus:border-amber-500 outline-none transition" />
-                    </div>
-                </div>
-            </div>
+        <!-- ================= FORM ĐỔI MẬT KHẨU ================= -->
+        <form asp-action="DoiMatKhau" asp-controller="BacSiDashboard" method="post" class="space-y-4">
+            @Html.AntiForgeryToken()
 
-            <div class="pt-6 border-t border-slate-100 flex flex-wrap gap-3 justify-end">
-                <a href="@Url.Action("ThongTinCaNhan", "BacSiDashboard")" class="px-5 py-2.5 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition font-medium flex items-center">
-                    <i class="fas fa-times mr-2"></i> Quay lại
-                </a>
-                
-                <button type="submit" class="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium flex items-center shadow-sm">
-                    <i class="fas fa-save mr-2"></i> Lưu thông tin
-                </button>
-                
-                <button type="submit" formaction="@Url.Action("DoiMatKhau", "BacSiDashboard")" class="px-5 py-2.5 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition font-medium flex items-center shadow-sm">
-                    <i class="fas fa-key mr-2"></i> Đổi mật khẩu
-                </button>
-            </div>
+            <h3 class="text-amber-600 font-bold">Đổi mật khẩu</h3>
 
+            <input type="password" name="MatKhauCu" placeholder="Mật khẩu cũ"
+                   class="w-full border rounded-lg px-3 py-2" />
+
+            <input type="password" name="MatKhauMoi" placeholder="Mật khẩu mới"
+                   class="w-full border rounded-lg px-3 py-2" />
+
+            <input type="password" name="XacNhanMatKhauMoi" placeholder="Xác nhận mật khẩu"
+                   class="w-full border rounded-lg px-3 py-2" />
+
+            <button type="submit"
+                    class="bg-amber-500 text-white px-5 py-2 rounded-lg">
+                Đổi mật khẩu
+            </button>
         </form>
 
     </div>

@@ -13,5 +13,7 @@ namespace QuanLyPhongKham.Services.Interfaces
         Task<bool> PhanCongNhieuNgayAsync(int bacSiId, int phongKhamId, List<DateOnly> danhSachNgay);
         Task<bool> XoaLichTrucAsync(int id);
         Task<List<LichKhaDungDto>> LayDanhSachLichKhaDungAsync(int chuyenKhoaId);
+        Task<List<LichTruc>> LayLichTrucTuHomNayAsync(int bacSiId);
+        Task<bool> XoaLichTheoDanhSachIdAsync(List<int> ids);
     }
 }

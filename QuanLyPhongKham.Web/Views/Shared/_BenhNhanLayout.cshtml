@@ -60,16 +60,13 @@
                     <i class="fas fa-calendar-plus w-5"></i>
                     <span>Đặt lịch khám</span>
                 </a>
-
-                @* <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all @(inactiveClass)">
-                    <i class="fas fa-notes-medical w-5"></i>
-                    <span>Xem tiểu sử</span>
-                </a> *@
                 
-                <a href="@Url.Action("XemBacSi", "BenhNhanDashboard")" class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all @(inactiveClass)">
+                <!-- 🔥 TÔI ĐÃ SỬA DÒNG NÀY: Thêm điều kiện để nút Xem Bác Sĩ hiện màu xanh -->
+                <a href="@Url.Action("XemBacSi", "BenhNhanDashboard")"
+                       class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all @(currentController == "BenhNhanDashboard" && currentAction == "XemBacSi" ? activeClass : inactiveClass)">
                     <i class="fas fa-user-md w-5"></i>
                     <span>Xem bác sĩ</span>
-                </a> 
+                </a>
             </nav>
 
             <div class="p-4 border-t border-slate-100">
@@ -86,7 +83,20 @@
                 <div class="flex items-center space-x-4 cursor-pointer hover:opacity-80 transition group">
                     <div class="text-right">
                         <h2 class="text-sm font-bold text-slate-800 leading-none">Giao diện cho Bệnh Nhân</h2>
-                        <p class="text-[10px] text-blue-600 font-bold uppercase mt-1.5 tracking-wider">BỆNH NHÂN</p>
+                        <!-- 🔥 TÔI ĐÃ TIỆN TAY GẮN LẠI CODE HIỆN TÊN BỆNH NHÂN LÊN GÓC PHẢI MÀN HÌNH -->
+                        <p class="text-[10px] text-blue-600 font-bold uppercase mt-1.5 tracking-wider">
+                            @if (User.Identity != null && User.Identity.IsAuthenticated)
+                            {
+                                var tenBenhNhan = User.Claims.FirstOrDefault(c => c.Type == "FullName" || c.Type == System.Security.Claims.ClaimTypes.Name)?.Value
+                                                  ?? User.Identity.Name
+                                                  ?? "BỆNH NHÂN";
+                                @tenBenhNhan
+                            }
+                            else
+                            {
+                                <text>BỆNH NHÂN</text>
+                            }
+                        </p>
                     </div>
                 </div>
             </header>
@@ -104,7 +114,6 @@
         event.preventDefault();
         const isConfirmed = confirm("Bạn có chắc chắn muốn đăng xuất?");
         if (isConfirmed) {
-        // Đảm bảo đường dẫn này đúng với Controller và Action Đăng xuất của ông
         window.location.href = "/Account/Logout";
         }
         }
