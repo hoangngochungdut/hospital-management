@@ -12,7 +12,8 @@ namespace QuanLyPhongKham.Web.Controllers
         private readonly IChuyenKhoaService _chuyenKhoaService;
         private readonly IBuoiKhamService _buoiKhamService;
         private readonly ILichTrucService _lichTrucService;
-        private readonly IPhongKhamService _phongKhamService;
+        private readonly IPhongKhamService _phongKhamService;   
+        private readonly ILeTanService _leTanService;
 
         public AdminDashboardController(
             IBuoiKhamService buoiKhamService,
@@ -20,7 +21,8 @@ namespace QuanLyPhongKham.Web.Controllers
             IBenhNhanService benhNhanService,
             IPhongKhamService phongKhamService,
             ILichTrucService lichTrucService,
-            IChuyenKhoaService chuyenKhoaService)
+            IChuyenKhoaService chuyenKhoaService,
+            ILeTanService leTanService)
         {
             _buoiKhamService = buoiKhamService;
             _chuyenKhoaService = chuyenKhoaService;
@@ -28,6 +30,7 @@ namespace QuanLyPhongKham.Web.Controllers
             _benhNhanService = benhNhanService;
             _phongKhamService = phongKhamService;
             _lichTrucService = lichTrucService;
+            _leTanService = leTanService;
         }
 
         // ==================== TỔNG QUAN ====================
@@ -55,9 +58,8 @@ namespace QuanLyPhongKham.Web.Controllers
             var danhSachLich = await _lichTrucService.LayTatCaLichTrucAsync();
             return View(danhSachLich);
         }
-        // 2. Hàm đón lõng dữ liệu
         [HttpPost]
-        [IgnoreAntiforgeryToken] // Phải có cái này để Ajax không bị văng lỗi bảo mật
+        [IgnoreAntiforgeryToken] 
         public async Task<IActionResult> ImportLichTrucExcel([FromBody] List<LichTrucImportDto> data)
         {
             if (data == null || !data.Any())
@@ -66,17 +68,14 @@ namespace QuanLyPhongKham.Web.Controllers
             }
 
             int countSuccess = 0;
-            int countTrach = 0; // Đếm số ca trùng lịch
+            int countTrach = 0; 
 
             foreach (var item in data)
             {
-                // Parse ngày "04/05/2026" từ JS sang kiểu DateOnly của ông
                 if (DateOnly.TryParseExact(item.Ngay, "dd/MM/yyyy", null, System.Globalization.DateTimeStyles.None, out DateOnly ngayTruc))
                 {
                     try
                     {
-                        // Tận dụng luôn hàm PhanCongBacSiAsync ông đã viết trong Service!
-                        // Hàm này của ông đã có sẵn trò check trùng, nếu trùng nó sẽ ném Exception
                         bool ketQua = await _lichTrucService.PhanCongBacSiAsync(item.BacSiId, item.PhongKhamId, ngayTruc);
                         if (ketQua)
                         {
@@ -85,7 +84,6 @@ namespace QuanLyPhongKham.Web.Controllers
                     }
                     catch (Exception)
                     {
-                        // Nếu Service ném Exception ("Bác sĩ đã có lịch..."), mình bắt lỗi ở đây và bỏ qua ca này
                         countTrach++;
                     }
                 }
@@ -160,7 +158,6 @@ namespace QuanLyPhongKham.Web.Controllers
         [HttpGet]
         public async Task<IActionResult> QuanLyLichKham(int? chuyenKhoaId, string? tenBacSi)
         {
-            // Vẫn lấy full data để Client JS tự do thanh lọc
             var ketQuaLoc = await _buoiKhamService.LayToanBoLichKhamAdminAsync(chuyenKhoaId, tenBacSi);
             return View(ketQuaLoc);
         }
@@ -203,13 +200,13 @@ namespace QuanLyPhongKham.Web.Controllers
             return RedirectToAction("QuanLyLichKham");
         }
 
-        // 🔥 ADMIN: XÓA CỨNG KHỎI DB (CHỈ ÁP DỤNG CHO LỊCH ĐÃ HỦY)
+        //  ADMIN: Xóa
         [HttpPost]
         public IActionResult XoaVinhVien(int id)
         {
             try
             {
-                _buoiKhamService.XoaLichKham(id); // Gọi hàm xóa cứng từ Service
+                _buoiKhamService.XoaLichKham(id); 
                 TempData["ThongBao"] = "✅ Đã xóa vĩnh viễn lịch khám khỏi hệ thống!";
             }
             catch (Exception ex)
@@ -245,24 +242,17 @@ namespace QuanLyPhongKham.Web.Controllers
         {
             try
             {
-                // 1. Gọi Service Bác sĩ (Hàm GetAll() ông đã viết sẵn trong BacSiService.cs)
-                // Nó trả về ICollection<BacSi> đã kèm Chuyên Khoa
                 var listBacSi = _bacSiService.GetAll();
-
-                // 2. Gọi Service Phòng (Giả sử ông có IPhongKhamService)
                 var listPhong = await _phongKhamService.GetAllAsync();
-
-                // 3. Map dữ liệu sang JSON để trả về cho Web
                 var bacSis = listBacSi.Select(b => new {
                     id = b.Id,
                     hoTen = b.HoTen,
-                    // b.ChuyenKhoa đã được Repo Include nên có thể lấy TenKhoa
                     khoa = b.ChuyenKhoa?.TenKhoa ?? "N/A"
                 });
 
                 var phongs = listPhong.Select(p => new {
                     id = p.Id,
-                    soPhong = p.SoPhong.ToString() // Trả về số phòng để user nhập 101, 102 cho dễ
+                    soPhong = p.SoPhong.ToString() 
                 });
 
                 return Json(new { success = true, bacSis = bacSis, phongs = phongs });
@@ -303,6 +293,11 @@ namespace QuanLyPhongKham.Web.Controllers
         {
             var tatCaChuyenKhoa = _chuyenKhoaService.GetAll();
             return View(tatCaChuyenKhoa);
+        }
+        public IActionResult LeTan()
+        {
+            var tatCaLeTan = _leTanService.GetAll();
+            return View(tatCaLeTan);
         }
     }
 }

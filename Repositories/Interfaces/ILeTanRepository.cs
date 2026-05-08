@@ -4,6 +4,7 @@ namespace QuanLyPhongKham.Repositories.Interfaces
 {
     public interface ILeTanRepository : IRepository<LeTan>
     {
-        //LeTan? GetByNguoiDungId(int nguoiDungId);
+        // Thêm dòng này vào trong interface ILeTanRepository
+        LeTan? GetByIdWithTaiKhoan(int id);
     }
 }

@@ -9,106 +9,117 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         body {
-        font-family: 'Inter', sans-serif;
-        }</style>
-    </head>
-    <body class="bg-[#f8fafc] text-slate-800 antialiased">
-
-        @{
-            var currentController = ViewContext.RouteData.Values["Controller"]?.ToString();
-            var currentAction = ViewContext.RouteData.Values["Action"]?.ToString();
-            var activeClass = "bg-blue-50 text-blue-600 font-bold border-r-4 border-blue-600 shadow-sm";
-            var inactiveClass = "text-slate-500 hover:bg-slate-50 hover:text-slate-700 font-medium";
+            font-family: 'Inter', sans-serif;
         }
+        /* Tùy chỉnh thanh cuộn cho menu */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="bg-[#f8fafc] text-slate-800 antialiased">
 
-        <div class="flex min-h-screen">
-            <aside class="w-64 bg-white border-r border-slate-200 hidden lg:flex flex-col sticky top-0 h-screen shadow-sm">
-                <div class="p-8">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-200">
-                            <i class="fas fa-plus-square text-lg"></i>
-                        </div>
-                        <span class="text-xl font-black tracking-tighter text-slate-800">PBL3<span class="text-blue-600">MED</span></span>
+    @{
+        var currentController = ViewContext.RouteData.Values["Controller"]?.ToString();
+        var currentAction = ViewContext.RouteData.Values["Action"]?.ToString();
+        var activeClass = "bg-blue-50 text-blue-600 font-bold border-r-4 border-blue-600 shadow-sm";
+        var inactiveClass = "text-slate-500 hover:bg-slate-50 hover:text-slate-700 font-medium";
+    }
+
+    <div class="flex min-h-screen">
+        <aside class="w-64 bg-white border-r border-slate-200 hidden lg:flex flex-col sticky top-0 h-screen shadow-sm">
+            <div class="p-8">
+                <div class="flex items-center space-x-3">
+                    <div class="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-200">
+                        <i class="fas fa-plus-square text-lg"></i>
+                    </div>
+                    <span class="text-xl font-black tracking-tighter text-slate-800">PBL3<span class="text-blue-600">MED</span></span>
+                </div>
+            </div>
+            
+            <!-- Đã thêm overflow-y-auto custom-scrollbar để sắp xếp gọn gàng -->
+            <nav class="flex-1 px-4 space-y-1 overflow-y-auto custom-scrollbar">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-4 mb-2">Chính</p>
+
+                <a href="@Url.Action("TongQuan", "AdminDashboard")"
+                   class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all @(currentController == "AdminDashboard" && currentAction == "TongQuan" ? activeClass : inactiveClass)">
+                    <i class="fas fa-chart-line w-5"></i>
+                    <span>Tổng quan</span>
+                </a>
+
+                <a href="@Url.Action("QuanLyLichKham", "AdminDashboard")" class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all @(currentController == "AdminDashboard" && currentAction == "QuanLyLichKham" ? activeClass : inactiveClass)">
+                    <i class="fas fa-calendar-alt w-5"></i>
+                    <span>Lịch Khám</span>
+                </a>
+
+                <a href="@Url.Action("LichTruc", "AdminDashboard")" class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all @(currentController == "AdminDashboard" && currentAction == "LichTruc" ? activeClass : inactiveClass)">
+                    <i class="fas fa-calendar-check w-5"></i>
+                    <span>Phân Công Lịch</span>
+                </a>
+
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-4 mt-6 mb-2">Nhân sự & Dữ liệu</p>
+
+                <a href="@Url.Action("LeTan", "AdminDashboard")" class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all @(currentAction == "LeTan" || currentController == "LeTan" ? activeClass : inactiveClass)">
+                    <i class="fas fa-user-tie w-5"></i>
+                    <span>Lễ Tân</span>
+                </a>
+
+                <a href="@Url.Action("BacSi", "AdminDashboard")" class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all @(currentAction == "BacSi" || currentController == "BacSi" ? activeClass : inactiveClass)">
+                    <i class="fas fa-user-md w-5"></i>
+                    <span>Bác Sĩ</span>
+                </a>
+
+                <a href="@Url.Action("BenhNhan", "AdminDashboard")" class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all @(currentAction == "BenhNhan" || currentController == "BenhNhan" ? activeClass : inactiveClass)">
+                    <i class="fas fa-user-injured w-5"></i>
+                    <span>Bệnh Nhân</span>
+                </a>
+                <a href="@Url.Action("ChuyenKhoa", "AdminDashboard")" class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all @(currentAction == "ChuyenKhoa" || currentController == "ChuyenKhoa" ? activeClass : inactiveClass)">
+                    <i class="fas fa-stethoscope w-5"></i>
+                    <span>Chuyên khoa</span>
+                </a>
+            </nav>
+
+            <div class="p-4 border-t border-slate-100">
+                <a href="#" onclick="handleLogout(event)" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-red-500 hover:bg-red-50 transition cursor-pointer">
+                    <i class="fas fa-sign-out-alt w-5"></i>
+                    <span class="font-semibold">Đăng Xuất</span>
+                </a>
+            </div>
+        </aside>
+
+        <main class="flex-1 flex flex-col relative">
+            <header class="w-full px-8 py-6 flex justify-end items-center bg-transparent">
+                <div class="flex items-center space-x-4 cursor-pointer hover:opacity-80 transition group">
+                    <div class="text-right">
+                        <h2 class="text-sm font-bold text-slate-800 leading-none">Admin</h2>
+                        <p class="text-[10px] text-blue-600 font-bold uppercase mt-1.5 tracking-wider">Quản Trị Viên</p>
+                    </div>
+                    <div class="relative">
+                        <img src="https://ui-avatars.com/api/?name=Admin&background=2563eb&color=fff" class="w-10 h-10 rounded-xl object-cover shadow-sm border border-slate-200 transition-all group-hover:border-blue-400" alt="Avatar">
+                        <div class="absolute bottom-[-2px] right-[-2px] w-3.5 h-3.5 bg-green-500 border-2 border-[#f8fafc] rounded-full"></div>
                     </div>
                 </div>
-                    <nav class="flex-1 px-4 space-y-1">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-4 mb-2">Chính</p>
+            </header>
 
-                        <a href="@Url.Action("TongQuan", "AdminDashboard")"
-                               class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all @(currentController == "AdminDashboard" && currentAction == "TongQuan" ? activeClass : inactiveClass)">
-                            <i class="fas fa-chart-line w-5"></i>
-                            <span>Tổng quan</span>
-                        </a>
-    
-                        <a href="@Url.Action("QuanLyLichKham", "AdminDashboard")" class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all @(currentController == "AdminDashboard" && currentAction == "QuanLyLichKham" ? activeClass : inactiveClass)">
-                            <i class="fas fa-calendar-alt w-5"></i>
-                            <span>Lịch Khám</span>
-                        </a>
+            <div id="main-app-content" class="flex-1 w-full h-full p-8">
+                @RenderBody()
+            </div>
+        </main>
+    </div>
 
-                        <a href="@Url.Action("LichTruc", "AdminDashboard")" class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all @(currentController == "AdminDashboard" && currentAction == "LichTruc" ? activeClass : inactiveClass)">
-                            <i class="fas fa-calendar-check w-5"></i>
-                            <span>Phân Công Lịch</span>
-                        </a>
-    
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-4 mt-6 mb-2">Nhân sự & Dữ liệu</p>
-    
-                        <a href="@Url.Action("LeTan", "AdminDashboard")" class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all @(currentController == "AdminDashboard" && currentAction == "LeTan" ? activeClass : inactiveClass)">
-                            <i class="fas fa-user-tie w-5"></i>
-                            <span>Lễ Tân</span>
-                        </a>
-    
-                        <a href="@Url.Action("BacSi", "AdminDashboard")" class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all @(currentController == "AdminDashboard" && currentAction == "BacSi" ? activeClass : inactiveClass)">
-                            <i class="fas fa-user-md w-5"></i>
-                            <span>Bác Sĩ</span>
-                        </a>
-    
-                        <a href="@Url.Action("ChuyenKhoa", "AdminDashboard")" class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all @(currentController == "AdminDashboard" && currentAction == "ChuyenKhoa" ? activeClass : inactiveClass)">
-                            <i class="fas fa-stethoscope w-5"></i>
-                            <span>Chuyên khoa</span>
-                        </a>
-    
-                        <a href="@Url.Action("BenhNhan", "AdminDashboard")" class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all @(currentController == "AdminDashboard" && currentAction == "BenhNhan" ? activeClass : inactiveClass)">
-                            <i class="fas fa-user-injured w-5"></i>
-                            <span>Bệnh Nhân</span>
-                        </a>
-                    </nav>
-
-                <div class="p-4 border-t border-slate-100">
-                    <a href="#" onclick="handleLogout(event)" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-red-500 hover:bg-red-50 transition cursor-pointer">
-                        <i class="fas fa-sign-out-alt w-5"></i>
-                        <span class="font-semibold">Đăng Xuất</span>
-                    </a>
-                </div>
-            </aside>
-
-            <main class="flex-1 flex flex-col relative">
-                <header class="w-full px-8 py-6 flex justify-end items-center bg-transparent">
-                    <div class="flex items-center space-x-4 cursor-pointer hover:opacity-80 transition group">
-                        <div class="text-right">
-                            <h2 class="text-sm font-bold text-slate-800 leading-none">Admin</h2>
-                            <p class="text-[10px] text-blue-600 font-bold uppercase mt-1.5 tracking-wider">Quản Trị Viên</p>
-                        </div>
-                        <div class="relative">
-                            <img src="https://ui-avatars.com/api/?name=Admin&background=2563eb&color=fff" class="w-10 h-10 rounded-xl object-cover shadow-sm border border-slate-200 transition-all group-hover:border-blue-400" alt="Avatar">
-                            <div class="absolute bottom-[-2px] right-[-2px] w-3.5 h-3.5 bg-green-500 border-2 border-[#f8fafc] rounded-full"></div>
-                        </div>
-                    </div>
-                </header>
-
-                <div id="main-app-content" class="flex-1 w-full h-full p-8">
-                    @RenderBody()
-                </div>
-            </main>
-        </div>
-    
-        <script>
-            function handleLogout(event) {
+    <script>
+        function handleLogout(event) {
             event.preventDefault();
             if (confirm("Bạn có chắc chắn muốn đăng xuất?")) {
-            window.location.href = "/Account/Logout"; // Đổi thành action Logout cho chuẩn bảo mật
+                window.location.href = "/Account/Logout"; 
             }
-            }
-        </script>
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        @await RenderSectionAsync("Scripts", required: false)
-    </body></html>
+        }
+    </script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

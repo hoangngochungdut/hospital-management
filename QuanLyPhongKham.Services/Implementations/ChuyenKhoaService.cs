@@ -30,32 +30,6 @@ namespace QuanLyPhongKham.Services.Implementations
             _chuyenKhoaRepository.Delete(chuyenKhoa);
         }
 
-        //public bool DeleteC(int id, out string message)
-        //{
-        //    var chuyenKhoa = _chuyenKhoaRepo.GetById(id);
-
-        //    if (chuyenKhoa == null)
-        //    {
-        //        message = "Không tìm thấy chuyên khoa";
-        //        return false;
-        //    }
-
-        //    // kiểm tra có bác sĩ thuộc chuyên khoa này không
-        //    var coBacSi = _bacSiRepo.Any(bs => bs.ChuyenKhoaId == id);
-
-        //    if (coBacSi)
-        //    {
-        //        message = "Không thể xóa vì vẫn còn bác sĩ thuộc chuyên khoa này";
-        //        return false;
-        //    }
-
-        //    _chuyenKhoaRepo.Delete(chuyenKhoa);
-        //    _chuyenKhoaRepo.Save();
-
-        //    message = "Xóa thành công";
-        //    return true;
-        //}
-
         public ICollection<ChuyenKhoa> GetAll()
         {
             return _chuyenKhoaRepository.GetAll();

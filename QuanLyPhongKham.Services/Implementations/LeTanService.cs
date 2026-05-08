@@ -1,9 +1,10 @@
-﻿using QuanLyPhongKham.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using QuanLyPhongKham.Data;
 using QuanLyPhongKham.Models;
 using QuanLyPhongKham.Models.DTOs;
+using QuanLyPhongKham.Repositories.Implementations;
 using QuanLyPhongKham.Repositories.Interfaces;
 using QuanLyPhongKham.Services.Interfaces;
-using Microsoft.EntityFrameworkCore;
 
 namespace QuanLyPhongKham.Services.Implementations
 {
@@ -11,39 +12,15 @@ namespace QuanLyPhongKham.Services.Implementations
     {
         private readonly INguoiDungRepository _nguoiDungRepo;
         private readonly ITaiKhoanRepository _taiKhoanRepo;
-        //private readonly AppDbContext _context;
+        private readonly ILeTanRepository _letanRepository;
 
-        public LeTanService(INguoiDungRepository nguoiDungRepo, ITaiKhoanRepository taiKhoanRepo)
+        public LeTanService(INguoiDungRepository nguoiDungRepo, ITaiKhoanRepository taiKhoanRepo, ILeTanRepository letanRepository)
         {
             _nguoiDungRepo = nguoiDungRepo;
             _taiKhoanRepo = taiKhoanRepo;
+            _letanRepository = letanRepository;
         }
 
-        
-        //public async Task<IEnumerable<object>> SearchBenhNhanAsync(string term)
-        //{
-        //    if (string.IsNullOrWhiteSpace(term))
-        //    {
-        //        return new List<object>();
-        //    }
-
-        //    var lowerTerm = term.ToLower();
-
-        //    // LƯU Ý: Nếu Bệnh Nhân của ông kế thừa Người Dùng giống như Bác Sĩ, 
-        //    // ông gọi thẳng thuộc tính HoTen và Sdt như bên dưới.
-        //    var benhNhans = await _context.BenhNhans
-        //        .Where(b => b.HoTen.ToLower().Contains(lowerTerm) || b.Sdt.Contains(lowerTerm))
-        //        .Select(b => new
-        //        {
-        //            id = b.Id,
-        //            hoTen = b.HoTen,
-        //            sdt = b.Sdt
-        //        })
-        //        .Take(10) // Giới hạn trả về 10 người cho nhẹ Web
-        //        .ToListAsync();
-
-        //    return benhNhans;
-        //}
         public XemHoSoLeTanResponse? GetHoSo(int nguoiDungId)
         {
             var nguoiDung = _nguoiDungRepo.GetById(nguoiDungId);
@@ -85,7 +62,6 @@ namespace QuanLyPhongKham.Services.Implementations
         {
             try
             {
-                // ✅ Lấy từ repository (KHÔNG dùng _context nữa)
                 var taiKhoan = _taiKhoanRepo.GetByNguoiDungId(nguoiDungId);
 
                 if (taiKhoan == null)
@@ -94,10 +70,7 @@ namespace QuanLyPhongKham.Services.Implementations
                 if (taiKhoan.MatKhauHash != request.MatKhauCu)
                     return (false, "Mật khẩu cũ không đúng");
 
-                // ✅ Cập nhật mật khẩu
                 taiKhoan.MatKhauHash = request.MatKhauMoi;
-
-                // ✅ Lưu qua repository
                 _taiKhoanRepo.Update(taiKhoan);
 
                 return (true, "Đổi mật khẩu thành công!");
@@ -105,6 +78,64 @@ namespace QuanLyPhongKham.Services.Implementations
             catch (Exception ex)
             {
                 return (false, $"Lỗi: {ex.Message}");
+            }
+        }
+
+        public ICollection<LeTan> GetAll()
+        {
+            return _letanRepository.GetAll();
+        }
+
+        public LeTan? GetByIdWithTaiKhoan(int id)
+        {
+            return _letanRepository.GetByIdWithTaiKhoan(id);
+        }
+
+        public void Add(AddLeTanDto model)
+        {
+            // 1. Tạo tài khoản trước (Đã đổi thành MatKhauHash cho chuẩn logic của ông)
+            var taiKhoanMoi = new TaiKhoan
+            {
+                TenDangNhap = model.TenDangNhap,
+                MatKhauHash = model.MatKhau,
+                VaiTro = "LT"
+            };
+
+            // 2. Tạo Lễ tân và nhét cái Tài khoản vào
+            var leTanMoi = new LeTan
+            {
+                HoTen = model.HoTen,
+                GioiTinh = model.GioiTinh,
+                Sdt = model.SoDienThoai,
+                Email = model.Email,
+                DiaChi = model.DiaChi,
+                TaiKhoan = taiKhoanMoi
+            };
+
+            _letanRepository.Add(leTanMoi);
+        }
+
+        public void Update(int id, CapNhatHoSoLeTanRequest model)
+        {
+            var leTan = _letanRepository.GetById(id);
+            if (leTan != null)
+            {
+                leTan.HoTen = model.HoTen;
+                leTan.GioiTinh = model.GioiTinh;
+                leTan.Sdt = model.SoDienThoai;
+                leTan.Email = model.Email;
+                leTan.DiaChi = model.DiaChi;
+
+                _letanRepository.Update(leTan);
+            }
+        }
+
+        public void Delete(int id)
+        {
+            var leTan = _letanRepository.GetById(id);
+            if (leTan != null)
+            {
+                _letanRepository.Delete(leTan);
             }
         }
     }

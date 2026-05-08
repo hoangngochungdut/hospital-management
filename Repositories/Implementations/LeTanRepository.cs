@@ -35,6 +35,13 @@ namespace QuanLyPhongKham.Repositories.Implementations
             return _context.LeTans.FirstOrDefault(x => x.Id == nguoiDungId);
         }
 
+        public LeTan? GetByIdWithTaiKhoan(int id)
+        {
+            return _context.LeTans
+                           .Include(x => x.TaiKhoan) 
+                           .FirstOrDefault(x => x.Id == id);
+        }
+
         public void Update(LeTan entity)
         {
             _context.LeTans.Update(entity);
@@ -46,6 +53,5 @@ namespace QuanLyPhongKham.Repositories.Implementations
             _context.LeTans.Remove(entity);
             _context.SaveChanges();
         }
-
     }
 }

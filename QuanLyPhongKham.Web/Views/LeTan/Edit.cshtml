@@ -1,0 +1,126 @@
+﻿@model QuanLyPhongKham.Models.DTOs.CapNhatHoSoLeTanRequest
+
+@{
+    ViewData["Title"] = "Sửa hồ sơ lễ tân";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="max-w-3xl mx-auto mt-6 bg-white rounded-xl shadow-lg overflow-hidden">
+
+    <!-- HEADER -->
+    <div class="bg-blue-600 px-6 py-4">
+        <h2 class="text-white text-lg font-semibold">
+            Sửa hồ sơ lễ tân
+        </h2>
+    </div>
+
+    <!-- BODY -->
+    <div class="p-6 space-y-4">
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="bg-green-100 text-green-700 px-4 py-2 rounded">
+                @TempData["Success"]
+            </div>
+        }
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="bg-red-100 text-red-700 px-4 py-2 rounded">
+                @TempData["Error"]
+            </div>
+        }
+
+        <form asp-action="Edit" asp-controller="LeTan" method="post" class="space-y-4">
+            @Html.AntiForgeryToken()
+
+            <input type="hidden" name="id" value="@ViewBag.LeTanId" />
+
+            <!-- Họ tên -->
+            <div>
+                <label class="block font-medium mb-1">Họ tên</label>
+                <input asp-for="HoTen"
+                       type="text"
+                       class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" />
+                <span asp-validation-for="HoTen" class="text-red-500 text-sm"></span>
+            </div>
+
+            <!-- Giới tính -->
+            <div>
+                <label class="block font-medium mb-1">Giới tính</label>
+                <select asp-for="GioiTinh"
+                        class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                    <option value="">--Chọn--</option>
+                    <option value="Nam">Nam</option>
+                    <option value="Nữ">Nữ</option>
+                    <option value="Khác">Khác</option>
+                </select>
+            </div>
+
+            <!-- Địa chỉ -->
+            <div>
+                <label class="block font-medium mb-1">Địa chỉ</label>
+                <textarea asp-for="DiaChi"
+                          rows="3"
+                          class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"></textarea>
+            </div>
+
+            <!-- SĐT -->
+            <div>
+                <label class="block font-medium mb-1">Số điện thoại</label>
+                <input asp-for="SoDienThoai"
+                       type="text"
+                       class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" />
+                <span asp-validation-for="SoDienThoai" class="text-red-500 text-sm"></span>
+            </div>
+
+            <!-- PHỤC HỒI: Email -->
+            <div>
+                <label class="block font-medium mb-1">Email</label>
+                <input asp-for="Email"
+                       type="email"
+                       class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" />
+                <span asp-validation-for="Email" class="text-red-500 text-sm"></span>
+            </div>
+
+            <!-- Button -->
+            <div class="pt-2">
+                <div class="flex gap-3">
+                    <button type="submit"
+                            class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg">
+                        Lưu thông tin
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        <!-- KHU VỰC RESET MẬT KHẨU & QUAY LẠI -->
+        <div class="flex flex-wrap gap-3 items-center justify-end pt-6 border-t border-slate-100">
+
+            <!-- RESET PASSWORD FORM -->
+            <form asp-action="ResetMatKhau" asp-controller="LeTan" method="post">
+                <input type="hidden" name="leTanId" value="@ViewBag.LeTanId" />
+
+                <button type="submit" onclick="return confirm('Bạn có chắc chắn muốn reset mật khẩu của Lễ tân này về mặc định?');"
+                        class="bg-amber-500 hover:bg-amber-600 text-white px-5 py-2 rounded-lg transition">
+                    Reset mật khẩu
+                </button>
+            </form>
+
+            <!-- QUAY LẠI -->
+            <a asp-controller="LeTan"
+                   asp-action="ChiTiet"
+                   asp-route-id="@ViewBag.LeTanId"
+                   class="bg-red-50 text-red-600 border border-red-200 hover:bg-red-500 hover:text-white px-3 py-1.5 rounded text-sm transition-all font-medium">
+                Quay lại
+            </a>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
