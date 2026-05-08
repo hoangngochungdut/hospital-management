@@ -117,8 +117,6 @@ namespace QuanLyPhongKham.Services.Implementations
             return _benhNhanRepository.GetByIdWithTaiKhoan(id);
         }
 
-
-
         public void Add(AddBenhNhanDto entity)
         {
             if (entity == null)

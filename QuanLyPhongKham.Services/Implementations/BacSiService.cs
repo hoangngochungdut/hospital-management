@@ -155,6 +155,13 @@ namespace QuanLyPhongKham.Services.Implementations
             if (entity == null)
                 throw new ArgumentNullException(nameof(entity));
 
+            var taiKhoan = new TaiKhoan
+            {
+                TenDangNhap = entity.TenDangNhap,
+                MatKhauHash = entity.MatKhau,
+                VaiTro = "BS"
+            };
+
             var bacSi = new BacSi
             {
                 HoTen = entity.HoTen,
@@ -162,9 +169,8 @@ namespace QuanLyPhongKham.Services.Implementations
                 Email = entity.Email,
                 ChuyenKhoaId = entity.ChuyenKhoaId,
                 DiaChi = entity.DiaChi,
-                //NgaySinh = entity.NgaySinh,
                 GioiTinh = entity.GioiTinh,
-                //TrangThai = true // mặc định active
+                TaiKhoan = taiKhoan
             };
 
             _bacSiRepo.Add(bacSi);

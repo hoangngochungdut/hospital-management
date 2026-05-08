@@ -9,10 +9,26 @@ namespace QuanLyPhongKham.Web.Controllers
     {
         private readonly IBenhNhanService _benhNhanService;
         private readonly ITaiKhoanService _taiKhoanService;
-        public BenhNhanController(IBenhNhanService benhNhanService, ITaiKhoanService taiKhoanService)
+        private readonly IBuoiKhamService _buoiKhamService;
+        public BenhNhanController(IBenhNhanService benhNhanService, ITaiKhoanService taiKhoanService, IBuoiKhamService buoiKhamService)
         {
             _benhNhanService = benhNhanService;
             _taiKhoanService = taiKhoanService;
+            _buoiKhamService = buoiKhamService;
+        }
+
+        [HttpGet]
+        public IActionResult LichKham(int id)
+        {
+            //int? currentId = HttpContext.Session.GetInt32("UserId");
+
+            //if (currentId == null)
+                //return RedirectToAction("Login", "Account");
+
+            var lich = _buoiKhamService
+                .GetByBenhNhanId(id);
+
+            return View(lich);
         }
 
         [HttpGet]
