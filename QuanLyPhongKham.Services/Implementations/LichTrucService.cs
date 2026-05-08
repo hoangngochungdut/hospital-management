@@ -79,5 +79,18 @@ namespace QuanLyPhongKham.Services.Implementations
             // Gọi xuống Repo lấy data
             return await _lichTrucRepo.GetLichKhaDungByKhoaAsync(chuyenKhoaId, homNay);
         }
+        public async Task<List<LichTruc>> LayLichTrucTuHomNayAsync(int bacSiId)
+        {
+            // Lấy ngày hôm nay
+            var today = DateOnly.FromDateTime(DateTime.Now);
+
+            // Gọi xuống Repo bằng await
+            return await _lichTrucRepo.GetLichTrucTuNgayAsync(bacSiId, today);
+        }
+        public async Task<bool> XoaLichTheoDanhSachIdAsync(List<int> ids)
+        {
+            if (ids == null || !ids.Any()) return false;
+            return await _lichTrucRepo.XoaNhieuLichTrucAsync(ids);
+        }
     }
 }

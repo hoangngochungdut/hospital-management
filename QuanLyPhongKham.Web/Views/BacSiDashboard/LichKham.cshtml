@@ -5,11 +5,18 @@
     Layout = "~/Views/Shared/_BacSiLayout.cshtml";
     ViewData["Title"] = "Lịch Của Tôi";
 
-    // 1. Ca sắp tới: Ưu tiên ca gần nhất lên đầu (8h nằm trên 9h)
-    var lichSapToi = Model.Where(x => x.TrangThai == TrangThaiBuoiKham.ChuaXacNhan || x.TrangThai == TrangThaiBuoiKham.XacNhan)
+    // Lấy ngày hiện tại để so sánh
+    var today = DateOnly.FromDateTime(DateTime.Now);
+
+    // 1. Ca khám hôm nay
+    var lichHomNay = Model.Where(x => x.Ngay == today && (x.TrangThai == TrangThaiBuoiKham.ChuaXacNhan || x.TrangThai == TrangThaiBuoiKham.XacNhan))
+                          .OrderBy(x => x.Gio).ToList();
+
+    // 2. Ca khám sắp tới
+    var lichSapToi = Model.Where(x => x.Ngay > today && (x.TrangThai == TrangThaiBuoiKham.ChuaXacNhan || x.TrangThai == TrangThaiBuoiKham.XacNhan))
                           .OrderBy(x => x.Ngay).ThenBy(x => x.Gio).ToList();
 
-    // 2. Lịch sử: Ưu tiên ca vừa mới xong hiện lên đầu
+    // 3. Lịch sử: Đã xong hoặc đã hủy
     var lichSuKham = Model.Where(x => x.TrangThai == TrangThaiBuoiKham.HoanThanh || x.TrangThai == TrangThaiBuoiKham.Huy)
                           .OrderByDescending(x => x.Ngay).ThenByDescending(x => x.Gio).ToList();
 }
@@ -33,157 +40,63 @@
                     👨‍⚕️ BS. @(Model.FirstOrDefault()?.BacSi?.HoTen ?? "Đang cập nhật")
                 </p>
             </div>
-            <div class="text-right bg-blue-50 p-3 rounded-xl border border-blue-100">
-                <p class="text-[11px] text-blue-500 font-black uppercase tracking-widest">Hôm nay</p>
-                <p class="text-xl text-blue-700 font-black">@DateTime.Now.ToString("dd/MM/yyyy")</p>
+            <div class="text-right bg-blue-600 p-4 rounded-2xl shadow-lg shadow-blue-200">
+                <p class="text-[11px] text-blue-100 font-black uppercase tracking-widest mb-1 text-center">Hôm nay</p>
+                <p class="text-2xl text-white font-black">@DateTime.Now.ToString("dd/MM/yyyy")</p>
             </div>
         </div>
 
-        @* ================= PHẦN 1: CA KHÁM SẮP TỚI ================= *@
+        @* ================= PHẦN 1: CA KHÁM HÔM NAY ================= *@
+        <div class="mb-10">
+            <h3 class="text-lg font-black text-emerald-600 uppercase tracking-wider mb-4 flex items-center gap-2">
+                <span class="w-3 h-3 bg-emerald-500 rounded-full animate-pulse"></span>
+                <span>Ca khám hôm nay</span>
+                <span class="bg-emerald-100 text-emerald-800 text-xs px-2.5 py-0.5 rounded-full ml-1">@lichHomNay.Count</span>
+            </h3>
+
+            <div class="bg-white p-2 rounded-2xl shadow-md border-2 border-emerald-100 overflow-hidden">
+                @if (!lichHomNay.Any())
+                {
+                    <div class="text-center py-10">
+                        <p class="text-slate-400 italic">Hôm nay hiện chưa có ca khám nào.</p>
+                    </div>
+                }
+                else
+                {
+                    @RenderTable(lichHomNay)
+                }
+            </div>
+        </div>
+
+        @* ================= PHẦN 2: CA KHÁM SẮP TỚI ================= *@
         <div class="mb-10">
             <h3 class="text-lg font-black text-blue-700 uppercase tracking-wider mb-4 flex items-center gap-2">
-                <span class="w-2.5 h-2.5 bg-blue-600 rounded-full animate-ping"></span>
-                <span>Ca khám sắp tới</span>
+                <span>📅 Ca khám sắp tới</span>
                 <span class="bg-blue-100 text-blue-800 text-xs px-2.5 py-0.5 rounded-full ml-1">@lichSapToi.Count</span>
             </h3>
 
             <div class="bg-white p-2 rounded-2xl shadow-md border border-slate-200 overflow-hidden">
                 @if (!lichSapToi.Any())
                 {
-                    <div class="text-center py-12">
-                        <div class="text-5xl mb-3 opacity-50">☕</div>
-                        <p class="text-slate-500 font-medium">Bác sĩ hiện không có ca khám nào sắp tới.</p>
+                    <div class="text-center py-10">
+                        <p class="text-slate-400 italic">Không có ca khám nào trong những ngày tới.</p>
                     </div>
                 }
                 else
                 {
-                    <table class="w-full text-left">
-                        <tr class="border-b border-slate-100 bg-slate-50 text-slate-500 text-xs uppercase tracking-widest">
-                            <th class="py-4 px-5">Thời gian</th>
-                            <th class="py-4 px-5">Bệnh nhân</th>
-                            <th class="py-4 px-5 text-center">Phòng</th>
-                            <th class="py-4 px-5">Trạng thái</th>
-                            <th class="py-4 px-5">Thao tác</th>
-                        </tr>
-                        @foreach (var item in lichSapToi)
-                        {
-                            <tr class="border-b border-slate-50 hover:bg-slate-50 transition-all align-top group">
-                                <td class="py-5 px-5">
-                                    <div class="text-slate-800 font-bold text-base">@item.Ngay.ToString("dd/MM/yyyy")</div>
-                                    <div class="text-blue-600 font-black text-sm mt-0.5">@item.Gio.ToString("HH:mm")</div>
-                                </td>
-                                @* <td class="py-5 px-5">
-                                    <a href="/BacSiDashboard/HoSoBenhNhan?benhNhanId=@item.BenhNhanId" class="font-bold text-slate-800 hover:text-blue-600 transition-colors text-lg">
-                                        @item.BenhNhan?.HoTen
-                                    </a>
-                                    <div class="text-xs text-slate-500 font-medium mt-1">SĐT: @item.BenhNhan?.Sdt</div>
-                                </td> *@
-                                <td class="py-5 px-5">
-                                    <div class="flex items-center gap-2">
-
-                                        <a href="/BacSiDashboard/HoSoBenhNhan?benhNhanId=@item.BenhNhanId"
-                                               class="font-bold text-slate-800 hover:text-blue-600 transition-colors text-lg">
-                                            @item.BenhNhan?.HoTen
-                                        </a>
-
-                                        <!-- 👁 ICON -->
-                                        <i class="fa fa-eye text-blue-500 cursor-pointer hover:text-blue-700"
-                                           onclick="xemTieuSu(@item.Id, @item.BenhNhanId, 'saptoi')"></i>
-                                    </div>
-
-                                    <div class="text-xs text-slate-500 font-medium mt-1">
-                                        SĐT: @item.BenhNhan?.Sdt
-                                    </div>
-                                </td>
-                                <td class="py-5 px-5 text-center">
-                                    <span class="bg-slate-100 text-slate-600 px-3 py-1.5 rounded-lg text-[11px] font-black border border-slate-200">P.@item.PhongKham?.SoPhong</span>
-                                </td>
-                                <td class="py-5 px-5">
-                                    @if (item.TrangThai == TrangThaiBuoiKham.ChuaXacNhan)
-                                    {
-                                        <span class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-[10px] font-black uppercase">Chờ xác nhận</span>
-                                    }
-                                    else if (item.TrangThai == TrangThaiBuoiKham.XacNhan)
-                                    {
-                                        <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-[10px] font-black uppercase">Đã xác nhận</span>
-                                    }
-                                </td>
-                               
-                                <td class="py-5 px-5 w-[350px]">
-                                
-      
-                                    
-                                    @* Thông báo bệnh nhân dời lịch *@
-                                    @if (item.TrangThai == TrangThaiBuoiKham.ChuaXacNhan && !string.IsNullOrEmpty(item.ThongBaoChoBenhNhan) && item.ThongBaoChoBenhNhan.Contains("dời lịch"))
-                                    {
-                                        string thongBaoCuaBacSi = item.ThongBaoChoBenhNhan.Replace("Bạn đã yêu cầu", "Bệnh nhân yêu cầu").Replace("Vui lòng đợi phòng khám xác nhận lại.", "");
-                                        <div class="mb-3 p-3 bg-orange-50 border border-orange-200 text-orange-700 text-xs rounded-xl shadow-sm">
-                                            <span class="font-black">⚠️ BN XIN DỜI LỊCH:</span> <br />
-                                            <span class="italic mt-1 inline-block">@thongBaoCuaBacSi</span>
-                                        </div>
-                                    }
-
-                                    <div class="flex flex-col gap-2">
-                                        <div class="flex gap-2">
-                                            <form asp-controller="BacSiDashboard" asp-action="DoiTrangThai" method="POST" class="flex-1">
-                                                <input type="hidden" name="id" value="@item.Id" />
-                                                <input type="hidden" name="ghiChu" class="ghiChuInput" value="" />
-
-                                                @if (item.TrangThai == TrangThaiBuoiKham.ChuaXacNhan)
-                                                {
-                                                    <button type="submit" name="trangThaiMoi" value="@((int)TrangThaiBuoiKham.XacNhan)" class="w-full bg-blue-600 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-blue-700 shadow-sm transition-all uppercase">
-                                                        Xác nhận
-                                                    </button>
-                                                }
-                                                else if (item.TrangThai == TrangThaiBuoiKham.XacNhan)
-                                                {
-                                                    <button type="button" onclick="openNoteModal(this, '✅ Hoàn thành ca khám', 'Nhập kết luận / dặn dò cho bệnh nhân:', 2)" class="w-full bg-green-600 text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-green-700 shadow-sm transition-all uppercase">
-                                                        Hoàn thành
-                                                    </button>
-                                                }
-                                            </form>
-                                            
-                                            <form asp-controller="BacSiDashboard" asp-action="DoiTrangThai" method="POST" class="flex-none">
-                                                <input type="hidden" name="id" value="@item.Id" />
-                                                <input type="hidden" name="ghiChu" class="ghiChuInput" value="" />
-                                                <button type="button" onclick="openNoteModal(this, '❌ Hủy lịch khám', 'Nhập lý do hủy (sẽ thông báo cho bệnh nhân):', 3)" class="bg-red-50 text-red-600 border border-red-200 px-4 py-2 rounded-xl text-xs font-bold hover:bg-red-600 hover:text-white transition-all uppercase">
-                                                    Hủy
-                                                </button>
-                                            </form>
-                                        </div>
-
-                                        <form asp-controller="BacSiDashboard" asp-action="DoiLichKham" method="POST">
-                                            <input type="hidden" name="id" value="@item.Id" />
-                                            <input type="hidden" name="ngayMoi" class="ngayMoiInput" value="" />
-                                            <input type="hidden" name="gioMoi" class="gioMoiInput" value="" />
-                                            <input type="hidden" name="lyDoDoi" class="lyDoDoiInput" value="" />
-                                            <button type="button" onclick="openMoveModal(this)" class="w-full bg-slate-100 text-slate-600 border border-slate-200 px-3 py-2 rounded-xl text-[11px] font-black hover:bg-slate-200 transition-all uppercase tracking-wider">
-                                                🕒 Bác sĩ dời lịch
-                                            </button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                                  
-                            <tr>
-                                <td colspan="5" class="p-0 border-none">
-                                    <div id="tieusu-saptoi-@item.Id" style="display:none;"></div>
-                                </td>
-                            </tr>
-                        }
-                    </table>
+                    @RenderTable(lichSapToi)
                 }
             </div>
         </div>
 
-        @* ================= PHẦN 2: LỊCH SỬ ĐÃ KHÁM ================= *@
+        @* ================= PHẦN 3: LỊCH SỬ KHÁM BỆNH ================= *@
         <div>
             <h3 class="text-lg font-black text-slate-500 uppercase tracking-wider mb-4 flex items-center gap-2">
                 <span>📜 Lịch sử khám bệnh</span>
                 <span class="bg-slate-200 text-slate-600 text-xs px-2.5 py-0.5 rounded-full ml-1">@lichSuKham.Count</span>
             </h3>
 
-            <div class="bg-white p-2 rounded-2xl shadow-sm border border-slate-200 overflow-hidden opacity-90 hover:opacity-100 transition-opacity">
+            <div class="bg-white p-2 rounded-2xl shadow-sm border border-slate-200 overflow-hidden opacity-90">
                 @if (!lichSuKham.Any())
                 {
                     <p class="text-slate-400 text-center py-6 italic text-sm">Chưa có lịch sử khám bệnh.</p>
@@ -200,75 +113,49 @@
                         </tr>
                         @foreach (var item in lichSuKham)
                         {
-                           
                             <tr class="border-b border-slate-50 hover:bg-slate-50 transition-all align-top">
-
                                 <td class="py-4 px-5 opacity-70">
-                                    <div class="text-slate-600 font-bold text-base">
-                                        @item.Ngay.ToString("dd/MM/yyyy")
-                                    </div>
-                                    <div class="text-slate-400 font-black text-xs mt-0.5">
-                                        @item.Gio.ToString("HH:mm")
-                                    </div>
+                                    <div class="text-slate-600 font-bold text-base">@item.Ngay.ToString("dd/MM/yyyy")</div>
+                                    <div class="text-slate-400 font-black text-xs mt-0.5">@item.Gio.ToString("HH:mm")</div>
                                 </td>
-
                                 <td class="py-4 px-5 opacity-80">
                                     <div class="flex items-center gap-2">
-
-                                        <div class="font-bold text-slate-700 text-lg">
-                                            @item.BenhNhan?.HoTen
-                                        </div>
-
-                                        <!-- 👁 ICON -->
-                                        <i class="fa fa-eye text-blue-500 cursor-pointer hover:text-blue-700"
-                                           onclick="xemTieuSu(@item.Id, @item.BenhNhanId, 'lichsu')"></i>
-
-
+                                        <div class="font-bold text-slate-700 text-lg">@item.BenhNhan?.HoTen</div>
+                                        @if (item.TrangThai != TrangThaiBuoiKham.Huy)
+                                        {
+                                            <!-- 👁 được bấm -->
+                                            <i class="fa fa-eye text-blue-500 cursor-pointer hover:text-blue-700 text-lg"
+                                                   onclick="xemTieuSu(@item.BenhNhanId)">
+                                            </i>
+                                        }
+                                        else
+                                        {
+                                            <!-- 👁 bị disable -->
+                                            <i class="fa fa-eye text-gray-300 cursor-not-allowed text-lg"
+                                                   title="Ca khám đã hủy - không xem tiểu sử">
+                                            </i>
+                                        }
                                     </div>
-
-                                    <div class="text-xs text-slate-400 font-medium mt-1">
-                                        SĐT: @item.BenhNhan?.Sdt
-                                    </div>
+                                    <div class="text-xs text-slate-400 font-medium mt-1">SĐT: @item.BenhNhan?.Sdt</div>
                                 </td>
-
                                 <td class="py-4 px-5 text-center opacity-80">
-                                    <span class="bg-slate-50 text-slate-500 px-3 py-1.5 rounded-lg text-[11px] font-black border border-slate-100">
-                                        P.@item.PhongKham?.SoPhong
-                                    </span>
+                                    <span class="bg-slate-50 text-slate-500 px-3 py-1.5 rounded-lg text-[11px] font-black border border-slate-100">P.@item.PhongKham?.SoPhong</span>
                                 </td>
-
                                 <td class="py-4 px-5">
                                     @if (item.TrangThai == TrangThaiBuoiKham.HoanThanh)
                                     {
-                                        <span class="bg-green-50 text-green-700 border border-green-200 px-3 py-1 rounded-full text-[10px] font-black uppercase">
-                                            Hoàn thành
-                                        </span>
+                                        <span class="bg-green-50 text-green-700 border border-green-200 px-3 py-1 rounded-full text-[10px] font-black uppercase">Hoàn thành</span>
                                     }
                                     else
                                     {
-                                        <span class="bg-red-50 text-red-700 border border-red-200 px-3 py-1 rounded-full text-[10px] font-black uppercase">
-                                            Đã hủy
-                                        </span>
+                                        <span class="bg-red-50 text-red-700 border border-red-200 px-3 py-1 rounded-full text-[10px] font-black uppercase">Đã hủy</span>
                                     }
                                 </td>
-
                                 <td class="py-4 px-5">
                                     <div class="text-xs text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-100">
-                                        <span class="font-bold text-slate-800">
-                                            @(item.TrangThai == TrangThaiBuoiKham.Huy ? "Lý do hủy:" : "Kết luận:")
-                                        </span>
-                                        <span class="italic block mt-1">
-                                            @(item.GhiChuKetQua ?? item.ThongBaoChoBenhNhan ?? "Không có ghi chú")
-                                        </span>
+                                        <span class="font-bold text-slate-800">@(item.TrangThai == TrangThaiBuoiKham.Huy ? "Lý do hủy:" : "Kết luận:")</span>
+                                        <span class="italic block mt-1">@(item.GhiChuKetQua ?? item.ThongBaoChoBenhNhan ?? "Không có ghi chú")</span>
                                     </div>
-                                </td>
-
-                            </tr>
-
-                            <!-- 🔥 TIỂU SỬ PHẢI NẰM NGAY SAU ROW -->
-                            <tr>
-                                <td colspan="5" class="p-0">
-                                    <div id="tieusu-lichsu-@item.Id" class="hidden p-3 bg-white border-l-4 border-blue-500"></div>
                                 </td>
                             </tr>
                         }
@@ -279,141 +166,203 @@
     </div>
 </div>
 
-@* --- CÁC MODAL GIỮ NGUYÊN --- *@
+@* Render bảng gọn gàng cho 2 mục đầu *@
+@functions {
+    public Microsoft.AspNetCore.Html.IHtmlContent RenderTable(List<QuanLyPhongKham.Models.BuoiKham> list)
+    {
+        var html = new System.Text.StringBuilder();
+        var today = DateOnly.FromDateTime(DateTime.Now);
+
+        html.Append("<table class='w-full text-left'>");
+        html.Append("<tr class='border-b border-slate-100 bg-slate-50 text-slate-500 text-xs uppercase tracking-widest'><th class='py-4 px-5'>Thời gian</th><th class='py-4 px-5'>Bệnh nhân</th><th class='py-4 px-5 text-center'>Phòng</th><th class='py-4 px-5'>Trạng thái</th><th class='py-4 px-5'>Thao tác</th></tr>");
+        
+        foreach (var item in list)
+        {
+            html.Append("<tr class='border-b border-slate-50 hover:bg-slate-50 transition-all align-top group'>");
+            html.Append($"<td class='py-5 px-5'><div class='text-slate-800 font-bold text-base'>{item.Ngay.ToString("dd/MM/yyyy")}</div><div class='text-blue-600 font-black text-sm mt-0.5'>{item.Gio.ToString("HH:mm")}</div></td>");
+            html.Append($"<td class='py-5 px-5'><div class='flex items-center gap-2'><a href='/BacSiDashboard/HoSoBenhNhan?benhNhanId={item.BenhNhanId}' class='font-bold text-slate-800 hover:text-blue-600 transition-colors text-lg'>{item.BenhNhan?.HoTen}</a><i class='fa fa-eye text-blue-500 cursor-pointer hover:text-blue-700 text-lg' onclick='xemTieuSu({item.BenhNhanId})'></i></div><div class='text-xs text-slate-500 font-medium mt-1'>SĐT: {item.BenhNhan?.Sdt}</div></td>");
+            html.Append($"<td class='py-5 px-5 text-center'><span class='bg-slate-100 text-slate-600 px-3 py-1.5 rounded-lg text-[11px] font-black border border-slate-200'>P.{item.PhongKham?.SoPhong}</span></td>");
+            html.Append("<td class='py-5 px-5'>");
+            
+            if (item.TrangThai == TrangThaiBuoiKham.ChuaXacNhan)
+                html.Append("<span class='bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-[10px] font-black uppercase'>Chờ xác nhận</span>");
+            else
+                html.Append("<span class='bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-[10px] font-black uppercase'>Đã xác nhận</span>");
+            
+            html.Append("</td><td class='py-5 px-5 w-[250px]'>");
+
+            // ================= LOGIC NÚT BẤM ĐÃ FIX CHUẨN =================
+            if (item.TrangThai == TrangThaiBuoiKham.ChuaXacNhan)
+            {
+                // 1. NẾU CHƯA XÁC NHẬN: Dù là hôm nay hay tương lai, CHỈ ĐƯỢC PHÉP DỜI LỊCH (Khóa cứng nút Hoàn Thành)
+                html.Append("<div class='flex flex-col gap-2'>");
+                html.Append("<form action='/BacSiDashboard/DoiLichKham' method='POST'>");
+                html.Append($"<input type='hidden' name='id' value='{item.Id}' />");
+                html.Append("<input type='hidden' name='ngayMoi' class='ngayMoiInput' value='' />");
+                html.Append("<input type='hidden' name='gioMoi' class='gioMoiInput' value='' />");
+                html.Append("<input type='hidden' name='lyDoDoi' class='lyDoDoiInput' value='' />");
+                html.Append("<button type='button' onclick='openMoveModal(this)' class='w-full bg-slate-100 text-slate-700 border border-slate-200 px-3 py-2 rounded-xl text-[11px] font-black hover:bg-slate-200 transition-all uppercase tracking-wider'>🕒 Dời lịch</button>");
+                html.Append("</form>");
+                html.Append("</div>");
+            }
+            else if (item.TrangThai == TrangThaiBuoiKham.XacNhan)
+            {
+                // 2. NẾU ĐÃ XÁC NHẬN: Kiểm tra xem có phải ngày hôm nay không
+                if (item.Ngay == today)
+                {
+                    // Đã xác nhận + Hôm nay -> Mới hiện nút HOÀN THÀNH (và JS sẽ chặn nếu chưa đủ 15p)
+                    DateTime thoiGianKham = item.Ngay.ToDateTime(item.Gio);
+                    string isoTime = thoiGianKham.ToString("s");
+
+                    html.Append("<form action='/BacSiDashboard/HoanThanhKham' method='POST' class='w-full'>");
+                    html.Append($"<input type='hidden' name='id' value='{item.Id}' />");
+                    html.Append("<input type='hidden' name='ghiChu' class='ghiChuInput' value='' />");
+                    html.Append("<input type='hidden' name='ketQuaKhamBenh' class='ketQuaInput' value='' />");
+                    html.Append($"<button type='button' onclick='checkAndOpenNoteModal(this, \"{isoTime}\")' class='w-full bg-green-500 text-white px-4 py-2.5 rounded-xl text-xs font-bold hover:bg-green-600 shadow-sm transition-all uppercase'><i class=\"fas fa-stethoscope mr-1\"></i> Hoàn thành</button>");
+                    html.Append("</form>");
+                }
+                else if (item.Ngay > today)
+                {
+                    // Đã xác nhận + Lịch ở tương lai -> KHÔNG CHO DỜI LỊCH (Chốt sổ)
+                    html.Append("<span class='text-slate-400 text-[11px] italic text-center w-full block py-2'>Đã chốt lịch, không thể dời</span>");
+                }
+            }
+            // ==============================================================
+
+            html.Append("</td></tr>");
+        }
+        html.Append("</table>");
+        return new Microsoft.AspNetCore.Html.HtmlString(html.ToString());
+    }
+}
+
+@* ================= MODALS ================= *@
+
+<!-- Modal Tiểu sử -->
+<div id="tieuSuModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center transition-all p-4">
+    <div class="bg-white rounded-[24px] shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col relative">
+        <button type="button" onclick="closeTieuSuModal()" class="absolute top-4 right-5 text-slate-400 hover:text-red-500 font-bold text-3xl z-50">&times;</button>
+        <div id="tieuSuModalContent" class="overflow-y-auto w-full h-full"></div>
+    </div>
+</div>
+
+<!-- Modal Dời Lịch -->
 <div id="moveModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center transition-all">
     <div class="bg-white rounded-[24px] shadow-2xl w-full max-w-md overflow-hidden">
         <div class="bg-orange-500 p-5 text-white flex justify-between items-center">
-            <h3 class="font-black text-lg uppercase tracking-tight">🕒 Dời lịch khám</h3>
+            <h3 class="font-black text-lg uppercase">🕒 Dời lịch khám</h3>
             <button type="button" onclick="closeModal('moveModal')" class="text-orange-200 hover:text-white font-bold text-2xl">&times;</button>
         </div>
         <div class="p-6 space-y-5">
             <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-xs font-black text-slate-500 uppercase mb-2">Ngày dời sang</label>
-                    <input type="date" id="moveModalDate" class="w-full border-2 border-slate-200 rounded-xl p-3 text-slate-700 outline-none focus:border-orange-500 font-medium transition-colors" required />
-                </div>
-                <div>
-                    <label class="block text-xs font-black text-slate-500 uppercase mb-2">Giờ khám mới</label>
-                    <input type="time" id="moveModalTime" class="w-full border-2 border-slate-200 rounded-xl p-3 text-slate-700 outline-none focus:border-orange-500 font-medium transition-colors" required />
-                </div>
+                <div><label class="block text-xs font-black text-slate-500 uppercase mb-2">Ngày dời sang</label><input type="date" id="moveModalDate" class="w-full border-2 border-slate-200 rounded-xl p-3" required /></div>
+                <div><label class="block text-xs font-black text-slate-500 uppercase mb-2">Giờ khám mới</label><input type="time" id="moveModalTime" class="w-full border-2 border-slate-200 rounded-xl p-3" required /></div>
             </div>
-            <div>
-                <label class="block text-xs font-black text-slate-500 uppercase mb-2">Lý do dời lịch (Gửi cho BN)</label>
-                <textarea id="moveModalReason" rows="3" class="w-full border-2 border-slate-200 rounded-xl p-3 text-slate-700 outline-none focus:border-orange-500 font-medium transition-colors" placeholder="Bác sĩ có việc bận đột xuất..." required></textarea>
-            </div>
-            
+            <div><label class="block text-xs font-black text-slate-500 uppercase mb-2">Lý do dời lịch</label><textarea id="moveModalReason" rows="3" class="w-full border-2 border-slate-200 rounded-xl p-3" required></textarea></div>
             <div class="pt-2 flex justify-end gap-3">
-                <button type="button" onclick="closeModal('moveModal')" class="px-6 py-2.5 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200 transition-colors uppercase text-xs">Hủy</button>
-                <button type="button" id="btnSubmitMove" class="px-6 py-2.5 bg-orange-500 text-white font-bold rounded-xl hover:bg-orange-600 shadow-md transition-colors uppercase text-xs">Lưu lịch mới</button>
+                <button type="button" onclick="closeModal('moveModal')" class="px-6 py-2.5 bg-slate-100 font-bold rounded-xl uppercase text-xs">Hủy</button>
+                <button type="button" id="btnSubmitMove" class="px-6 py-2.5 bg-orange-500 text-white font-bold rounded-xl uppercase text-xs">Lưu lịch mới</button>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Modal Nhập Kết Quả Khám -->
 <div id="noteModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center transition-all">
     <div class="bg-white rounded-[24px] shadow-2xl w-full max-w-md overflow-hidden">
-        <div class="bg-blue-600 p-5 text-white flex justify-between items-center" id="noteModalHeader">
-            <h3 id="noteModalTitle" class="font-black text-lg uppercase tracking-tight">Nhập thông tin</h3>
+        <div class="bg-green-600 p-5 text-white flex justify-between items-center">
+            <h3 id="noteModalTitle" class="font-black text-lg uppercase">Nhập thông tin</h3>
             <button type="button" onclick="closeModal('noteModal')" class="text-white/70 hover:text-white font-bold text-2xl">&times;</button>
         </div>
         <div class="p-6">
-            <p id="noteModalDesc" class="text-sm font-bold text-slate-500 mb-3">Điền chi tiết kết quả hoặc lý do:</p>
-            <textarea id="noteModalInput" rows="4" class="w-full border-2 border-slate-200 rounded-xl p-3 text-slate-700 outline-none focus:border-blue-500 font-medium transition-colors" placeholder="Nhập nội dung..."></textarea>
+            <div class="mb-4">
+                <label class="block text-sm font-bold text-green-700 mb-2">Kết quả chẩn đoán (Tên bệnh):</label>
+                <input type="text" id="modalKetQuaInput" class="w-full border-2 border-slate-200 rounded-xl p-3 focus:border-green-500" placeholder="VD: Sâu răng, Viêm họng..." />
+            </div>
+            <p id="noteModalDesc" class="text-sm font-bold text-slate-500 mb-2">Điền chi tiết dặn dò / Đơn thuốc:</p>
+            <textarea id="noteModalInput" rows="3" class="w-full border-2 border-slate-200 rounded-xl p-3 focus:border-green-500"></textarea>
             
             <div class="pt-6 flex justify-end gap-3">
-                <button type="button" onclick="closeModal('noteModal')" class="px-6 py-2.5 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200 transition-colors uppercase text-xs">Đóng</button>
-                <button type="button" id="btnSubmitNote" class="px-6 py-2.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 shadow-md transition-colors uppercase text-xs">Xác nhận</button>
+                <button type="button" onclick="closeModal('noteModal')" class="px-6 py-2.5 bg-slate-100 font-bold rounded-xl uppercase text-xs">Đóng</button>
+                <button type="button" id="btnSubmitNote" class="px-6 py-2.5 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl uppercase text-xs transition-colors">Xác nhận</button>
             </div>
         </div>
     </div>
 </div>
 
+@* ================= SCRIPTS ================= *@
 @section Scripts {
     <script>
         let currentForm = null;
-        let targetValue = null;
-
-        function openNoteModal(btn, title, desc, val) {
-            currentForm = $(btn).closest('form');
-            targetValue = val;
-            $('#noteModalTitle').text(title);
-            $('#noteModalDesc').text(desc);
-            $('#noteModalInput').val('');
-            
-            if(val == 3) {
-                $('#noteModalHeader').removeClass('bg-blue-600').addClass('bg-red-600');
-                $('#noteModalInput').removeClass('focus:border-blue-500').addClass('focus:border-red-500');
-                $('#btnSubmitNote').removeClass('bg-blue-600 hover:bg-blue-700').addClass('bg-red-600 hover:bg-red-700');
-            } else {
-                $('#noteModalHeader').removeClass('bg-red-600').addClass('bg-blue-600');
-                $('#noteModalInput').removeClass('focus:border-red-500').addClass('focus:border-blue-500');
-                $('#btnSubmitNote').removeClass('bg-red-600 hover:bg-red-700').addClass('bg-blue-600 hover:bg-blue-700');
-            }
-            $('#noteModal').removeClass('hidden').addClass('flex');
-        }
-
-        function openMoveModal(btn) {
-            currentForm = $(btn).closest('form');
-            $('#moveModalDate').val('');
-            $('#moveModalTime').val('');
-            $('#moveModalReason').val('');
-            $('#moveModal').removeClass('hidden').addClass('flex');
-        }
 
         function closeModal(modalId) {
             $('#' + modalId).addClass('hidden').removeClass('flex');
-            currentForm = null;
+        }
+
+        // --- KỊCH BẢN TIỂU SỬ BỆNH NHÂN ---
+        function xemTieuSu(benhNhanId) {
+            $('#tieuSuModal').removeClass('hidden').addClass('flex');
+            $('#tieuSuModalContent').html('<div class="p-10 text-center"><p class="animate-pulse">⏳ Đang tải...</p></div>');
+            fetch(`/BacSiDashboard/TieuSuBenhNhan?id=${benhNhanId}`)
+                .then(res => res.text())
+                .then(html => { $('#tieuSuModalContent').html(html); });
+        }
+        function closeTieuSuModal() { $('#tieuSuModal').addClass('hidden').removeClass('flex'); }
+
+        // --- HÀM KIỂM TRA THỜI GIAN VÀ MỞ MODAL HOÀN THÀNH ---
+        function checkAndOpenNoteModal(btn, isoTime) {
+            let thoiGianKham = new Date(isoTime);
+            // Thêm 15 phút vào giờ khám
+            let thoiGianChoPhep = new Date(thoiGianKham.getTime() + 15 * 60000);
+            let now = new Date();
+
+            // Nếu thời gian hiện tại vẫn nhỏ hơn (chưa tới) thời gian cho phép
+            if (now < thoiGianChoPhep) {
+                let gioKham = thoiGianKham.getHours().toString().padStart(2, '0') + ':' + thoiGianKham.getMinutes().toString().padStart(2, '0');
+                let gioPhep = thoiGianChoPhep.getHours().toString().padStart(2, '0') + ':' + thoiGianChoPhep.getMinutes().toString().padStart(2, '0');
+                
+                alert(`⛔ CHƯA ĐẾN GIỜ NHẬP KẾT QUẢ!\n\nCa khám của bệnh nhân bắt đầu lúc ${gioKham}.\nBác sĩ vui lòng chờ qua ${gioPhep} (đủ 15 phút) để có thể Hoàn Thành ca khám này.`);
+                return; // Dừng lại, không mở modal
+            }
+
+            // Nếu đã đủ 15 phút thì chạy tiếp mở modal như bình thường
+            currentForm = $(btn).closest('form');
+            $('#noteModalTitle').text("✅ Khám & Ghi Kết Quả");
+            $('#noteModalDesc').text("Nhập dặn dò/ghi chú cho bệnh nhân:");
+            $('#noteModalInput').val('');
+            $('#modalKetQuaInput').val('');
+            $('#noteModal').removeClass('hidden').addClass('flex');
         }
 
         $('#btnSubmitNote').click(function() {
-            let txt = $('#noteModalInput').val();
-            if (txt.trim() === "") {
-                alert("Vui lòng không để trống nội dung!");
-                return;
-            }
-            currentForm.find('.ghiChuInput').val(txt);
-            $('<input>').attr({ type: 'hidden', name: 'trangThaiMoi', value: targetValue }).appendTo(currentForm);
+            let txtDanDo = $('#noteModalInput').val();
+            let txtKetQua = $('#modalKetQuaInput').val();
+            
+            if (txtKetQua.trim() === "") { alert("Vui lòng nhập Kết quả chẩn đoán!"); return; }
+            if (txtDanDo.trim() === "") { alert("Vui lòng nhập Chi tiết dặn dò/ghi chú!"); return; }
+            
+            currentForm.find('.ghiChuInput').val(txtDanDo);
+            currentForm.find('.ketQuaInput').val(txtKetQua);
             currentForm.submit();
         });
+
+        // --- KỊCH BẢN DỜI LỊCH ---
+        function openMoveModal(btn) {
+            currentForm = $(btn).closest('form');
+            $('#moveModal').removeClass('hidden').addClass('flex');
+        }
 
         $('#btnSubmitMove').click(function() {
             let ngay = $('#moveModalDate').val();
             let gio = $('#moveModalTime').val();
             let lyDo = $('#moveModalReason').val();
             
-            if (ngay.trim() === "" || gio.trim() === "" || lyDo.trim() === "") {
-                alert("Vui lòng điền đủ thông tin dời lịch!");
-                return;
-            }
-
+            if (!ngay || !gio || !lyDo) { alert("Vui lòng điền đủ thông tin để dời lịch!"); return; }
+            
             currentForm.find('.ngayMoiInput').val(ngay);
             currentForm.find('.gioMoiInput').val(gio);
             currentForm.find('.lyDoDoiInput').val(lyDo);
             currentForm.submit();
         });
-      
-                function xemTieuSu(buoiKhamId, benhNhanId, loai) {
-
-            let divId = "tieusu-" + loai + "-" + buoiKhamId;
-            let div = document.getElementById(divId);
-
-            if (!div) {
-                console.error("Không tìm thấy thẻ div: " + divId);
-                return;
-            }
-
-            if (div.style.display === "none" || div.classList.contains('hidden')) {
-                fetch(`/BacSiDashboard/TieuSuBenhNhan?id=${benhNhanId}`) // 🔥 sửa ở đây
-                    .then(res => res.text())
-                    .then(html => {
-                        div.innerHTML = html;
-                        div.style.display = "block";
-                        div.classList.remove('hidden');
-                    });
-            } else {
-                div.style.display = "none";
-                div.classList.add('hidden');
-            }
-        }
     </script>
 }

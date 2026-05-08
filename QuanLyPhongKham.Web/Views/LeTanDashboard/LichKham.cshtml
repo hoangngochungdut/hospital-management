@@ -27,6 +27,7 @@
 
         <form asp-controller="LeTanDashboard" asp-action="DatLich" method="POST" id="formDatLich">
             
+            <!-- Bước 1: Chọn Bệnh Nhân -->
             <div class="mb-10 bg-slate-50 p-6 rounded-2xl border border-slate-200 shadow-inner">
                 <h3 class="font-bold text-xl text-blue-700 mb-4 flex items-center">
                     <span class="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center mr-3 text-sm">1</span> Chọn Bệnh nhân
@@ -43,6 +44,7 @@
                 </select>
             </div>
 
+            <!-- Bước 2: Chọn Chuyên Khoa -->
             <div class="mb-10">
                 <h3 class="font-bold text-xl text-blue-700 mb-4 flex items-center">
                     <span class="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center mr-3 text-sm">2</span> Xác định chuyên khoa
@@ -64,6 +66,7 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+                <!-- Bước 3: Chọn Bác Sĩ -->
                 <div>
                     <h3 class="font-bold text-lg text-blue-700 mb-3 flex items-center">
                         <span class="w-7 h-7 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mr-2 text-xs">3</span> Chọn Bác Sĩ
@@ -73,6 +76,7 @@
                     </select>
                 </div>
 
+                <!-- Bước 4: Chọn Phòng -->
                 <div>
                     <h3 class="font-bold text-lg text-blue-700 mb-3 flex items-center">
                         <span class="w-7 h-7 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mr-2 text-xs">4</span> Chọn Phòng
@@ -84,6 +88,7 @@
             </div>
 
             <div class="mb-10 bg-slate-50 p-6 rounded-2xl border border-slate-100 shadow-inner">
+                <!-- Bước 5: Chọn Ngày -->
                 <div class="mb-8">
                     <h3 class="font-bold text-lg text-blue-700 mb-4 flex items-center">
                         <span class="w-7 h-7 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mr-2 text-xs">5</span> Chọn Ngày Khám
@@ -92,6 +97,7 @@
                            class="w-full border-2 border-slate-200 p-3 rounded-xl outline-none focus:border-blue-500 bg-white text-slate-900 font-bold transition-all" required />
                 </div>
 
+                <!-- Bước 6: Chọn Ca Khám -->
                 <div>
                     <h3 class="font-bold text-lg text-blue-700 mb-5 flex items-center">
                         <span class="w-7 h-7 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mr-2 text-xs">6</span> Chọn Ca Khám
@@ -158,10 +164,10 @@
         // CHỌN KHOA -> TẢI DATA
         $('#ChuyenKhoaId').change(function () {
         let khoaId = $(this).val();
-                
+                                    
         $('#BacSiId').html('<option value="">-- Chọn khoa trước --</option>').prop('disabled', true).addClass('bg-slate-50 text-slate-400 cursor-not-allowed').removeClass('bg-white text-slate-900 border-blue-200');
         $('#PhongKhamId').html('<option value="">-- Chọn khoa trước --</option>').prop('disabled', true).addClass('bg-slate-50 text-slate-400 cursor-not-allowed').removeClass('bg-white text-slate-900 border-blue-200');
-                
+                                    
         datePicker.clear();
         datePicker.set("enable", [ function() { return false; } ]);
 
@@ -176,15 +182,19 @@
         $.get('/BuoiKham/GetLichKhamKhaDung?chuyenKhoaId=' + khoaId, function (res) {
         if (res.success && res.data.length > 0) {
         danhSachLich = res.data;
-                            
+                                                                                
         let listBs = [...new Map(danhSachLich.map(item => [item.bacSiId, item])).values()];
         let bsHtml = '<option value="">-- Chọn Bác Sĩ --</option>';
         listBs.forEach(b => { bsHtml += `<option value="${b.bacSiId}">BS. ${b.bacSiTen.replace(/^BS\.\s*/i, "")}</option>`; });
         $('#BacSiId').html(bsHtml).prop('disabled', false).removeClass('bg-slate-50 text-slate-400 cursor-not-allowed').addClass('bg-white text-slate-900 border-blue-200');
 
+        // 🔥 ĐÃ SỬA: Hiển thị Phòng kèm loại ⭐ VIP/Thường 🔥
         let listPhong = [...new Map(danhSachLich.map(item => [item.phongId, item])).values()];
         let pHtml = '<option value="">-- Chọn Phòng --</option>';
-        listPhong.forEach(p => { pHtml += `<option value="${p.phongId}">${p.phongTen}</option>`; });
+        listPhong.forEach(p => {
+        let labelLoai = (p.loaiPhong && p.loaiPhong.toUpperCase() === "VIP") ? "⭐ VIP" : "Thường";
+        pHtml += `<option value="${p.phongId}">${p.phongTen} (${labelLoai})</option>`;
+        });
         $('#PhongKhamId').html(pHtml).prop('disabled', false).removeClass('bg-slate-50 text-slate-400 cursor-not-allowed').addClass('bg-white text-slate-900 border-blue-200');
 
         capNhatLich();
@@ -227,19 +237,15 @@
         }
         }
 
-        // --- THUẬT TOÁN SINH GIỜ THEO ID KHOA ---
+        // ĐỒNG BỘ THỜI GIAN THEO KHOA
         function xacDinhPhutMoiCa() {
         let khoaId = parseInt($('#ChuyenKhoaId').val());
         switch (khoaId) {
-        case 2: // Răng
-        case 6: // Răng Hàm Mặt
-        case 5: // Nhi
-        case 7: // Tai Mũi Họng
-        return 30;
-        case 8: // Da Liễu
-        return 20;
-        default:
-        return 60; // Các khoa còn lại
+        case 8: return 15; // Da Liễu
+        case 7: return 20; // Tai Mũi Họng
+        case 1: case 3: case 4: case 5: return 30; // Nội, Ngoại...
+        case 2: case 6: return 60; // Răng
+        default: return 30;
         }
         }
 
@@ -267,7 +273,7 @@
 
         $.get(`/BuoiKham/GetGioTrong?bacSiId=${bsId}&phongKhamId=${pId}&ngay=${ngay}`, function (res) {
         $('#ContainerGio').empty();
-                    
+                                            
         let phutMoiCa = xacDinhPhutMoiCa();
         const tatCaCaKham = taoDanhSachCaKham(phutMoiCa);
 
@@ -277,7 +283,7 @@
         if (cacCaTrong.includes(ca)) {
         $('#ContainerGio').append(`<button type="button" data-time="${ca}" class="btn-gio py-3 px-1 border-2 border-blue-200 bg-white text-blue-700 font-bold rounded-xl hover:bg-blue-50 hover:border-blue-400 transition-all shadow-sm text-sm">${ca}</button>`);
         } else {
-        $('#ContainerGio').append(`<div class="relative group"><button type="button" disabled class="w-full py-3 px-1 border-2 border-red-100 bg-red-50 text-red-400 font-bold rounded-xl cursor-not-allowed line-through text-sm opacity-80">${ca}</button></div>`);
+        $('#ContainerGio').append(`<div class="relative group"><button type="button" disabled class="w-full py-3 px-1 border-2 border-red-200 bg-red-50 text-red-200 font-bold rounded-xl cursor-not-allowed line-through text-sm opacity-80">${ca}</button></div>`);
         }
         });
         } else {
@@ -289,7 +295,7 @@
         $(document).on('click', '.btn-gio', function () {
         $('.btn-gio').removeClass('bg-blue-600 text-white border-blue-600 scale-105 shadow-md').addClass('bg-white text-blue-700 border-blue-200');
         $(this).removeClass('bg-white text-blue-700 border-blue-200').addClass('bg-blue-600 text-white border-blue-600 scale-105 shadow-md');
-                
+                                    
         let caKham = $(this).data('time');
         let gioCut = caKham.split(' - ')[0];
         $('#GioKhamValue').val(gioCut + ":00");

@@ -31,39 +31,47 @@
                         <span class="text-xl font-black tracking-tighter text-slate-800">PBL3<span class="text-blue-600">MED</span></span>
                     </div>
                 </div>
+                    <nav class="flex-1 px-4 space-y-1">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-4 mb-2">Chính</p>
 
-                <nav class="flex-1 px-4 space-y-1">
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-4 mb-2">Chính</p>
+                        <a href="@Url.Action("TongQuan", "AdminDashboard")"
+                               class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all @(currentController == "AdminDashboard" && currentAction == "TongQuan" ? activeClass : inactiveClass)">
+                            <i class="fas fa-chart-line w-5"></i>
+                            <span>Tổng quan</span>
+                        </a>
     
-                    <a href="@Url.Action("TongQuan", "AdminDashboard")"
-                           class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all @(currentController == "AdminDashboard" && currentAction == "TongQuan" ? activeClass : inactiveClass)">
-                        <i class="fas fa-chart-line w-5"></i>
-                        <span>Tổng quan</span>
-                    </a>
-                    
-                    <a href="@Url.Action("QuanLyLichKham", "AdminDashboard")" class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all @(currentController == "AdminDashboard" && currentAction == "LichKham" ? activeClass : inactiveClass)">
-                        <i class="fas fa-calendar-alt w-5"></i>
-                        <span>Lịch Khám</span>
-                    </a>
+                        <a href="@Url.Action("QuanLyLichKham", "AdminDashboard")" class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all @(currentController == "AdminDashboard" && currentAction == "QuanLyLichKham" ? activeClass : inactiveClass)">
+                            <i class="fas fa-calendar-alt w-5"></i>
+                            <span>Lịch Khám</span>
+                        </a>
 
-                    <a href="@Url.Action("LichTruc", "AdminDashboard")" class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all @(currentController == "AdminDashboard" && currentAction == "QuanLyLichTruc" ? activeClass : inactiveClass)">
-                        <i class="fas fa-calendar-check w-5"></i>
-                        <span>Phân Công Lịch</span>
-                    </a>
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-4 mt-6 mb-2">Nhân sự & Dữ liệu</p>
-                    <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all @inactiveClass">
-                        <i class="fas fa-user-tie w-5"></i>
-                        <span>Lễ Tân</span>
-                    </a>
-                    <a href="@Url.Action("BacSi", "AdminDashboard")" class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all @(currentController == "AdminDashboard" && currentAction == "BacSi" ? activeClass : inactiveClass)">
-                        <i class="fas fa-user-md w-5"></i>
-                        <span>Bác Sĩ</span>
-                    </a>
-                    <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all @inactiveClass">
-                        <i class="fas fa-user-injured w-5"></i>
-                        <span>Bệnh Nhân</span>
-                    </a>
-                </nav>
+                        <a href="@Url.Action("LichTruc", "AdminDashboard")" class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all @(currentController == "AdminDashboard" && currentAction == "LichTruc" ? activeClass : inactiveClass)">
+                            <i class="fas fa-calendar-check w-5"></i>
+                            <span>Phân Công Lịch</span>
+                        </a>
+    
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-4 mt-6 mb-2">Nhân sự & Dữ liệu</p>
+    
+                        <a href="@Url.Action("LeTan", "AdminDashboard")" class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all @(currentController == "AdminDashboard" && currentAction == "LeTan" ? activeClass : inactiveClass)">
+                            <i class="fas fa-user-tie w-5"></i>
+                            <span>Lễ Tân</span>
+                        </a>
+    
+                        <a href="@Url.Action("BacSi", "AdminDashboard")" class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all @(currentController == "AdminDashboard" && currentAction == "BacSi" ? activeClass : inactiveClass)">
+                            <i class="fas fa-user-md w-5"></i>
+                            <span>Bác Sĩ</span>
+                        </a>
+    
+                        <a href="@Url.Action("ChuyenKhoa", "AdminDashboard")" class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all @(currentController == "AdminDashboard" && currentAction == "ChuyenKhoa" ? activeClass : inactiveClass)">
+                            <i class="fas fa-stethoscope w-5"></i>
+                            <span>Chuyên khoa</span>
+                        </a>
+    
+                        <a href="@Url.Action("BenhNhan", "AdminDashboard")" class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all @(currentController == "AdminDashboard" && currentAction == "BenhNhan" ? activeClass : inactiveClass)">
+                            <i class="fas fa-user-injured w-5"></i>
+                            <span>Bệnh Nhân</span>
+                        </a>
+                    </nav>
 
                 <div class="p-4 border-t border-slate-100">
                     <a href="#" onclick="handleLogout(event)" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-red-500 hover:bg-red-50 transition cursor-pointer">

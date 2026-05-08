@@ -30,11 +30,14 @@ namespace QuanLyPhongKham.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("BacSiId")
+                    b.Property<int?>("BacSiId")
                         .HasColumnType("int");
 
-                    b.Property<int>("BenhNhanId")
+                    b.Property<int?>("BenhNhanId")
                         .HasColumnType("int");
+
+                    b.Property<bool>("DaThanhToan")
+                        .HasColumnType("bit");
 
                     b.Property<int?>("DiemDanhGia")
                         .HasColumnType("int");
@@ -156,6 +159,9 @@ namespace QuanLyPhongKham.Data.Migrations
                     b.Property<string>("DiaChi")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Email")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("GioiTinh")
                         .HasColumnType("nvarchar(max)");
 
@@ -206,6 +212,9 @@ namespace QuanLyPhongKham.Data.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("IsMustChangePassword")
+                        .HasColumnType("bit");
 
                     b.Property<string>("MatKhauHash")
                         .HasColumnType("nvarchar(max)");
@@ -278,14 +287,12 @@ namespace QuanLyPhongKham.Data.Migrations
                     b.HasOne("QuanLyPhongKham.Models.BacSi", "BacSi")
                         .WithMany("BuoiKhams")
                         .HasForeignKey("BacSiId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("QuanLyPhongKham.Models.BenhNhan", "BenhNhan")
                         .WithMany("BuoiKhams")
                         .HasForeignKey("BenhNhanId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("QuanLyPhongKham.Models.PhongKham", "PhongKham")
                         .WithMany("BuoiKhams")
@@ -385,7 +392,8 @@ namespace QuanLyPhongKham.Data.Migrations
                 {
                     b.HasOne("QuanLyPhongKham.Models.ChuyenKhoa", "ChuyenKhoa")
                         .WithMany("BacSis")
-                        .HasForeignKey("ChuyenKhoaId");
+                        .HasForeignKey("ChuyenKhoaId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("QuanLyPhongKham.Models.NguoiDung", null)
                         .WithOne()

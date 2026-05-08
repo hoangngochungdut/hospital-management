@@ -16,5 +16,7 @@ namespace QuanLyPhongKham.Repositories.Interfaces
         Task<bool> ThemDanhSachLichTrucAsync(List<LichTruc> dsLich);
         Task<bool> XoaLichTrucAsync(int id);
         Task<List<LichKhaDungDto>> GetLichKhaDungByKhoaAsync(int chuyenKhoaId, DateOnly tuNgay);
+        Task<List<LichTruc>> GetLichTrucTuNgayAsync(int bacSiId, DateOnly tuNgay);
+        Task<bool> XoaNhieuLichTrucAsync(List<int> ids);
     }
 }

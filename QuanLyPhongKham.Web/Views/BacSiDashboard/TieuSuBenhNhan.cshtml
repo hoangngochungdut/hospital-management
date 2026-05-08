@@ -1,107 +1,89 @@
 ﻿@model QuanLyPhongKham.Models.DTOs.TieuSuBenhNhan
 
-<div class="p-5 bg-white border border-slate-200 rounded-2xl shadow-md space-y-4">
+@{
+    var cacBenh = Model.LichSuKham
+        .Where(x => !string.IsNullOrWhiteSpace(x.KetQua)
+                 && x.KetQua != "Chưa có kết quả"
+                 && !x.KetQua.Trim().Equals("Bình thường", StringComparison.OrdinalIgnoreCase)
+                 && !x.KetQua.Trim().Equals("Bình Thường", StringComparison.OrdinalIgnoreCase))
+        .Select(x => x.KetQua.Trim())
+        .Distinct()
+        .ToList();
 
-    <!-- 🔵 HEADER -->
-    <div class="flex items-center justify-between border-b pb-3">
-        <h2 class="text-lg font-black text-blue-700 uppercase tracking-wide">
-            👤 Tiểu sử bệnh nhân
-        </h2>
-        <span class="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full font-bold">
-            Hồ sơ y tế
-        </span>
-    </div>
+    string tienSuTuDong = cacBenh.Any() ? string.Join(", ", cacBenh) : "Chưa có";
+}
 
-    <!-- 🧑 THÔNG TIN CÁ NHÂN -->
-    <div class="grid grid-cols-3 gap-3 text-sm">
+<div class="p-6 relative">
+    @* Dải viền màu xanh nhạt phía trên cho sang trọng *@
+    <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-blue-500 to-indigo-500"></div>
 
-        <div class="p-3 bg-slate-50 rounded-xl border">
-            <p class="text-xs text-slate-500 font-bold uppercase">Họ tên</p>
-            <p class="font-semibold text-slate-800">
-                @(Model?.ThongTin?.HoTen ?? "Chưa có")
-            </p>
-        </div>
-
-        <div class="p-3 bg-slate-50 rounded-xl border">
-            <p class="text-xs text-slate-500 font-bold uppercase">Giới tính</p>
-            <p class="font-semibold text-slate-800">
-                @(Model?.ThongTin?.GioiTinh ?? "Chưa có")
-            </p>
-        </div>
-
-        <div class="p-3 bg-slate-50 rounded-xl border">
-            <p class="text-xs text-slate-500 font-bold uppercase">SĐT</p>
-            <p class="font-semibold text-slate-800">
-                @(Model?.ThongTin?.SoDienThoai ?? "Chưa có")
-            </p>
-        </div>
-
-    </div>
-
-    <!-- 🟠 TIỀN SỬ -->
-    <div class="p-4 border border-orange-200 bg-orange-50 rounded-xl">
-        <p class="text-xs font-black text-orange-600 uppercase mb-1">
-            🩺 Tiền sử bệnh
-        </p>
-        <p class="text-sm text-slate-700">
-            @(Model?.TienSuBenh ?? "Chưa có thông tin")
-        </p>
-    </div>
-
-    <!-- 🟢 LỊCH SỬ KHÁM -->
-    <div>
-
-        <h3 class="text-sm font-black text-green-700 uppercase mb-2 flex items-center gap-2">
-            📋 Lịch sử khám
+    <div class="flex justify-between items-center mb-6 mt-2">
+        <h3 class="text-xl font-black text-blue-800 uppercase tracking-tight flex items-center gap-2">
+            👤 TIỂU SỬ BỆNH NHÂN
         </h3>
+        <a href="/BacSiDashboard/HoSoBenhNhan?benhNhanId=@Model.ThongTin.NguoiDungId" class="px-5 py-2 bg-blue-50 text-blue-600 font-bold rounded-xl text-xs hover:bg-blue-600 hover:text-white transition-all shadow-sm mr-6">
+            Mở Hồ Sơ Y Tế Đầy Đủ
+        </a>
+    </div>
 
-        <div class="overflow-hidden rounded-xl border border-slate-200">
-
-            <table class="w-full text-sm">
-
-                <thead class="bg-slate-100 text-slate-600 uppercase text-xs">
-                    <tr>
-                        <th class="p-3 text-left">Ngày khám</th>
-                        <th class="p-3 text-left">Kết quả</th>
-                        <th class="p-3 text-left">Ghi chú</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-
-                    @if (Model?.LichSuKham != null && Model.LichSuKham.Any())
-                    {
-                        foreach (var item in Model.LichSuKham)
-                        {
-                            <tr class="border-t hover:bg-slate-50 transition">
-                                <td class="p-3 font-semibold text-slate-700">
-                                    @item.NgayKham.ToString("dd/MM/yyyy")
-                                </td>
-                                <td class="p-3">
-                                    <span class="px-2 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700">
-                                        @(item.KetQua ?? "Chưa có")
-                                    </span>
-                                </td>
-                                <td class="p-3 text-slate-600">
-                                    @(item.GhiChu ?? "-")
-                                </td>
-                            </tr>
-                        }
-                    }
-                    else
-                    {
-                        <tr>
-                            <td colspan="3" class="p-4 text-center text-slate-400 italic">
-                                Không có lịch sử khám
-                            </td>
-                        </tr>
-                    }
-
-                </tbody>
-
-            </table>
-
+    @* --- THÔNG TIN BỆNH NHÂN --- *@
+    <div class="grid grid-cols-3 gap-4 mb-6">
+        <div class="bg-slate-50 border border-slate-100 p-3 rounded-xl hover:bg-white hover:shadow-sm transition-all">
+            <p class="text-[10px] text-slate-400 font-bold uppercase mb-1">Họ Tên</p>
+            <p class="font-bold text-slate-800 text-sm">@Model.ThongTin.HoTen</p>
+        </div>
+        <div class="bg-slate-50 border border-slate-100 p-3 rounded-xl hover:bg-white hover:shadow-sm transition-all">
+            <p class="text-[10px] text-slate-400 font-bold uppercase mb-1">Giới tính</p>
+            <p class="font-bold text-slate-800 text-sm">@Model.ThongTin.GioiTinh</p>
+        </div>
+        <div class="bg-slate-50 border border-slate-100 p-3 rounded-xl hover:bg-white hover:shadow-sm transition-all">
+            <p class="text-[10px] text-slate-400 font-bold uppercase mb-1">SĐT</p>
+            <p class="font-bold text-slate-800 text-sm">@Model.ThongTin.SoDienThoai</p>
         </div>
     </div>
 
+    @* --- TIỀN SỬ BỆNH ĐÃ GOM TỰ ĐỘNG --- *@
+    <div class="bg-orange-50 border border-orange-200/60 p-4 rounded-xl mb-6 shadow-inner">
+        <p class="text-[11px] text-orange-600 font-black uppercase tracking-wider mb-2 flex items-center gap-1">
+            🩺 TIỀN SỬ BỆNH
+        </p>
+        <p class="font-black text-slate-800 text-lg">@tienSuTuDong</p>
+    </div>
+
+    @* --- BẢNG LỊCH SỬ KHÁM --- *@
+    <div>
+        <p class="text-[11px] text-emerald-600 font-black uppercase tracking-wider mb-3 flex items-center gap-1">
+            📋 LỊCH SỬ KHÁM
+        </p>
+        <div class="border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+            <table class="w-full text-left text-sm">
+                <tr class="bg-slate-50 text-slate-500 font-bold text-xs uppercase border-b border-slate-200">
+                    <th class="p-4">Ngày khám</th>
+                    <th class="p-4">Kết quả</th>
+                    <th class="p-4">Ghi chú</th>
+                </tr>
+                @foreach (var item in Model.LichSuKham)
+                {
+                    <tr class="border-b border-slate-100 hover:bg-blue-50/50 transition-colors">
+                        <td class="p-4 text-slate-700 font-medium">@item.NgayKham.ToString("dd/MM/yyyy")</td>
+                        <td class="p-4">
+                            @if (string.IsNullOrEmpty(item.KetQua) || item.KetQua == "Chưa có kết quả")
+                            {
+                                <span class="bg-slate-100 text-slate-500 border border-slate-200 px-3 py-1 rounded-full text-[10px] font-bold">Chưa có kết quả</span>
+                            }
+                            else if (item.KetQua.Trim().Equals("Bình thường", StringComparison.OrdinalIgnoreCase))
+                            {
+                                <span class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1 rounded-full text-[10px] font-bold">@item.KetQua</span>
+                            }
+                            else
+                            {
+                                <span class="bg-blue-100 text-blue-700 border border-blue-200 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shadow-sm">@item.KetQua</span>
+                            }
+                        </td>
+                        <td class="p-4 text-slate-600 italic text-xs">@item.GhiChu</td>
+                    </tr>
+                }
+            </table>
+        </div>
+    </div>
 </div>

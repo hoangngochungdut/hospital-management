@@ -7,8 +7,9 @@ namespace QuanLyPhongKham.Web.Controllers
     public class AdminDashboardController : Controller
     {
         private readonly IBacSiService _bacSiService;
-        private readonly IBuoiKhamService _buoiKhamService;
         private readonly IBenhNhanService _benhNhanService;
+        private readonly IChuyenKhoaService _chuyenKhoaService;
+        private readonly IBuoiKhamService _buoiKhamService;
         private readonly ILichTrucService _lichTrucService;
         private readonly IPhongKhamService _phongKhamService;
 
@@ -17,9 +18,11 @@ namespace QuanLyPhongKham.Web.Controllers
             IBacSiService bacSiService,
             IBenhNhanService benhNhanService,
             IPhongKhamService phongKhamService,
-            ILichTrucService lichTrucService)
+            ILichTrucService lichTrucService,
+            IChuyenKhoaService chuyenKhoaService)
         {
             _buoiKhamService = buoiKhamService;
+            _chuyenKhoaService = chuyenKhoaService;
             _bacSiService = bacSiService;
             _benhNhanService = benhNhanService;
             _phongKhamService = phongKhamService;
@@ -47,7 +50,7 @@ namespace QuanLyPhongKham.Web.Controllers
         [HttpGet]
         public async Task<IActionResult> LichTruc()
         {
-            ViewBag.DsChuyenKhoa = _bacSiService.GetDanhSachChuyenKhoa();
+            ViewBag.DsChuyenKhoa = _chuyenKhoaService.GetAll();
             var danhSachLich = await _lichTrucService.LayTatCaLichTrucAsync();
             return View(danhSachLich);
         }
@@ -94,46 +97,79 @@ namespace QuanLyPhongKham.Web.Controllers
             return RedirectToAction("LichTruc");
         }
 
-        // ==================== LỊCH KHÁM ====================
+        [HttpPost]
+        public async Task<IActionResult> XoaLichHangLoat([FromBody] List<int> ids)
+        {
+            if (ids == null || ids.Count == 0)
+                return Json(new { success = false, message = "Không có lịch nào được chọn!" });
+
+            var result = await _lichTrucService.XoaLichTheoDanhSachIdAsync(ids);
+            if (result)
+                return Json(new { success = true, message = $"Đã xóa thành công {ids.Count} lịch trực!" });
+
+            return Json(new { success = false, message = "Lỗi khi xóa lịch trực!" });
+        }
+
+        // ==================== QUẢN LÝ LỊCH KHÁM ====================
         [HttpGet]
         public async Task<IActionResult> QuanLyLichKham(int? chuyenKhoaId, string? tenBacSi)
         {
-            var ketQuaLoc = await _buoiKhamService
-                .LayToanBoLichKhamAdminAsync(chuyenKhoaId, tenBacSi);
-
-            ViewBag.DsChuyenKhoa = await _buoiKhamService.LayTatCaChuyenKhoaAsync();
-            ViewBag.SelectedKhoa = chuyenKhoaId;
-            ViewBag.SelectedTen = tenBacSi;
-
+            // Vẫn lấy full data để Client JS tự do thanh lọc
+            var ketQuaLoc = await _buoiKhamService.LayToanBoLichKhamAdminAsync(chuyenKhoaId, tenBacSi);
             return View(ketQuaLoc);
         }
 
         [HttpPost]
         public IActionResult DoiTrangThai(int id, int trangThaiMoi)
         {
-            _buoiKhamService.CapNhatTrangThai(
-                id,
-                (TrangThaiBuoiKham)trangThaiMoi,
-                "Admin cập nhật"
-            );
+            try
+            {
+                _buoiKhamService.XulyCaKham(
+                    id,
+                    (TrangThaiBuoiKham)trangThaiMoi,
+                    "Admin cập nhật"
+                );
+                TempData["ThongBao"] = "✅ Cập nhật trạng thái thành công!";
+            }
+            catch (Exception ex)
+            {
+                TempData["ThongBao"] = "❌ Lỗi: " + ex.Message;
+            }
+            return RedirectToAction("QuanLyLichKham");
+        }
+        // 🔥 THÊM MỚI: ADMIN DỜI LỊCH
+        [HttpPost]
+        public IActionResult DoiLichKham(int id, DateTime ngayMoi, string gioMoi, string lyDoDoi)
+        {
+            try
+            {
+                DateOnly dateParsed = DateOnly.FromDateTime(ngayMoi);
+                TimeOnly timeParsed = TimeOnly.Parse(gioMoi);
 
-            TempData["ThongBao"] = "✅ Cập nhật trạng thái thành công!";
+                _buoiKhamService.DoiLichKham(id, dateParsed, timeParsed, lyDoDoi);
+                TempData["ThongBao"] = "✅ Dời lịch thành công! Cập nhật đã được ghi nhận.";
+            }
+            catch (Exception ex)
+            {
+                TempData["ThongBao"] = "❌ Không thể dời lịch: " + ex.Message;
+            }
+
             return RedirectToAction("QuanLyLichKham");
         }
 
+        // 🔥 ADMIN: XÓA CỨNG KHỎI DB (CHỈ ÁP DỤNG CHO LỊCH ĐÃ HỦY)
         [HttpPost]
-        public IActionResult XoaLich(int id)
+        public IActionResult XoaVinhVien(int id)
         {
-            bool success = _buoiKhamService.CapNhatTrangThai(
-                id,
-                TrangThaiBuoiKham.Huy,
-                "Admin xóa ca khám"
-            );
-
-            TempData["ThongBao"] = success
-                ? "✅ Đã hủy/xóa lịch khám!"
-                : "❌ Không tìm thấy lịch!";
-
+            try
+            {
+                _buoiKhamService.XoaLichKham(id); // Gọi hàm xóa cứng từ Service
+                TempData["ThongBao"] = "✅ Đã xóa vĩnh viễn lịch khám khỏi hệ thống!";
+            }
+            catch (Exception ex)
+            {
+                TempData["ThongBao"] = "❌ Lỗi xóa lịch: " + ex.Message;
+            }
             return RedirectToAction("QuanLyLichKham");
         }
 
@@ -159,7 +195,8 @@ namespace QuanLyPhongKham.Web.Controllers
             });
         }
 
-        // ==================== AJAX ====================
+
+        // ==================== AJAX KHÁC ====================
         [HttpGet]
         public async Task<IActionResult> GetDataByKhoa(int chuyenKhoaId)
         {
@@ -172,6 +209,23 @@ namespace QuanLyPhongKham.Web.Controllers
                 bacSis = bacSis.Select(b => new { b.Id, b.HoTen }),
                 phongs = phongs.Select(p => new { p.Id, p.SoPhong, p.LoaiPhong })
             });
+        }
+
+        public IActionResult BacSi()
+        {
+            var tatCaBacSi = _bacSiService.GetAll();
+            return View(tatCaBacSi);
+        }
+        public IActionResult BenhNhan()
+        {
+            var tatCaBenhNhan = _benhNhanService.GetAll();
+            return View(tatCaBenhNhan);
+        }
+
+        public IActionResult ChuyenKhoa()
+        {
+            var tatCaChuyenKhoa = _chuyenKhoaService.GetAll();
+            return View(tatCaChuyenKhoa);
         }
     }
 }

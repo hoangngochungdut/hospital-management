@@ -18,6 +18,21 @@ namespace QuanLyPhongKham.Models.DTOs
         [Phone(ErrorMessage = "Số điện thoại không hợp lệ")]
         public string? SoDienThoai { get; set; }
 
-        
+        [Required(ErrorMessage = "Email không được để trống")]
+        [EmailAddress(ErrorMessage = "Email không hợp lệ")]
+        public string Email { get; set; }
+
+        public CapNhatHoSoBenhNhanRequest()
+        {
+
+        }
+        public CapNhatHoSoBenhNhanRequest(BenhNhan benhnhan)
+        {
+            HoTen = benhnhan.HoTen;
+            GioiTinh = benhnhan.GioiTinh;
+            DiaChi = benhnhan.DiaChi;
+            SoDienThoai = benhnhan.Sdt;
+            Email = benhnhan.Email;
+        }
     }
 }

@@ -7,12 +7,14 @@ namespace QuanLyPhongKham.Repositories.Interfaces
 {
     public interface IBacSiRepository : IRepository<BacSi>
     {
-        // Thằng IRepository đã có: BacSi GetById(int id); rồi, không cần viết lại.
-
+        BacSi? GetByIdWithTaiKhoan(int id);
+        ICollection<BacSi> GetAllWithTaiKhoan();
+        //BacSi? GetByNguoiDungId(int nguoiDungId);
         public XemHoSoBacSiResponse? GetHoSo(int id);
 
         // Hàm này dùng Task vì nó là hàm mới, không bị ràng buộc bởi IRepository
         Task<List<BacSi>> GetByChuyenKhoaIdAsync(int chuyenKhoaId);
         List<BacSi> GetDanhSachBacSiKemDanhGia();
+
     }
 }

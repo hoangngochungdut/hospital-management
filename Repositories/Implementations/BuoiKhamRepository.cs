@@ -103,6 +103,7 @@ namespace QuanLyPhongKham.Repositories.Implementations
                 .Include(b => b.BacSi)
                     .ThenInclude(bs => bs.ChuyenKhoa)
                 .Include(b => b.PhongKham)
+                .Include(b => b.KetQuaKham)
                 .Where(b => b.BenhNhanId == benhNhanId)
                 .OrderByDescending(b => b.Ngay)
                 .ThenByDescending(b => b.Gio)
@@ -141,6 +142,14 @@ namespace QuanLyPhongKham.Repositories.Implementations
                 .Select(b => b.Gio)
                 .ToListAsync();
         }
-        
+        public void CapNhatThanhToan(int lichKhamId) // Nhớ là CapNhatThanhToan cho khớp Interface
+        {
+            var caKham = _context.BuoiKhams.Find(lichKhamId);
+            if (caKham != null)
+            {
+                caKham.DaThanhToan = true;
+                _context.SaveChanges();
+            }
+        }
     }
 }

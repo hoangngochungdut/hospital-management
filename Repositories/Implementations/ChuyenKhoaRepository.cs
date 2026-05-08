@@ -41,11 +41,18 @@ public class ChuyenKhoaRepository : IChuyenKhoaRepository
         _context.ChuyenKhoas.Remove(entity);
         _context.SaveChanges();
     }
+
     public ICollection<ChuyenKhoa> GetAll()
     {
         return _context.ChuyenKhoas
             .OrderBy(x => x.TenKhoa)
             .ToList();
     }
-
 }
+
+
+
+
+
+
+

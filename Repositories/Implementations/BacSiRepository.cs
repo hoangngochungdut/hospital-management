@@ -32,14 +32,27 @@ namespace QuanLyPhongKham.Repositories.Implementations
                 .ToList();
         }
 
-        // 👉 FIX LỖI CS0738: Trả về BacSi thường, không dùng Task ở đây để khớp Interface của nhóm
-        public BacSi GetById(int id)
+
+        public ICollection<BacSi> GetAllWithTaiKhoan()
+        {
+            return _context.BacSis
+                .Include(x => x.TaiKhoan)
+                .Include(x => x.ChuyenKhoa)
+                .ToList();
+        }
+        public BacSi? GetById(int id)
         {
             return _context.BacSis
                 .Include(b => b.ChuyenKhoa) // Nạp Chuyên Khoa để Controller không bị Null TenKhoa
                 .FirstOrDefault(b => b.Id == id);
         }
 
+        public BacSi? GetByIdWithTaiKhoan(int id)
+        {
+            return _context.BacSis
+                .Include(x => x.TaiKhoan)
+                .FirstOrDefault(x => x.Id == id);
+        }
         public void Update(BacSi entity)
         {
             _context.BacSis.Update(entity);

@@ -12,5 +12,7 @@ namespace QuanLyPhongKham.Models
         public string? MatKhauHash { get; set; }
         public string? VaiTro { get; set; }
         public NguoiDung? NguoiDung{ get; set; }
+
+        public bool IsMustChangePassword { get; set; } = false;
     }
 }

@@ -44,9 +44,23 @@
                         <i class="fas fa-calendar-alt w-5"></i>
                         <span>Lịch Khám</span>
                     </a>
-                    <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all @inactiveClass">
+                    @* <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all @inactiveClass">
                         <i class="fas fa-file-invoice-dollar w-5"></i>
                         <span>Thanh Toán</span>
+                    </a> *@
+                    @* <form asp-action="ConfirmMomo" asp-controller="LeTanDashboard" method="POST" class="m-0 p-0">
+                        <!-- Thay đổi value thành số tiền thực tế bạn muốn test, ví dụ: 50000 -->
+                        <input type="hidden" name="sotien" value="50000" />
+    
+                        <button type="submit" class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all @inactiveClass" style="background: none; border: none; color: inherit; font: inherit; cursor: pointer;">
+                            <i class="fas fa-file-invoice-dollar w-5"></i>
+                            <span>Thanh Toán MoMo</span>
+                        </button>
+                    </form> *@
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-4 mt-6 mb-2">Chính</p>
+                    <a href="@Url.Action("QuanLyLichKham", "LeTanDashboard")" class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all @(currentController == "LeTanDashboard" && (currentAction == "LichKham" || currentAction == "DatLich") ? activeClass : inactiveClass)">
+                        <i class="fas fa-calendar-alt w-5"></i>
+                        <span>Quản Lý Lịch Khám</span>
                     </a>
                 </nav>
 
@@ -84,5 +98,20 @@
         </script>
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         @await RenderSectionAsync("Scripts", required: false)
+        <!-- Form ẩn dùng chung: Đặt ở cuối file Layout -->
+        <form id="momoForm" asp-action="ConfirmMomo" asp-controller="LeTanDashboard" method="POST" style="display:none;">
+            <input type="hidden" id="amountToPay" name="sotien" value="" />
+            <input type="hidden" id="lichKhamId" name="lichKhamId" value="" />
+        </form>
+
+        <script>
+            function triggerMomoPayment(amount, id) {
+            if (confirm("Tiến hành thanh toán hóa đơn " + Number(amount).toLocaleString() + "đ qua MoMo?")) {
+            document.getElementById('amountToPay').value = amount;
+            document.getElementById('lichKhamId').value = id;
+            document.getElementById('momoForm').submit();
+            }
+            }
+        </script>
     </body>
 </html>

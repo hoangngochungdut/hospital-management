@@ -13,9 +13,9 @@ namespace QuanLyPhongKham.Models
         public DateOnly Ngay { get; set; }
         public TimeOnly Gio { get; set; }
         public TrangThaiBuoiKham TrangThai { get; set; }
-        public int BenhNhanId { get; set; }
+        public int? BenhNhanId { get; set; }
         public BenhNhan? BenhNhan { get; set; }
-        public int BacSiId { get; set; }
+        public int? BacSiId { get; set; }
         public BacSi? BacSi { get; set; }
         public int PhongKhamId { get; set; }
         public PhongKham? PhongKham { get; set; }
@@ -27,5 +27,7 @@ namespace QuanLyPhongKham.Models
         public int? DiemDanhGia { get; set; }
         public string? NhanXetCuaBenhNhan { get; set; }
         public string? ThongBaoChoBenhNhan { get; set; }
+        public bool DaThanhToan { get; set; } = false;
+
     }
 }

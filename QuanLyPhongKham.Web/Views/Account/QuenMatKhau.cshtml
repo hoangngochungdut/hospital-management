@@ -1,0 +1,50 @@
+﻿@{
+    ViewData["Title"] = "Quên mật khẩu";
+}
+
+@model QuanLyPhongKham.Models.DTOs.QuenMatKhauDto
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-4">
+        <h2 class="text-center mb-4">Quên mật khẩu</h2>
+
+        <div class="mb-3 text-center text-muted">
+            <p class="mb-1">
+                Sau khi reset mật khẩu, bạn sẽ nhận được mật khẩu tạm thời qua email đã đăng ký.
+            </p>
+            <p>
+                Vui lòng dùng mật khẩu tạm thời để đăng nhập và đặt mật khẩu mới.
+            </p>
+        </div>
+
+        <form asp-controller="Account"
+              asp-action="QuenMatKhau"
+              method="post"
+              class="p-4 border rounded shadow-sm bg-white">
+
+            <div asp-validation-summary="ModelOnly"
+                 class="text-danger mb-3">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Tên đăng nhập</label>
+                <input asp-for="Username" class="form-control" />
+                <span asp-validation-for="Username"
+                      class="text-danger"></span>
+            </div>
+
+            <button type="submit"
+                    class="btn btn-success w-100 mb-3 py-2">
+                Reset mật khẩu
+            </button>
+
+            <div class="text-center mt-3 pt-3 border-top">
+                <a asp-controller="Account"
+                       asp-action="Login"
+                       class="text-decoration-none fw-bold">
+                    Quay lại
+                </a>
+            </div>
+        </form>
+    </div>
+</div>

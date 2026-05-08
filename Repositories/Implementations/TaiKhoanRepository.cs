@@ -1,4 +1,5 @@
-﻿using QuanLyPhongKham.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using QuanLyPhongKham.Data;
 using QuanLyPhongKham.Models;
 using QuanLyPhongKham.Repositories.Interfaces;
 using System;
@@ -47,15 +48,30 @@ namespace QuanLyPhongKham.Repositories.Implementations
             TaiKhoan? taiKhoan = _context.TaiKhoans.FirstOrDefault(t => t.TenDangNhap == username);
             return taiKhoan;
         }
-        public bool ExistedByUsername(string username)
-        {
-            return _context.TaiKhoans.Any(t => t.TenDangNhap == username);
-        }
+        
         public TaiKhoan? GetByNguoiDungId(int nguoiDungId)
         {
             return _context.TaiKhoans
                 .FirstOrDefault(tk => tk.NguoiDungId == nguoiDungId);
         }
 
+        public bool ExistedByUsername(string username)
+        {
+            return _context.TaiKhoans.Any(t => t.TenDangNhap == username);
+        }
+
+        public TaiKhoan? GetByUsernameWithNguoiDung(string username)
+        {
+            return _context.TaiKhoans
+                .Include(t => t.NguoiDung)
+                .FirstOrDefault(t => t.TenDangNhap == username);
+        }
+
+        public TaiKhoan? GetByIdWithNguoiDung(int id)
+        {
+            return _context.TaiKhoans
+                .Include(t => t.NguoiDung)
+                .FirstOrDefault(t => t.Id == id);
+        }
     }
 }

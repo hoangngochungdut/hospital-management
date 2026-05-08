@@ -1,12 +1,12 @@
 ﻿using QuanLyPhongKham.Models;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace QuanLyPhongKham.Repositories.Interfaces
 {
     public interface IKetQuaKhamRepository
     {
-        KetQuaKham? GetByBuoiKhamId(int buoiKhamId);
+        KetQuaKham GetById(int buoiKhamId);
+        bool Add(KetQuaKham entity);
+        bool Update(KetQuaKham entity);
+
     }
 }
