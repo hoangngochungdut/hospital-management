@@ -1,6 +1,7 @@
 ﻿using QuanLyPhongKham.Models;
 using QuanLyPhongKham.Models.DTOs;
 using QuanLyPhongKham.Models.Enums;
+using QuanLyPhongKham.Repositories.Implementations;
 using QuanLyPhongKham.Repositories.Interfaces;
 using QuanLyPhongKham.Services.Interfaces;
 
@@ -319,5 +320,12 @@ namespace QuanLyPhongKham.Services.Implementations
 
             return _buoiKhamRepo.Update(lich);
         }
+        // Đảm bảo bạn đã inject _buoiKhamRepository vào constructor của Service nhé
+        public void CapNhatThanhToan(int lichKhamId)
+        {
+            // Gọi xuống Repository để cập nhật Database
+            _buoiKhamRepo.CapNhatThanhToan(lichKhamId);
+        }
+
     }
 }

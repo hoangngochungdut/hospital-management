@@ -195,5 +195,6 @@ namespace QuanLyPhongKham.Web.Controllers
 
             return View(danhSachLichTruc);
         }
+
     }
 }

@@ -2,6 +2,10 @@
 using QuanLyPhongKham.Models.DTOs;
 using QuanLyPhongKham.Models.Enums;
 using QuanLyPhongKham.Services.Interfaces;
+using System.Security.Cryptography; // Để dùng hàm HMACSHA256 (tạo chữ ký)
+using System.Text;               // Để mã hóa chuỗi sang Byte
+using System.Net.Http;             // Để gửi dữ liệu sang máy chủ MoMo
+using System.Text.Json;            // Để đọc kết quả trả về từ MoMo
 
 namespace QuanLyPhongKham.Web.Controllers
 {
@@ -214,6 +218,116 @@ namespace QuanLyPhongKham.Web.Controllers
             TempData[success ? "Success" : "Error"] = message;
 
             return RedirectToAction(nameof(HoSo));
+        }
+        private string CreateSignature(string rawHash, string secretKey)
+        {
+            byte[] keyByte = Encoding.UTF8.GetBytes(secretKey);
+            byte[] messageBytes = Encoding.UTF8.GetBytes(rawHash);
+            using (var hmacsha256 = new HMACSHA256(keyByte))
+            {
+                byte[] hashmessage = hmacsha256.ComputeHash(messageBytes);
+                return BitConverter.ToString(hashmessage).Replace("-", "").ToLower();
+            }
+        }
+        
+        [HttpPost]
+        public async Task<IActionResult> ConfirmMomo(long sotien, int lichKhamId)
+        {
+            // Các thông tin Key giữ nguyên như cũ
+            string endpoint = "https://test-payment.momo.vn/v2/gateway/api/create";
+            string partnerCode = "MOMOBKUN20180529";
+            string accessKey = "klm05TvNBzhg7h7j";
+            string secretKey = "at67qH6mk8w5Y1nAyMoYKMWACiEi2bsa";
+
+            string orderInfo = "Thanh toán phí khám bệnh #" + lichKhamId;
+            string redirectUrl = "https://localhost:7282/LeTanDashboard/MomoCallback";
+            string ipnUrl = "https://localhost:7282/LeTanDashboard/IPN";
+            string requestType = "captureWallet";
+
+            string orderId = DateTime.Now.Ticks.ToString();
+            string requestId = DateTime.Now.Ticks.ToString();
+
+            // QUAN TRỌNG: Gửi ID lịch khám vào đây để MoMo trả ngược lại cho mình
+            string extraData = lichKhamId.ToString();
+
+            // Tạo chuỗi ký (Lưu ý: Phải có extraData trong chuỗi này)
+            string rawHash = $"accessKey={accessKey}&amount={sotien}&extraData={extraData}&ipnUrl={ipnUrl}&orderId={orderId}&orderInfo={orderInfo}&partnerCode={partnerCode}&redirectUrl={redirectUrl}&requestId={requestId}&requestType={requestType}";
+
+            string signature = CreateSignature(rawHash, secretKey);
+
+            var requestData = new MomoPaymentRequest
+            {
+                partnerCode = partnerCode,
+                requestId = requestId,
+                amount = sotien,
+                orderId = orderId,
+                orderInfo = orderInfo,
+                redirectUrl = redirectUrl,
+                ipnUrl = ipnUrl,
+                lang = "vi",
+                extraData = extraData, // Đảm bảo extraData được đóng gói
+                requestType = requestType,
+                signature = signature
+            };
+
+            using (var client = new HttpClient())
+            {
+                var response = await client.PostAsJsonAsync(endpoint, requestData);
+                var responseContent = await response.Content.ReadAsStringAsync();
+                var momoResponse = JsonDocument.Parse(responseContent);
+
+                if (momoResponse.RootElement.TryGetProperty("payUrl", out var payUrl))
+                {
+                    return Redirect(payUrl.GetString());
+                }
+                return BadRequest("Lỗi kết nối MoMo");
+            }
+        }
+        [HttpGet]
+        public async Task<IActionResult> MomoCallback(string resultCode, string message, string extraData)
+        {
+            // 1. Dùng resultCode thay vì errorCode
+            // MoMo trả về "0" là giao dịch thành công hoàn toàn
+            if (resultCode == "0")
+            {
+                if (int.TryParse(extraData, out int lichKhamId))
+                {
+                    try
+                    {
+                        // 2. PHẢI MỞ KHÓA DÒNG NÀY ĐỂ CẬP NHẬT DATABASE
+                        // Gọi hàm cập nhật DaThanhToan = true mà mình đã làm ở các bước trước
+                        _buoiKhamService.CapNhatThanhToan(lichKhamId);
+
+                        TempData["SuccessMessage"] = $"✅ Thanh toán thành công cho ca khám #{lichKhamId}!";
+                    }
+                    catch (Exception ex)
+                    {
+                        TempData["ErrorMessage"] = "Lỗi cập nhật dữ liệu: " + ex.Message;
+                    }
+                }
+            }
+            else
+            {
+                // Nhảy vào đây nếu khách hủy hoặc resultCode != 0
+                TempData["ErrorMessage"] = "Thanh toán thất bại hoặc đã bị hủy: " + message;
+            }
+
+            return RedirectToAction("QuanLyLichKham");
+        }
+        [HttpPost]
+        public IActionResult XacNhanThuTien(int id)
+        {
+            try
+            {
+                // Dùng lại chính hàm chúng ta vừa fix lỗi xong!
+                _buoiKhamService.CapNhatThanhToan(id);
+                TempData["ThongBao"] = "✅ Đã xác nhận thu tiền mặt thành công!";
+            }
+            catch (Exception ex)
+            {
+                TempData["ThongBao"] = "❌ Lỗi: " + ex.Message;
+            }
+            return RedirectToAction("QuanLyLichKham");
         }
     }
 }

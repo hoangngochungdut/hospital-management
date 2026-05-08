@@ -27,5 +27,7 @@ namespace QuanLyPhongKham.Models
         public int? DiemDanhGia { get; set; }
         public string? NhanXetCuaBenhNhan { get; set; }
         public string? ThongBaoChoBenhNhan { get; set; }
+        public bool DaThanhToan { get; set; } = false;
+
     }
 }

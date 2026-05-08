@@ -11,5 +11,7 @@ namespace QuanLyPhongKham.Models.DTOs
         public int BacSiId { get; set; }
         public int PhongKhamId { get; set; }
         public int? BenhNhanId { get; set; }
+        public string HinhThucThanhToan { get; set; }
+
     }
 }

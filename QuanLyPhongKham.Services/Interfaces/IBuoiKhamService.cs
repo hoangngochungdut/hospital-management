@@ -70,5 +70,6 @@ namespace QuanLyPhongKham.Services.Interfaces
             int bacSiMoiId,
             string lyDo);
         bool XoaLichKham(int id);
+        void CapNhatThanhToan(int lichKhamId);
     }
 }

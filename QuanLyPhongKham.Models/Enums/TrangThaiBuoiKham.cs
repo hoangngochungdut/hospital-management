@@ -9,6 +9,7 @@ namespace QuanLyPhongKham.Models.Enums
         ChuaXacNhan = 0,
         XacNhan = 1,
         HoanThanh = 2,
-        Huy = 3
+        Huy = 3,
+        //DaThanhToan = 4
     }
 }

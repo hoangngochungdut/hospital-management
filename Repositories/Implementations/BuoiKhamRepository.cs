@@ -142,6 +142,14 @@ namespace QuanLyPhongKham.Repositories.Implementations
                 .Select(b => b.Gio)
                 .ToListAsync();
         }
-        
+        public void CapNhatThanhToan(int lichKhamId) // Nhớ là CapNhatThanhToan cho khớp Interface
+        {
+            var caKham = _context.BuoiKhams.Find(lichKhamId);
+            if (caKham != null)
+            {
+                caKham.DaThanhToan = true;
+                _context.SaveChanges();
+            }
+        }
     }
 }

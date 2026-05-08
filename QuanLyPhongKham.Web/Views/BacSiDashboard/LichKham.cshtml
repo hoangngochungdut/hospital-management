@@ -121,7 +121,20 @@
                                 <td class="py-4 px-5 opacity-80">
                                     <div class="flex items-center gap-2">
                                         <div class="font-bold text-slate-700 text-lg">@item.BenhNhan?.HoTen</div>
-                                        <i class="fa fa-eye text-blue-500 cursor-pointer hover:text-blue-700 text-lg" onclick="xemTieuSu(@item.BenhNhanId)"></i>
+                                        @if (item.TrangThai != TrangThaiBuoiKham.Huy)
+                                        {
+                                            <!-- 👁 được bấm -->
+                                            <i class="fa fa-eye text-blue-500 cursor-pointer hover:text-blue-700 text-lg"
+                                                   onclick="xemTieuSu(@item.BenhNhanId)">
+                                            </i>
+                                        }
+                                        else
+                                        {
+                                            <!-- 👁 bị disable -->
+                                            <i class="fa fa-eye text-gray-300 cursor-not-allowed text-lg"
+                                                   title="Ca khám đã hủy - không xem tiểu sử">
+                                            </i>
+                                        }
                                     </div>
                                     <div class="text-xs text-slate-400 font-medium mt-1">SĐT: @item.BenhNhan?.Sdt</div>
                                 </td>
