@@ -12,12 +12,49 @@ namespace QuanLyPhongKham.Web.Controllers
         private readonly IBacSiService _bacSiService;
         private readonly IChuyenKhoaService _chuyenKhoaService;
         private readonly ITaiKhoanService _taiKhoanService;
+        private readonly IBuoiKhamService _buoiKhamService;
         //private readonly 
-        public BacSiController(IBacSiService bacSiService, IChuyenKhoaService chuyenKhoaService, ITaiKhoanService taiKhoanService)
+        public BacSiController(
+            IBacSiService bacSiService, 
+            IChuyenKhoaService chuyenKhoaService, 
+            ITaiKhoanService taiKhoanService,
+            IBuoiKhamService buoiKhamService)
         {
             _bacSiService = bacSiService;
             _chuyenKhoaService = chuyenKhoaService;
             _taiKhoanService = taiKhoanService;
+            _buoiKhamService = buoiKhamService;
+        }
+
+        [HttpGet]
+        public IActionResult ChiTiet(int id)
+        {
+            var bacSi = _bacSiService.GetByIdWithTaiKhoan(id);
+            if (bacSi == null)
+            {
+                return NotFound();
+            }
+
+            CapNhatHoSoBacSiRequest capNhatHoSoBacSi = new(bacSi);
+
+            ViewBag.DanhSachChuyenKhoa = _chuyenKhoaService.GetAll();
+            ViewBag.BacSiId = id;
+            ViewBag.TenChuyenKhoa = bacSi.ChuyenKhoa?.TenKhoa;
+            Console.WriteLine("Bac si id đang chon = " + ViewBag.BacSiId);
+            return View(capNhatHoSoBacSi);
+        }
+
+        [HttpGet]
+        public IActionResult LichKham(int id)
+        {
+            //int? currentBacSiId = HttpContext.Session.GetInt32("UserId");
+
+            //if (id == null)
+                //return RedirectToAction("Login", "Account");
+
+            var lichCuaToi = _buoiKhamService.GetByBacSiId(id);
+
+            return View(lichCuaToi);
         }
 
         [HttpGet]
@@ -76,6 +113,8 @@ namespace QuanLyPhongKham.Web.Controllers
                     ViewBag.DanhSachChuyenKhoa = _chuyenKhoaService.GetAll();
                     return View(model);
                 }
+
+                
 
                 _bacSiService.Add(model);
 

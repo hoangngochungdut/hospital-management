@@ -7,6 +7,8 @@
 }
 
 <div class="bg-white p-6 rounded-xl shadow border border-slate-200">
+
+    <!-- HEADER -->
     <div class="flex items-center justify-between mb-4">
         <h2 class="text-xl font-bold">Danh sách bác sĩ</h2>
 
@@ -17,6 +19,7 @@
         </a>
     </div>
 
+    <!-- THÔNG BÁO -->
     @if (TempData["Success"] != null)
     {
         <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
@@ -31,6 +34,38 @@
         </div>
     }
 
+    <!-- BỘ LỌC -->
+    <div class="bg-slate-50 border border-slate-200 rounded-lg p-4 mb-5">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+
+            <!-- Lọc theo tên -->
+            <div>
+                <label class="block text-sm font-medium text-slate-600 mb-1">
+                    Tên bác sĩ
+                </label>
+
+                <input type="text"
+                       id="filterTen"
+                       placeholder="Nhập tên bác sĩ..."
+                       class="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-400" />
+            </div>
+
+            <!-- Lọc theo chuyên khoa -->
+            <div>
+                <label class="block text-sm font-medium text-slate-600 mb-1">
+                    Chuyên khoa
+                </label>
+
+                <input type="text"
+                       id="filterChuyenKhoa"
+                       placeholder="Nhập chuyên khoa..."
+                       class="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-400" />
+            </div>
+
+        </div>
+    </div>
+
+    <!-- BẢNG -->
     <table class="w-full text-left">
         <thead>
             <tr class="border-b bg-slate-800 text-white">
@@ -45,33 +80,42 @@
         <tbody>
             @foreach (var bs in Model ?? new List<BacSi>())
             {
-                <tr class="border-b hover:bg-slate-50 transition-colors">
+                <tr class="border-b hover:bg-slate-50 transition-colors doctor-row">
 
-                    <td class="py-3 px-2 font-bold text-blue-600">
+                    <!-- TÊN -->
+                    <td class="py-3 px-2 font-bold text-blue-600 doctor-name">
                         @bs.HoTen
                     </td>
 
-                    <td class="py-3 px-2">
+                    <!-- CHUYÊN KHOA -->
+                    <td class="py-3 px-2 doctor-specialty">
                         @(bs.ChuyenKhoa?.TenKhoa ?? "Chưa phân chuyên khoa")
                     </td>
 
+                    <!-- ĐỊA CHỈ -->
                     <td class="py-3 px-2">
-                        @(string.IsNullOrWhiteSpace(bs.DiaChi) ? "Chưa có địa chỉ" : bs.DiaChi)
+                        @(string.IsNullOrWhiteSpace(bs.DiaChi)
+                            ? "Chưa có địa chỉ"
+                            : bs.DiaChi)
                     </td>
 
+                    <!-- SĐT -->
                     <td class="py-3 px-2">
-                        @(string.IsNullOrWhiteSpace(bs.Sdt) ? "Chưa có SĐT" : bs.Sdt)
+                        @(string.IsNullOrWhiteSpace(bs.Sdt)
+                            ? "Chưa có SĐT"
+                            : bs.Sdt)
                     </td>
 
+                    <!-- THAO TÁC -->
                     <td class="py-3 px-2">
                         <div class="flex items-center space-x-2">
 
-                            <!-- Nút sửa -->
+                            <!-- Nút chi tiết -->
                             <a asp-controller="BacSi"
-                                   asp-action="Edit"
+                                   asp-action="ChiTiet"
                                    asp-route-id="@bs.Id"
-                                   class="bg-yellow-50 text-yellow-600 border border-yellow-200 hover:bg-yellow-500 hover:text-white px-3 py-1.5 rounded text-sm transition-all font-medium">
-                                Sửa
+                                   class="bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-500 hover:text-white px-3 py-1.5 rounded text-sm transition-all font-medium">
+                                Chi tiết
                             </a>
 
                             <!-- Nút xóa -->
@@ -97,3 +141,39 @@
         </tbody>
     </table>
 </div>
+
+<!-- SCRIPT FILTER -->
+<script>
+    const filterTen = document.getElementById("filterTen");
+    const filterChuyenKhoa = document.getElementById("filterChuyenKhoa");
+
+    const rows = document.querySelectorAll(".doctor-row");
+
+    function filterDoctors() {
+
+        const tenValue = filterTen.value.toLowerCase();
+        const khoaValue = filterChuyenKhoa.value.toLowerCase();
+
+        rows.forEach(row => {
+
+            const ten = row.querySelector(".doctor-name")
+                .innerText.toLowerCase();
+
+            const khoa = row.querySelector(".doctor-specialty")
+                .innerText.toLowerCase();
+
+            const matchTen = ten.includes(tenValue);
+            const matchKhoa = khoa.includes(khoaValue);
+
+            if (matchTen && matchKhoa) {
+                row.style.display = "";
+            }
+            else {
+                row.style.display = "none";
+            }
+        });
+    }
+
+    filterTen.addEventListener("input", filterDoctors);
+    filterChuyenKhoa.addEventListener("input", filterDoctors);
+</script>

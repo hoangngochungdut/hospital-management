@@ -8,15 +8,28 @@
 <div class="bg-slate-50 min-h-screen py-10 px-4">
     <div class="max-w-6xl mx-auto">
         
-        <div class="mb-8">
-            <h2 class="text-3xl font-black text-slate-800 uppercase tracking-tight">Đội ngũ Bác sĩ</h2>
-            <p class="text-slate-500 mt-2">Xem thông tin và đánh giá thực tế từ các bệnh nhân đi trước để dễ dàng lựa chọn.</p>
+        <!-- HEADER VÀ Ô TÌM KIẾM -->
+        <div class="mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+            <div>
+                <h2 class="text-3xl font-black text-slate-800 uppercase tracking-tight">Đội ngũ Bác sĩ</h2>
+                <p class="text-slate-500 mt-2">Xem thông tin và đánh giá thực tế từ các bệnh nhân đi trước để dễ dàng lựa chọn.</p>
+            </div>
+            
+            <!-- Ô INPUT TÌM KIẾM -->
+            <div class="relative w-full md:w-96">
+                <i class="fas fa-search absolute left-4 top-3.5 text-slate-400"></i>
+                <input type="text" id="searchInput" placeholder="Tìm tên bác sĩ, hoặc chuyên khoa..."
+                       class="w-full bg-white border border-slate-200 text-slate-700 font-medium text-sm rounded-xl outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 block pl-10 p-3 shadow-sm transition-all" />
+            </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="doctorGrid">
             @foreach (var bs in Model)
             {
-                <div class="bg-white rounded-3xl shadow-lg border border-slate-100 overflow-hidden flex flex-col transition-all hover:shadow-xl hover:-translate-y-1">
+                /* THÊM class 'doctor-card' VÀ CÁC THUỘC TÍNH data-* ĐỂ JAVASCRIPT LỌC */
+                <div class="doctor-card bg-white rounded-3xl shadow-lg border border-slate-100 overflow-hidden flex flex-col transition-all hover:shadow-xl hover:-translate-y-1"
+                     data-name="@bs.TenBacSi.ToLower()"
+                     data-khoa="@bs.TenChuyenKhoa.ToLower()">
                     
                     <div class="p-6 border-b border-slate-100 relative overflow-hidden">
                         <div class="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-bl-full -z-10"></div>
@@ -89,6 +102,14 @@
                     </div>
                 </div>
             }
+            
+            <!-- THÔNG BÁO KHI TÌM KHÔNG THẤY -->
+            <div id="noResultsMessage" class="hidden text-center py-16 w-full col-span-full bg-white rounded-3xl border border-slate-100 shadow-sm">
+                <div class="text-5xl mb-4 opacity-50">🔍</div>
+                <h3 class="text-xl font-black text-slate-700">Không tìm thấy bác sĩ</h3>
+                <p class="text-slate-500 mt-2">Vui lòng thử tìm với tên hoặc chuyên khoa khác!</p>
+            </div>
+            
         </div>
     </div>
 </div>
@@ -114,18 +135,49 @@
 
 @section Scripts {
     <script>
+        // HÀM LOẠI BỎ DẤU TIẾNG VIỆT ĐỂ TÌM KIẾM CHÍNH XÁC HƠN
+        function removeAccents(str) {
+            return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D');
+        }
+
+        // TÍNH NĂNG TÌM KIẾM TRỰC TIẾP TRÊN TRANG (FRONTEND)
+        $(document).ready(function() {
+            $('#searchInput').on('input', function() {
+                let keyword = removeAccents($(this).val().toLowerCase().trim());
+                let hasResult = false;
+
+                $('.doctor-card').each(function() {
+                    // Lấy dữ liệu từ data-name và data-khoa đã gắn ở HTML
+                    let name = removeAccents($(this).data('name'));
+                    let khoa = removeAccents($(this).data('khoa'));
+
+                    // Kiểm tra xem từ khóa có nằm trong tên hoặc chuyên khoa không
+                    if (name.includes(keyword) || khoa.includes(keyword)) {
+                        $(this).removeClass('hidden').addClass('flex');
+                        hasResult = true;
+                    } else {
+                        $(this).removeClass('flex').addClass('hidden');
+                    }
+                });
+
+                // Hiển thị/Ẩn thông báo "Không tìm thấy"
+                if (hasResult) {
+                    $('#noResultsMessage').addClass('hidden');
+                } else {
+                    $('#noResultsMessage').removeClass('hidden');
+                }
+            });
+        });
+
         // Hàm mở Modal và gọi API lấy dữ liệu Bác sĩ
         function xemThongTinBacSi(id, tenKhoa) {
-            // 1. Mở Modal
             $('#bacSiModal').removeClass('hidden').addClass('flex');
             setTimeout(() => {
                 $('#bacSiModalContent').removeClass('scale-95 opacity-0').addClass('scale-100 opacity-100');
             }, 10);
 
-            // 2. Set trạng thái loading
             $('#bacSiModalBody').html('<div class="flex justify-center py-8"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>');
 
-            // 3. Gọi AJAX lấy dữ liệu
             $.get('/BenhNhanDashboard/GetThongTinBacSi?id=' + id, function(res) {
                 if (res.success) {
                     let d = res.data;
@@ -156,7 +208,6 @@
                                     <p class="font-bold text-slate-700 text-sm">${d.sdt}</p>
                                 </div>
                             </div>
-                            <!-- ĐÃ XÓA KHỐI EMAIL THEO YÊU CẦU -->
                             <div class="flex items-center gap-4 p-3 bg-slate-50 rounded-xl border border-slate-100 hover:bg-white hover:shadow-sm transition-all">
                                 <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-500 flex items-center justify-center">
                                     <i class="fas fa-map-marker-alt text-sm"></i>
@@ -175,7 +226,6 @@
             });
         }
 
-        // Hàm đóng Modal
         function closeBacSiModal() {
             $('#bacSiModalContent').removeClass('scale-100 opacity-100').addClass('scale-95 opacity-0');
             setTimeout(() => {
