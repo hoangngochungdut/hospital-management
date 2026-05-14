@@ -2,6 +2,7 @@
 {
     public class BacSiDanhGiaViewModel
     {
+        public int ChuyenKhoaId { get; set; }
         public int BacSiId { get; set; }
         public string? TenBacSi { get; set; }
         public string? TenChuyenKhoa { get; set; }

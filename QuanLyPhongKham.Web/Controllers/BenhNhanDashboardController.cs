@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using QuanLyPhongKham.Models;
 using QuanLyPhongKham.Models.DTOs;
 using QuanLyPhongKham.Models.Enums;
 using QuanLyPhongKham.Services.Interfaces;
@@ -23,52 +24,15 @@ namespace QuanLyPhongKham.Web.Controllers
 
         // ==================== ĐẶT LỊCH ====================
         [HttpGet]
-        public async Task<IActionResult> LichKham()
+        public async Task<IActionResult> LichKham(int? bacSiId, int? chuyenKhoaId)
         {
             ViewBag.DsChuyenKhoa = await _buoiKhamService.LayTatCaChuyenKhoaAsync();
+            ViewBag.SelectedBacSiId = bacSiId;
+            ViewBag.SelectedChuyenKhoaId = chuyenKhoaId;
             return View();
         }
 
-        //[HttpPost]
-        //public async Task<IActionResult> DatLich(
-        //    DateOnly Ngay,
-        //    string Gio,
-        //    int BacSiId,
-        //    int PhongKhamId)
-        //{
-        //    int? currentId = HttpContext.Session.GetInt32("UserId");
 
-        //    if (currentId == null)
-        //        return RedirectToAction("Login", "Account");
-
-        //    if (!TimeOnly.TryParse(Gio, out var gioParsed))
-        //    {
-        //        TempData["ThongBao"] = $"❌ Không đọc được giờ ({Gio})!";
-        //        return RedirectToAction("LichKham");
-        //    }
-
-        //    var request = new DatLichRequest
-        //    {
-        //        Ngay = Ngay,
-        //        Gio = gioParsed,
-        //        BacSiId = BacSiId,
-        //        PhongKhamId = PhongKhamId
-        //    };
-
-        //    try
-        //    {
-        //        var result = await _buoiKhamService.DatLichKhamAsync(request, currentId.Value, "BenhNhan");
-
-        //        if (result)
-        //            TempData["ThongBao"] = "✅ Đặt lịch thành công! Chờ xác nhận.";
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        TempData["ThongBao"] = ex.Message;
-        //    }
-
-        //    return RedirectToAction("LichKham");
-        //}
         // ==================== ĐẶT LỊCH VÀ THANH TOÁN ====================
         [HttpPost]
         public async Task<IActionResult> DatLich(DateOnly Ngay, string Gio, int BacSiId, int PhongKhamId, string HinhThucThanhToan)

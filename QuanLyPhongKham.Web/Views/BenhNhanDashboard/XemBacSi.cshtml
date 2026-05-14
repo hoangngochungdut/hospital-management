@@ -26,7 +26,6 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="doctorGrid">
             @foreach (var bs in Model)
             {
-                /* THÊM class 'doctor-card' VÀ CÁC THUỘC TÍNH data-* ĐỂ JAVASCRIPT LỌC */
                 <div class="doctor-card bg-white rounded-3xl shadow-lg border border-slate-100 overflow-hidden flex flex-col transition-all hover:shadow-xl hover:-translate-y-1"
                      data-name="@bs.TenBacSi.ToLower()"
                      data-khoa="@bs.TenChuyenKhoa.ToLower()">
@@ -34,7 +33,6 @@
                     <div class="p-6 border-b border-slate-100 relative overflow-hidden">
                         <div class="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-bl-full -z-10"></div>
                         
-                        <!-- Tên bác sĩ thành nút bấm (Clickable) -->
                         <h3 class="text-xl font-bold text-slate-800 cursor-pointer hover:text-blue-600 transition-colors inline-flex items-center gap-2"
                             onclick="xemThongTinBacSi(@bs.BacSiId, '@bs.TenChuyenKhoa')"
                             title="Xem chi tiết hồ sơ bác sĩ">
@@ -69,7 +67,7 @@
                         </div>
                     </div>
 
-                    <div class="p-6 bg-slate-50 flex-1">
+                    <div class="p-6 bg-slate-50 flex-1 flex flex-col">
                         <h4 class="text-[11px] font-black text-slate-400 uppercase mb-4 tracking-widest flex items-center gap-2">
                             <span>💬 Lời khen chê gần đây</span>
                         </h4>
@@ -99,11 +97,20 @@
                                 <div class="text-slate-400 text-xs font-medium">Bác sĩ này chưa có đánh giá nào.</div>
                             </div>
                         }
+
+                        <!-- ================= NÚT ĐẶT LỊCH ================= -->
+                        <div class="mt-auto pt-5 border-t border-slate-200/60">
+                            <!-- Đã sửa chuyenKhoaId thành tenKhoa -->
+                            <a href="@Url.Action("LichKham", "BenhNhanDashboard", new { bacSiId = bs.BacSiId, tenKhoa = bs.TenChuyenKhoa })"
+                               class="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-md hover:shadow-lg">
+                                <i class="far fa-calendar-check text-lg"></i>
+                                Đặt lịch khám bác sĩ này
+                            </a>
+                        </div>
                     </div>
                 </div>
             }
             
-            <!-- THÔNG BÁO KHI TÌM KHÔNG THẤY -->
             <div id="noResultsMessage" class="hidden text-center py-16 w-full col-span-full bg-white rounded-3xl border border-slate-100 shadow-sm">
                 <div class="text-5xl mb-4 opacity-50">🔍</div>
                 <h3 class="text-xl font-black text-slate-700">Không tìm thấy bác sĩ</h3>
@@ -114,7 +121,7 @@
     </div>
 </div>
 
-<!-- ================= MODAL XEM HỒ SƠ BÁC SĨ ================= -->
+<!-- MODAL -->
 <div id="bacSiModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
     <div class="bg-white rounded-[24px] shadow-2xl w-full max-w-md overflow-hidden transform transition-all scale-95 opacity-0 duration-300" id="bacSiModalContent">
         <div class="bg-blue-600 p-5 text-white flex justify-between items-center">
@@ -122,7 +129,6 @@
             <button onclick="closeBacSiModal()" class="text-white/70 hover:text-white text-2xl font-bold">&times;</button>
         </div>
         <div class="p-6" id="bacSiModalBody">
-            <!-- Loading Spinner hiển thị trong lúc chờ gọi API -->
             <div class="flex justify-center py-8">
                 <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
             </div>
@@ -135,23 +141,19 @@
 
 @section Scripts {
     <script>
-        // HÀM LOẠI BỎ DẤU TIẾNG VIỆT ĐỂ TÌM KIẾM CHÍNH XÁC HƠN
         function removeAccents(str) {
             return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D');
         }
 
-        // TÍNH NĂNG TÌM KIẾM TRỰC TIẾP TRÊN TRANG (FRONTEND)
         $(document).ready(function() {
             $('#searchInput').on('input', function() {
                 let keyword = removeAccents($(this).val().toLowerCase().trim());
                 let hasResult = false;
 
                 $('.doctor-card').each(function() {
-                    // Lấy dữ liệu từ data-name và data-khoa đã gắn ở HTML
                     let name = removeAccents($(this).data('name'));
                     let khoa = removeAccents($(this).data('khoa'));
 
-                    // Kiểm tra xem từ khóa có nằm trong tên hoặc chuyên khoa không
                     if (name.includes(keyword) || khoa.includes(keyword)) {
                         $(this).removeClass('hidden').addClass('flex');
                         hasResult = true;
@@ -160,7 +162,6 @@
                     }
                 });
 
-                // Hiển thị/Ẩn thông báo "Không tìm thấy"
                 if (hasResult) {
                     $('#noResultsMessage').addClass('hidden');
                 } else {
@@ -169,7 +170,6 @@
             });
         });
 
-        // Hàm mở Modal và gọi API lấy dữ liệu Bác sĩ
         function xemThongTinBacSi(id, tenKhoa) {
             $('#bacSiModal').removeClass('hidden').addClass('flex');
             setTimeout(() => {
@@ -236,20 +236,8 @@
 }
 
 <style>
-    .custom-scrollbar::-webkit-scrollbar {
-        width: 4px;
-    }
-
-    .custom-scrollbar::-webkit-scrollbar-track {
-        background: transparent;
-    }
-
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-        background: #cbd5e1;
-        border-radius: 10px;
-    }
-
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 </style>
