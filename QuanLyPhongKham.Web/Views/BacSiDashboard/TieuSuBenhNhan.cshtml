@@ -3,16 +3,22 @@
 @{
     var cacBenh = Model.LichSuKham
         .Where(x => !string.IsNullOrWhiteSpace(x.KetQua)
-                 && x.KetQua != "Chưa có kết quả"
-                 && !x.KetQua.Trim().Equals("Bình thường", StringComparison.OrdinalIgnoreCase)
-                 && !x.KetQua.Trim().Equals("Bình Thường", StringComparison.OrdinalIgnoreCase))
-        .Select(x => x.KetQua.Trim())
-        .Distinct()
+                 && !x.KetQua.Trim().Equals("Chưa có kết quả", StringComparison.OrdinalIgnoreCase)
+                 && !x.KetQua.Trim().Equals("Bình thường", StringComparison.OrdinalIgnoreCase))
+        // 1. Tách chuỗi theo dấu phẩy, tự động loại bỏ các phần tử rỗng (xử lý vụ ",,")
+        .SelectMany(x => x.KetQua.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+        // 2. Xóa khoảng trắng thừa ở 2 đầu mỗi bệnh
+        .Select(x => x.Trim())
+        // 3. Lọc bỏ các chuỗi rỗng sau khi trim hoặc các ký tự rác (ví dụ: chữ "m" lẻ tẻ)
+        .Where(x => x.Length > 1)
+        // 4. Gom nhóm theo chữ thường để loại bỏ trùng lặp hoa/thường (VD: "Mụn Trứng Cá" và "Mụn trứng cá")
+        .GroupBy(x => x.ToLower())
+        // 5. Lấy phần tử đầu tiên của mỗi nhóm (để giữ lại format chữ hoa ban đầu cho đẹp)
+        .Select(g => g.First())
         .ToList();
 
     string tienSuTuDong = cacBenh.Any() ? string.Join(", ", cacBenh) : "Chưa có";
 }
-
 <div class="p-6 relative">
     @* Dải viền màu xanh nhạt phía trên cho sang trọng *@
     <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-blue-500 to-indigo-500"></div>
@@ -21,9 +27,6 @@
         <h3 class="text-xl font-black text-blue-800 uppercase tracking-tight flex items-center gap-2">
             👤 TIỂU SỬ BỆNH NHÂN
         </h3>
-        <a href="/BacSiDashboard/HoSoBenhNhan?benhNhanId=@Model.ThongTin.NguoiDungId" class="px-5 py-2 bg-blue-50 text-blue-600 font-bold rounded-xl text-xs hover:bg-blue-600 hover:text-white transition-all shadow-sm mr-6">
-            Mở Hồ Sơ Y Tế Đầy Đủ
-        </a>
     </div>
 
     @* --- THÔNG TIN BỆNH NHÂN --- *@

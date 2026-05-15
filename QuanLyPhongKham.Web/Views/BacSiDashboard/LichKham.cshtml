@@ -162,9 +162,31 @@
                                     }
                                 </td>
                                 <td class="py-4 px-5">
-                                    <div class="text-xs text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-100">
-                                        <span class="font-bold text-slate-800">@(item.TrangThai == TrangThaiBuoiKham.Huy ? "Lý do hủy:" : "Kết luận:")</span>
-                                        <span class="italic block mt-1">@(item.GhiChuKetQua ?? item.ThongBaoChoBenhNhan ?? "Không có ghi chú")</span>
+                                    <div class="text-xs text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-100 min-w-[250px]">
+                                        @if (item.TrangThai == TrangThaiBuoiKham.Huy)
+                                        {
+                                            <span class="font-bold text-red-600 uppercase text-[11px] tracking-wider">Lý do hủy:</span>
+                                            <span class="italic block mt-1 text-slate-500">@(item.GhiChuKetQua ?? item.ThongBaoChoBenhNhan ?? "Không có ghi chú")</span>
+                                        }
+                                        else
+                                        {
+                                            <div class="mb-1.5">
+                                                <span class="font-bold text-slate-500 text-[11px] uppercase tracking-wider">Kết quả:</span>
+                                                @if (item.KetQuaKham != null && !string.IsNullOrWhiteSpace(item.KetQuaKham.KetQua))
+                                                {
+                                                    <span class="text-blue-700 font-bold text-sm ml-1 block mt-0.5">@item.KetQuaKham.KetQua</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-slate-400 italic text-sm ml-1 block mt-0.5">Chưa có kết quả</span>
+                                                }
+                                            </div>
+
+                                            <div class="pt-1.5 border-t border-slate-200">
+                                                <span class="font-bold text-slate-500 text-[11px] uppercase tracking-wider">Ghi chú:</span>
+                                                <span class="text-slate-500 italic block mt-0.5">@(item.GhiChuKetQua ?? "Không có ghi chú")</span>
+                                            </div>
+                                        }
                                     </div>
                                 </td>
                             </tr>
@@ -260,7 +282,6 @@
 
 @* ================= MODALS ================= *@
 
-<!-- Modal Tiểu sử -->
 <div id="tieuSuModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center transition-all p-4">
     <div class="bg-white rounded-[24px] shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col relative">
         <button type="button" onclick="closeTieuSuModal()" class="absolute top-4 right-5 text-slate-400 hover:text-red-500 font-bold text-3xl z-50">&times;</button>
@@ -268,7 +289,6 @@
     </div>
 </div>
 
-<!-- Modal Dời Lịch -->
 <div id="moveModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center transition-all">
     <div class="bg-white rounded-[24px] shadow-2xl w-full max-w-md overflow-hidden">
         <div class="bg-orange-500 p-5 text-white flex justify-between items-center">
@@ -289,7 +309,6 @@
     </div>
 </div>
 
-<!-- Modal Hủy Lịch -->
 <div id="cancelModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center transition-all">
     <div class="bg-white rounded-[24px] shadow-2xl w-full max-w-md overflow-hidden">
         <form action="/BacSiDashboard/HuyLichKham" method="POST">
@@ -311,7 +330,6 @@
     </div>
 </div>
 
-<!-- Modal Nhập Kết Quả Khám -->
 <div id="noteModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center transition-all">
     <div class="bg-white rounded-[24px] shadow-2xl w-full max-w-md overflow-hidden">
         <div class="bg-green-600 p-5 text-white flex justify-between items-center">
