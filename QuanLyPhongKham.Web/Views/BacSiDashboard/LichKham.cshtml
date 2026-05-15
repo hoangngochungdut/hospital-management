@@ -5,18 +5,30 @@
     Layout = "~/Views/Shared/_BacSiLayout.cshtml";
     ViewData["Title"] = "Lịch Của Tôi";
 
-    // Lấy ngày hiện tại để so sánh
+    // 1. Lấy ngày và giờ hiện tại
     var today = DateOnly.FromDateTime(DateTime.Now);
+    var currentTime = TimeOnly.FromDateTime(DateTime.Now);
 
-    // Lấy cả ca hôm nay VÀ CÁC CA QUÁ HẠN MÀ BÁC SĨ QUÊN BẤM HOÀN THÀNH (Ngay <= today)
-    var lichHomNay = Model.Where(x => x.Ngay <= today && (x.TrangThai == TrangThaiBuoiKham.ChuaXacNhan || x.TrangThai == TrangThaiBuoiKham.XacNhan))
+    // 2. Lấy TẤT CẢ các ca cần xử lý (Hôm nay + Ngày cũ chưa hoàn thành)
+    var cacCaCanXuLy = Model.Where(x => x.Ngay <= today && (x.TrangThai == TrangThaiBuoiKham.ChuaXacNhan || x.TrangThai == TrangThaiBuoiKham.XacNhan)).ToList();
+
+    // 3. TÁCH LÀM 2 NHÓM ĐỂ SẮP XẾP:
+    // Nhóm A: Các ca của hôm nay chưa tới giờ (ngoi lên đầu)
+    var nhomSapToi = cacCaCanXuLy.Where(x => x.Ngay == today && x.Gio >= currentTime)
+                                 .OrderBy(x => x.Gio).ToList();
+
+    // Nhóm B: Các ca đã quá giờ (của hôm nay hoặc ngày hôm qua) (đẩy xuống đáy)
+    var nhomQuaHan = cacCaCanXuLy.Where(x => x.Ngay < today || (x.Ngay == today && x.Gio < currentTime))
+                                 .OrderBy(x => x.Ngay).ThenBy(x => x.Gio).ToList();
+
+    // 4. GỘP 2 NHÓM LẠI: Lịch sắp tới ở trên, lịch quá hạn ở dưới
+    var lichHomNay = nhomSapToi.Concat(nhomQuaHan).ToList();
+
+    // 5. Ca khám ngày mai / tương lai
+    var lichSapToiTuongLai = Model.Where(x => x.Ngay > today && (x.TrangThai == TrangThaiBuoiKham.ChuaXacNhan || x.TrangThai == TrangThaiBuoiKham.XacNhan))
                           .OrderBy(x => x.Ngay).ThenBy(x => x.Gio).ToList();
 
-    // Ca khám sắp tới (Chỉ lấy tương lai)
-    var lichSapToi = Model.Where(x => x.Ngay > today && (x.TrangThai == TrangThaiBuoiKham.ChuaXacNhan || x.TrangThai == TrangThaiBuoiKham.XacNhan))
-                          .OrderBy(x => x.Ngay).ThenBy(x => x.Gio).ToList();
-
-    // Lịch sử: Đã xong hoặc đã hủy
+    // 6. Lịch sử: Đã xong hoặc đã hủy
     var lichSuKham = Model.Where(x => x.TrangThai == TrangThaiBuoiKham.HoanThanh || x.TrangThai == TrangThaiBuoiKham.Huy)
                           .OrderByDescending(x => x.Ngay).ThenByDescending(x => x.Gio).ToList();
 }
@@ -46,11 +58,11 @@
             </div>
         </div>
 
-        @* ================= PHẦN 1: CA KHÁM CẦN XỬ LÝ (HÔM NAY + QUÁ HẠN) ================= *@
+        @* ================= PHẦN 1: CA KHÁM CẦN XỬ LÝ ================= *@
         <div class="mb-10">
             <h3 class="text-lg font-black text-emerald-600 uppercase tracking-wider mb-4 flex items-center gap-2">
                 <span class="w-3 h-3 bg-emerald-500 rounded-full animate-pulse"></span>
-                <span>Ca khám cần xử lý</span>
+                <span>Ca khám cần xử lý (Sắp tới xếp trên)</span>
                 <span class="bg-emerald-100 text-emerald-800 text-xs px-2.5 py-0.5 rounded-full ml-1">@lichHomNay.Count</span>
             </h3>
 
@@ -71,12 +83,12 @@
         @* ================= PHẦN 2: CA KHÁM SẮP TỚI ================= *@
         <div class="mb-10">
             <h3 class="text-lg font-black text-blue-700 uppercase tracking-wider mb-4 flex items-center gap-2">
-                <span>📅 Ca khám sắp tới</span>
-                <span class="bg-blue-100 text-blue-800 text-xs px-2.5 py-0.5 rounded-full ml-1">@lichSapToi.Count</span>
+                <span>📅 Ca khám các ngày tới</span>
+                <span class="bg-blue-100 text-blue-800 text-xs px-2.5 py-0.5 rounded-full ml-1">@lichSapToiTuongLai.Count</span>
             </h3>
 
             <div class="bg-white p-2 rounded-2xl shadow-md border border-slate-200 overflow-hidden">
-                @if (!lichSapToi.Any())
+                @if (!lichSapToiTuongLai.Any())
                 {
                     <div class="text-center py-10">
                         <p class="text-slate-400 italic">Không có ca khám nào trong những ngày tới.</p>
@@ -84,7 +96,7 @@
                 }
                 else
                 {
-                    @RenderTable(lichSapToi)
+                    @RenderTable(lichSapToiTuongLai)
                 }
             </div>
         </div>
@@ -123,14 +135,12 @@
                                         <div class="font-bold text-slate-700 text-lg">@item.BenhNhan?.HoTen</div>
                                         @if (item.TrangThai != TrangThaiBuoiKham.Huy)
                                         {
-                                            <!-- 👁 được bấm -->
                                             <i class="fa fa-eye text-blue-500 cursor-pointer hover:text-blue-700 text-lg"
                                                    onclick="xemTieuSu(@item.BenhNhanId)">
                                             </i>
                                         }
                                         else
                                         {
-                                            <!-- 👁 bị disable -->
                                             <i class="fa fa-eye text-gray-300 cursor-not-allowed text-lg"
                                                    title="Ca khám đã hủy - không xem tiểu sử">
                                             </i>
@@ -172,19 +182,23 @@
     {
         var html = new System.Text.StringBuilder();
         var today = DateOnly.FromDateTime(DateTime.Now);
+        var currentTime = TimeOnly.FromDateTime(DateTime.Now);
 
         html.Append("<table class='w-full text-left'>");
         html.Append("<tr class='border-b border-slate-100 bg-slate-50 text-slate-500 text-xs uppercase tracking-widest'><th class='py-4 px-5'>Thời gian</th><th class='py-4 px-5'>Bệnh nhân</th><th class='py-4 px-5 text-center'>Phòng</th><th class='py-4 px-5'>Trạng thái</th><th class='py-4 px-5'>Thao tác</th></tr>");
         
         foreach (var item in list)
         {
+            // Kiểm tra xem ca này có bị lố giờ không (nhỏ hơn hôm nay HOẶC bằng hôm nay nhưng lố giờ)
+            bool isOverdue = item.Ngay < today || (item.Ngay == today && item.Gio < currentTime);
+
             // Bôi đỏ nhẹ những ca quá hạn để bác sĩ chú ý
-            string rowClass = item.Ngay < today ? "bg-red-50/50 border-b border-red-50 hover:bg-red-50" : "border-b border-slate-50 hover:bg-slate-50";
+            string rowClass = isOverdue ? "bg-red-50/50 border-b border-red-50 hover:bg-red-50" : "border-b border-slate-50 hover:bg-slate-50";
 
             html.Append($"<tr class='{rowClass} transition-all align-top group'>");
             
             html.Append($"<td class='py-5 px-5'>");
-            if (item.Ngay < today)
+            if (isOverdue)
             {
                 html.Append($"<div class='text-[10px] font-black text-red-500 uppercase mb-1'>⚠️ Quá hạn</div>");
             }
@@ -204,10 +218,8 @@
             // ================= LOGIC NÚT BẤM =================
             if (item.TrangThai == TrangThaiBuoiKham.ChuaXacNhan)
             {
-                // CHƯA XÁC NHẬN: CHỈ ĐƯỢC PHÉP DỜI LỊCH VÀ HỦY LỊCH
                 html.Append("<div class='flex flex-col gap-2'>");
                 
-                // Form Dời lịch
                 html.Append("<form action='/BacSiDashboard/DoiLichKham' method='POST'>");
                 html.Append($"<input type='hidden' name='id' value='{item.Id}' />");
                 html.Append("<input type='hidden' name='ngayMoi' class='ngayMoiInput' value='' />");
@@ -216,7 +228,6 @@
                 html.Append("<button type='button' onclick='openMoveModal(this)' class='w-full bg-white text-slate-700 border border-slate-200 px-3 py-2 rounded-xl text-[11px] font-black hover:bg-slate-100 transition-all uppercase tracking-wider shadow-sm'>🕒 Dời lịch</button>");
                 html.Append("</form>");
 
-                // Form Hủy Lịch (MỚI THÊM)
                 html.Append($"<button type='button' onclick='openCancelModal({item.Id})' class='w-full bg-red-50 text-red-600 border border-red-200 px-3 py-2 rounded-xl text-[11px] font-black hover:bg-red-100 transition-all uppercase tracking-wider shadow-sm'>❌ Hủy ca khám</button>");
 
                 html.Append("</div>");
@@ -240,8 +251,6 @@
                     html.Append("<span class='text-slate-400 text-[11px] italic text-center w-full block py-2'>Đã chốt lịch, không thể dời</span>");
                 }
             }
-            // ==============================================================
-
             html.Append("</td></tr>");
         }
         html.Append("</table>");
@@ -280,7 +289,7 @@
     </div>
 </div>
 
-<!-- Modal Hủy Lịch (MỚI THÊM) -->
+<!-- Modal Hủy Lịch -->
 <div id="cancelModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center transition-all">
     <div class="bg-white rounded-[24px] shadow-2xl w-full max-w-md overflow-hidden">
         <form action="/BacSiDashboard/HuyLichKham" method="POST">
@@ -334,7 +343,6 @@
             $('#' + modalId).addClass('hidden').removeClass('flex');
         }
 
-        // --- KỊCH BẢN TIỂU SỬ BỆNH NHÂN ---
         function xemTieuSu(benhNhanId) {
             $('#tieuSuModal').removeClass('hidden').addClass('flex');
             $('#tieuSuModalContent').html('<div class="p-10 text-center"><p class="animate-pulse">⏳ Đang tải...</p></div>');
@@ -344,23 +352,19 @@
         }
         function closeTieuSuModal() { $('#tieuSuModal').addClass('hidden').removeClass('flex'); }
 
-        // --- HÀM KIỂM TRA THỜI GIAN VÀ MỞ MODAL HOÀN THÀNH ---
         function checkAndOpenNoteModal(btn, isoTime) {
             let thoiGianKham = new Date(isoTime);
-            // Thêm 15 phút vào giờ khám
             let thoiGianChoPhep = new Date(thoiGianKham.getTime() + 15 * 60000);
             let now = new Date();
 
-            // Nếu thời gian hiện tại vẫn nhỏ hơn (chưa tới) thời gian cho phép
             if (now < thoiGianChoPhep) {
                 let gioKham = thoiGianKham.getHours().toString().padStart(2, '0') + ':' + thoiGianKham.getMinutes().toString().padStart(2, '0');
                 let gioPhep = thoiGianChoPhep.getHours().toString().padStart(2, '0') + ':' + thoiGianChoPhep.getMinutes().toString().padStart(2, '0');
                 
                 alert(`⛔ CHƯA ĐẾN GIỜ NHẬP KẾT QUẢ!\n\nCa khám của bệnh nhân bắt đầu lúc ${gioKham}.\nBác sĩ vui lòng chờ qua ${gioPhep} (đủ 15 phút) để có thể Hoàn Thành ca khám này.`);
-                return; // Dừng lại, không mở modal
+                return;
             }
 
-            // Nếu đã đủ 15 phút thì chạy tiếp mở modal như bình thường
             currentForm = $(btn).closest('form');
             $('#noteModalTitle').text("✅ Khám & Ghi Kết Quả");
             $('#noteModalDesc').text("Nhập dặn dò/ghi chú cho bệnh nhân:");
@@ -381,7 +385,6 @@
             currentForm.submit();
         });
 
-        // --- KỊCH BẢN DỜI LỊCH ---
         function openMoveModal(btn) {
             currentForm = $(btn).closest('form');
             $('#moveModal').removeClass('hidden').addClass('flex');
@@ -400,7 +403,6 @@
             currentForm.submit();
         });
 
-        // --- KỊCH BẢN HỦY LỊCH MỚI THÊM ---
         function openCancelModal(id) {
             $('#cancelModalId').val(id);
             $('#cancelModal').removeClass('hidden').addClass('flex');
