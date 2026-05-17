@@ -45,6 +45,12 @@ namespace QuanLyPhongKham.Web.Controllers
                 TempData["ThongBao"] = $"❌ Không đọc được giờ ({Gio})!";
                 return RedirectToAction("LichKham");
             }
+            var checkLich = _buoiKhamService.KiemTraTrungLichBenhNhan(currentId.Value, Ngay, gioParsed);
+            if (!checkLich.HopLe)
+            {
+                TempData["ThongBao"] = "❌ Đặt lịch thất bại! " + checkLich.ThongBao;
+                return RedirectToAction("LichKham");
+            }
 
             var request = new DatLichRequest
             {
@@ -53,6 +59,7 @@ namespace QuanLyPhongKham.Web.Controllers
                 BacSiId = BacSiId,
                 PhongKhamId = PhongKhamId
             };
+
 
             try
             {

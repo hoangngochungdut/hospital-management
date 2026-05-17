@@ -38,14 +38,11 @@ namespace QuanLyPhongKham.Services.Interfaces
             string role
         );
 
-
-        // ==================== TRẠNG THÁI & DỜI LỊCH ====================
-
-        //bool CapNhatTrangThai(
-        //    int id,
-        //    TrangThaiBuoiKham trangThaiMoi,
-        //    string? ghiChu = null
-        //);
+        // Kiểm tra xem bệnh nhân có đặt lịch trùng hoặc quá sát nhau không
+        (bool HopLe, string ThongBao) KiemTraTrungLichBenhNhan(
+            int benhNhanId,
+            DateOnly ngay,
+            TimeOnly gioDat);
         bool XulyCaKham(int id, TrangThaiBuoiKham trangThaiMoi, string? ghiChu = null, string? ketQuaKhamBenh = null);
         bool DoiLichKham(
             int id,

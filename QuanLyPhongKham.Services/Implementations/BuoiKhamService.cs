@@ -182,7 +182,27 @@ namespace QuanLyPhongKham.Services.Implementations
 
             return danhSachGioTrong;
         }
+        public (bool HopLe, string ThongBao) KiemTraTrungLichBenhNhan(int benhNhanId, DateOnly ngay, TimeOnly gioDat)
+        {
+            // Lấy lịch của bệnh nhân trong ngày đó (bỏ lịch Hủy)
+            // Tùy theo code cũ của ông gọi Repo thế nào, có thể là _buoiKhamRepository.GetAll().Where(...)
+            var lichTrongNgay = GetByBenhNhanId(benhNhanId)
+                .Where(x => x.Ngay == ngay && x.TrangThai != TrangThaiBuoiKham.Huy)
+                .ToList();
 
+            foreach (var lich in lichTrongNgay)
+            {
+                double khoangCachPhut = Math.Abs((lich.Gio - gioDat).TotalMinutes);
+
+                // Đặt khoảng cách tối thiểu giữa 2 ca là 30 phút
+                if (khoangCachPhut < 30)
+                {
+                    return (false, $"Bạn đã có lịch khám lúc {lich.Gio.ToString("HH:mm")}. Không thể đặt 2 lịch quá sát nhau!");
+                }
+            }
+
+            return (true, "Hợp lệ");
+        }
         // ==================== CẬP NHẬT ====================
         public bool XulyCaKham(int id, TrangThaiBuoiKham trangThaiMoi, string? ghiChu = null, string? ketQuaKhamBenh = null)
         {
