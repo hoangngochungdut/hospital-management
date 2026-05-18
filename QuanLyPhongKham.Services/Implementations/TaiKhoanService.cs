@@ -65,7 +65,7 @@ namespace QuanLyPhongKham.Services.Implementations
             return _taiKhoanRepository.GetByUsername(username);
         }
 
-        
+
 
         public async Task ResetMatKhau(int id)
         {

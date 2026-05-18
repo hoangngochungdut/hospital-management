@@ -12,5 +12,6 @@ namespace QuanLyPhongKham.Repositories.Interfaces
         public TaiKhoan? GetByIdWithNguoiDung(int id);
         public bool ExistedByUsername(string username);
         TaiKhoan? GetByNguoiDungId(int nguoiDungId);
+        // Thêm dòng này vào interface
     }
 }

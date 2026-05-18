@@ -16,5 +16,6 @@ namespace QuanLyPhongKham.Services.Interfaces
         public TaiKhoan? GetByUsernameWithNguoiDung(string username);
         public bool ExistedByUsername(string username);
         public Task ResetMatKhau(int id);
+
     }
 }

@@ -28,5 +28,22 @@ namespace QuanLyPhongKham.Services.Implementations
 
             return result.ToString();
         }
+        private static readonly string numbers = "0123456789";
+
+        public string GenerateNumericOtp(int length = 6)
+        {
+            var data = new byte[length];
+            using (var rng = System.Security.Cryptography.RandomNumberGenerator.Create())
+            {
+                rng.GetBytes(data);
+            }
+
+            var result = new System.Text.StringBuilder(length);
+            foreach (var b in data)
+            {
+                result.Append(numbers[b % numbers.Length]);
+            }
+            return result.ToString();
+        }
     }
 }
