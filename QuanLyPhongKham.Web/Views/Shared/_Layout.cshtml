@@ -10,17 +10,127 @@
     <link rel="stylesheet" href="~/QuanLyLichKham.styles.css" asp-append-version="true" />
 </head>
 <body>
-    
+
     <div class="container">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
 
+    <div class="modal fade" id="authModal" tabindex="-1" aria-labelledby="authModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow-lg border-0 rounded-4">
+                
+                <div class="modal-header border-0 pb-0 position-relative">
+                    <button type="button" class="btn-close position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Close"></button>
+                    
+                    <ul class="nav nav-pills w-100 mt-2" id="authTab" role="tablist">
+                        <li class="nav-item flex-fill text-center" role="presentation">
+                            <button class="nav-link active w-100 fw-bold" id="login-tab" data-bs-toggle="pill" data-bs-target="#login-pane" type="button" role="tab">Đăng Nhập</button>
+                        </li>
+                        <li class="nav-item flex-fill text-center" role="presentation">
+                            <button class="nav-link w-100 fw-bold" id="register-tab" data-bs-toggle="pill" data-bs-target="#register-pane" type="button" role="tab">Đăng Ký</button>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="modal-body p-4">
+                    <div class="tab-content" id="authTabContent">
+                        
+                        <div class="tab-pane fade show active" id="login-pane" role="tabpanel" tabindex="0">
+                            <form id="formLoginPopup">
+                                <div id="loginError" class="alert alert-danger d-none py-2 text-center fw-bold" role="alert"></div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label text-muted fw-bold small text-uppercase">Tên đăng nhập</label>
+                                    <input type="text" name="username" class="form-control form-control-lg" required placeholder="Nhập tài khoản..." />
+                                </div>
+                                <div class="mb-4">
+                                    <div class="d-flex justify-content-between">
+                                        <label class="form-label text-muted fw-bold small text-uppercase">Mật khẩu</label>
+                                        <a href="/Account/ForgotPassword" class="text-decoration-none small fw-bold">Quên mật khẩu?</a>
+                                    </div>
+                                    <input type="password" name="password" class="form-control form-control-lg" required placeholder="••••••••" />
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold">Đăng Nhập Ngay</button>
+                            </form>
+                        </div>
+
+                        <div class="tab-pane fade" id="register-pane" role="tabpanel" tabindex="0">
+                            <form id="formRegisterPopup">
+                                <div id="registerError" class="alert alert-danger d-none py-2 text-center fw-bold" role="alert"></div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label text-muted fw-bold small text-uppercase">Họ và Tên</label>
+                                    <input type="text" name="HoTen" class="form-control form-control-lg" required placeholder="Nguyễn Văn A" />
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label text-muted fw-bold small text-uppercase">Số điện thoại</label>
+                                    <input type="text" name="Sdt" class="form-control form-control-lg" required placeholder="0987654321" />
+                                </div>
+                                <div class="mb-4">
+                                    <label class="form-label text-muted fw-bold small text-uppercase">Mật khẩu</label>
+                                    <input type="password" name="Password" class="form-control form-control-lg" required placeholder="••••••••" />
+                                </div>
+                                <button type="submit" class="btn btn-success btn-lg w-100 fw-bold">Tạo Tài Khoản</button>
+                            </form>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    
+    <script>
+            $(document).ready(function () {
+            
+                // Xử lý ĐĂNG NHẬP
+                $('#formLoginPopup').submit(function (e) {
+                    e.preventDefault();
+                    let btn = $(this).find('button[type="submit"]');
+                    let originalText = btn.text();
+                    btn.html('<span class="spinner-border spinner-border-sm"></span> Đang xử lý...').prop('disabled', true);
+
+                    $.post('/Account/LoginAjax', $(this).serialize(), function (res) {
+                        if (res.success) {
+                            window.location.reload(); // F5 lại trang khi thành công
+                        } else {
+                            $('#loginError').text("❌ " + res.message).removeClass('d-none');
+                            btn.html(originalText).prop('disabled', false);
+                        }
+                    });
+                });
+
+                // Xử lý ĐĂNG KÝ
+                $('#formRegisterPopup').submit(function (e) {
+                    e.preventDefault();
+                    let btn = $(this).find('button[type="submit"]');
+                    let originalText = btn.text();
+                    btn.html('<span class="spinner-border spinner-border-sm"></span> Đang xử lý...').prop('disabled', true);
+
+                    $.post('/Account/RegisterAjax', $(this).serialize(), function (res) {
+                        if (res.success) {
+                            alert("✅ Đăng ký thành công! Đang tự động đăng nhập...");
+                            window.location.reload();
+                        } else {
+                            $('#registerError').text("❌ " + res.message).removeClass('d-none');
+                            btn.html(originalText).prop('disabled', false);
+                        }
+                    });
+                });
+
+                // Reset thông báo lỗi khi chuyển tab
+                $('#authTab button').on('show.bs.tab', function () {
+                    $('#loginError, #registerError').addClass('d-none');
+                });
+            });
+    </script>
+
     @await RenderSectionAsync("Scripts", required: false)
-   
 </body>
 </html>

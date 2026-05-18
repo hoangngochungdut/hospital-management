@@ -1,4 +1,8 @@
-﻿<!DOCTYPE html>
+﻿@{
+    // Nếu ông để file này trong thư mục Views thì giữ lại cục này, không thì xóa đi nhé
+    Layout = null; 
+}
+<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
@@ -15,7 +19,6 @@
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased overflow-x-hidden">
 
-    <!-- NAVBAR -->
     <nav class="bg-white/95 backdrop-blur-md shadow-sm sticky top-0 z-50">
         <div class="container mx-auto px-6 py-4 flex justify-between items-center">
             <a href="#" class="flex items-center space-x-3">
@@ -35,38 +38,17 @@
                 <a href="#lien-he" class="hover:text-blue-600 transition">Liên hệ</a>
             </div>
             
-            <!-- KHU VỰC NÚT ĐĂNG NHẬP / ĐĂNG KÝ TRÊN NAVBAR -->
             <div class="hidden md:flex items-center space-x-4">
-                <a asp-controller="Account" asp-action="Login" class="text-blue-600 font-semibold hover:text-blue-700 transition">
-                   Đăng nhập
-                </a>
-                <a asp-controller="Account" asp-action="Register" class="bg-blue-600 text-white px-6 py-2.5 rounded-full font-semibold hover:bg-blue-700 transition shadow-lg">
-                   Đăng ký
-                </a>
+                <button type="button" onclick="openAuthModal('login')" class="text-blue-600 font-semibold hover:text-blue-700 transition">
+                    Đăng nhập
+                </button>
+                <button type="button" onclick="openAuthModal('register')" class="bg-blue-600 text-white px-6 py-2.5 rounded-full font-semibold hover:bg-blue-700 transition shadow-lg">
+                    Đăng ký
+                </button>
             </div>
         </div>
     </nav>
 
-    <!-- THÔNG BÁO THÀNH CÔNG -->
-    @if (TempData["SuccessMessage"] != null)
-    {
-        <div class="container mx-auto px-6 mt-6">
-            <div class="bg-green-50 border-l-4 border-green-500 text-green-700 p-4 rounded-r-lg shadow-sm relative flex items-center justify-between" role="alert">
-                <div class="flex items-center">
-                    <i class="fas fa-check-circle text-xl mr-3 text-green-500"></i>
-                    <div>
-                        <strong class="font-bold">Thành công!</strong>
-                        <span class="block sm:inline ml-1">@TempData["SuccessMessage"]</span>
-                    </div>
-                </div>
-                <button type="button" class="..." onclick="this.parentElement.parentElement.style.display='none';">
-                    <i class="fas fa-times text-lg"></i>
-                </button>
-            </div>
-        </div>
-    }
-
-    <!-- HERO SECTION -->
     <section class="hero-gradient py-20">
         <div class="container mx-auto px-6 flex flex-col lg:flex-row items-center gap-12">
             <div class="lg:w-1/2 space-y-6">
@@ -78,15 +60,14 @@
                 </p>
                 
                 <div class="flex gap-4 pt-4 items-center">
-                    <a asp-controller="Account" asp-action="Login" class="text-blue-600 font-semibold hover:text-blue-700 transition">
-                       Đăng nhập
-                </a>
-                    <a asp-controller="Account" asp-action="Register" class="bg-blue-600 text-white px-6 py-2.5 rounded-full font-semibold hover:bg-blue-700 transition shadow-lg">
-                       Đăng ký
-                </a>
-
+                    <button type="button" onclick="openAuthModal('login')" class="text-blue-600 font-semibold hover:text-blue-700 transition">
+                        Đăng nhập
+                    </button>
+                    <button type="button" onclick="openAuthModal('register')" class="bg-blue-600 text-white px-6 py-2.5 rounded-full font-semibold hover:bg-blue-700 transition shadow-lg">
+                        Đăng ký
+                    </button>
                 </div>
-                </div>
+            </div>
 
             <div class="lg:w-1/2">
                 <img src="https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=800" alt="Phòng khám" class="w-full h-[400px] object-cover rounded-2xl shadow-2xl">
@@ -94,7 +75,6 @@
         </div>
     </section>
 
-    <!-- SECTION VỀ CHÚNG TÔI -->
     <section id="ve-chung-toi" class="py-20 bg-white">
         <div class="container mx-auto px-6 flex flex-col lg:flex-row gap-12 items-center">
             <div class="lg:w-1/2">
@@ -109,7 +89,7 @@
             </div>
         </div>
     </section>
-<!-- SECTION DỊCH VỤ -->
+
     <section id="dich-vu" class="py-20 bg-slate-50">
         <div class="container mx-auto px-6">
             <div class="text-center mb-12">
@@ -118,73 +98,46 @@
             </div>
 
             <div class="grid md:grid-cols-3 gap-8">
-                
-                <!-- Dịch vụ 1 -->
                 <div class="bg-white rounded-2xl p-8 shadow-sm border border-slate-100 hover:shadow-lg transition">
-                    <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-2xl mb-6">
-                        <i class="fas fa-stethoscope"></i> 
-                    </div>
+                    <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-2xl mb-6"><i class="fas fa-stethoscope"></i></div>
                     <h3 class="text-xl font-bold text-slate-900 mb-3">Khám Tổng Quát</h3>
                     <p class="text-slate-600 text-sm leading-relaxed">Gói khám sức khỏe toàn diện giúp phát hiện sớm các nguy cơ bệnh lý, bảo vệ sức khỏe cho bạn và gia đình.</p>
                 </div>
-
-                <!-- Dịch vụ 2 -->
                 <div class="bg-white rounded-2xl p-8 shadow-sm border border-slate-100 hover:shadow-lg transition">
-                    <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-2xl mb-6">
-                        <i class="fas fa-tooth"></i> 
-                    </div>
+                    <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-2xl mb-6"><i class="fas fa-tooth"></i></div>
                     <h3 class="text-xl font-bold text-slate-900 mb-3">Răng Hàm Mặt</h3>
                     <p class="text-slate-600 text-sm leading-relaxed">Cung cấp các dịch vụ nha khoa thẩm mỹ, điều trị bệnh lý răng miệng và chăm sóc nụ cười chuyên sâu.</p>
                 </div>
-
-                <!-- Dịch vụ 3 -->
                 <div class="bg-white rounded-2xl p-8 shadow-sm border border-slate-100 hover:shadow-lg transition">
-                    <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-2xl mb-6">
-                        <i class="fas fa-microscope"></i> 
-                    </div>
+                    <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-2xl mb-6"><i class="fas fa-microscope"></i></div>
                     <h3 class="text-xl font-bold text-slate-900 mb-3">Xét Nghiệm Sinh Hóa</h3>
                     <p class="text-slate-600 text-sm leading-relaxed">Hệ thống máy móc xét nghiệm hiện đại, trả kết quả nhanh chóng, chính xác hỗ trợ tối đa cho chẩn đoán.</p>
                 </div>
-
-                <!-- Dịch vụ 4 -->
                 <div class="bg-white rounded-2xl p-8 shadow-sm border border-slate-100 hover:shadow-lg transition">
-                    <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-2xl mb-6">
-                        <i class="fas fa-baby"></i> 
-                    </div>
+                    <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-2xl mb-6"><i class="fas fa-baby"></i></div>
                     <h3 class="text-xl font-bold text-slate-900 mb-3">Nhi Khoa</h3>
                     <p class="text-slate-600 text-sm leading-relaxed">Chăm sóc sức khỏe toàn diện cho trẻ sơ sinh và trẻ nhỏ với đội ngũ bác sĩ tận tâm, thấu hiểu tâm lý trẻ.</p>
                 </div>
-
-                <!-- Dịch vụ 5 -->
                 <div class="bg-white rounded-2xl p-8 shadow-sm border border-slate-100 hover:shadow-lg transition">
-                    <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-2xl mb-6">
-                        <i class="fas fa-x-ray"></i> 
-                    </div>
+                    <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-2xl mb-6"><i class="fas fa-x-ray"></i></div>
                     <h3 class="text-xl font-bold text-slate-900 mb-3">Chẩn Đoán Hình Ảnh</h3>
                     <p class="text-slate-600 text-sm leading-relaxed">Trang bị hệ thống Siêu âm, X-Quang kỹ thuật số thế hệ mới giúp phát hiện chính xác các tổn thương.</p>
                 </div>
-
-                <!-- Dịch vụ 6 -->
                 <div class="bg-white rounded-2xl p-8 shadow-sm border border-slate-100 hover:shadow-lg transition">
-                    <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-2xl mb-6">
-                        <i class="fas fa-heartbeat"></i> 
-                    </div>
+                    <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-2xl mb-6"><i class="fas fa-heartbeat"></i></div>
                     <h3 class="text-xl font-bold text-slate-900 mb-3">Tim Mạch</h3>
                     <p class="text-slate-600 text-sm leading-relaxed">Tầm soát và điều trị các bệnh lý tim mạch, huyết áp với phác đồ chuẩn y khoa theo tiêu chuẩn quốc tế.</p>
                 </div>
-
             </div>
         </div>
     </section>
 
-    <!-- SECTION ĐỘI NGŨ -->
     <section id="doi-ngu" class="py-20 bg-white">
         <div class="container mx-auto px-6">
             <div class="text-center mb-12">
                 <h2 class="text-3xl font-bold text-slate-900 mb-4">Đội Ngũ Bác Sĩ Đầu Ngành</h2>
                 <div class="w-16 h-1 bg-blue-600 mx-auto rounded-full"></div>
             </div>
-
             <div class="grid md:grid-cols-3 gap-8">
                 <div class="bg-white rounded-2xl overflow-hidden shadow border border-slate-100">
                     <img src="https://images.hcmcpv.org.vn/res/news/2020/09/25-09-2020-nguoi-bac-si-tan-tam-voi-nghe-chua-benh-cuu-nguoi-958FB4B0-details.jpg?vs=25092020073922" alt="Doctor" class="w-full h-64 object-cover">
@@ -196,28 +149,336 @@
             </div>
         </div>
     </section>
-    <!-- form liên hệ -->
 
-<section id="lien-he" class="py-20 bg-slate-50">
-    <div class="container mx-auto px-6 max-w-4xl">
-        <div class="bg-blue-600 rounded-2xl shadow-xl p-10 text-white text-center">
-            <h3 class="text-3xl font-bold mb-8">Thông Tin Liên Hệ</h3>
-            <div class="flex flex-col md:flex-row justify-center items-center gap-8 text-left">
-                <div class="flex items-center bg-white/10 p-4 rounded-xl">
-                    <i class="fas fa-map-marker-alt text-3xl mr-4 text-blue-200"></i>
-                    <p>Số 54 Nguyễn Lương Bằng,<br>Hòa Khánh Bắc, Liên Chiểu, Đà Nẵng</p>
-                </div>
-                <div class="flex items-center bg-white/10 p-4 rounded-xl">
-                    <i class="fas fa-phone-alt text-3xl mr-4 text-blue-200"></i>
-                    <div>
-                        <p class="text-sm text-blue-200">Hotline hỗ trợ</p>
-                        <p class="text-2xl font-semibold">0857157006</p>
+    <section id="lien-he" class="py-20 bg-slate-50">
+        <div class="container mx-auto px-6 max-w-4xl">
+            <div class="bg-blue-600 rounded-2xl shadow-xl p-10 text-white text-center">
+                <h3 class="text-3xl font-bold mb-8">Thông Tin Liên Hệ</h3>
+                <div class="flex flex-col md:flex-row justify-center items-center gap-8 text-left">
+                    <div class="flex items-center bg-white/10 p-4 rounded-xl">
+                        <i class="fas fa-map-marker-alt text-3xl mr-4 text-blue-200"></i>
+                        <p>Số 54 Nguyễn Lương Bằng,<br>Hòa Khánh Bắc, Liên Chiểu, Đà Nẵng</p>
+                    </div>
+                    <div class="flex items-center bg-white/10 p-4 rounded-xl">
+                        <i class="fas fa-phone-alt text-3xl mr-4 text-blue-200"></i>
+                        <div>
+                            <p class="text-sm text-blue-200">Hotline hỗ trợ</p>
+                            <p class="text-2xl font-semibold">0857157006</p>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
 
+    <div id="authModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-4 transition-all">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all scale-95 opacity-0 duration-300" id="authModalContent">
+            
+            <button type="button" onclick="closeAuthModal()" class="absolute top-4 right-5 text-slate-400 hover:text-red-500 font-black text-2xl z-10">&times;</button>
+
+            <div id="authTabsHeader" class="flex border-b border-slate-100 bg-slate-50 pt-2 px-2">
+                <button onclick="switchAuthTab('login')" id="tabLogin" class="flex-1 py-3 text-sm font-black text-blue-600 border-b-2 border-blue-600 uppercase tracking-wider transition-colors">Đăng Nhập</button>
+                <button onclick="switchAuthTab('register')" id="tabRegister" class="flex-1 py-3 text-sm font-bold text-slate-400 border-b-2 border-transparent hover:text-slate-600 uppercase tracking-wider transition-colors">Đăng Ký</button>
+            </div>
+
+            <div class="p-8">
+                <form id="formLoginPopup" class="space-y-4">
+                    <div id="loginError" class="hidden bg-red-50 text-red-600 p-3 rounded-lg text-sm font-bold border border-red-200 text-center"></div>
+                    
+                    <div>
+                        <label class="block text-xs font-black text-slate-500 uppercase mb-2">Tên đăng nhập</label>
+                        <input type="text" name="username" class="w-full border-2 border-slate-200 rounded-xl p-3 focus:border-blue-500 outline-none transition-all" required placeholder="Nhập tài khoản..." />
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="block text-xs font-black text-slate-500 uppercase">Mật khẩu</label>
+                            <a href="javascript:void(0)" onclick="switchAuthTab('forgot')" class="text-xs text-blue-500 font-bold hover:underline">Quên mật khẩu?</a>
+                        </div>
+                        <input type="password" name="password" class="w-full border-2 border-slate-200 rounded-xl p-3 focus:border-blue-500 outline-none transition-all" required placeholder="••••••••" />
+                    </div>
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-3 rounded-xl transition-all shadow-md uppercase mt-2">
+                        Đăng Nhập Ngay
+                    </button>
+                </form>
+
+                <form id="formRegisterPopup" class="space-y-3 hidden">
+                    <div id="registerError" class="hidden bg-red-50 text-red-600 p-3 rounded-lg text-sm font-bold border border-red-200 text-center"></div>
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[10px] font-black text-slate-500 uppercase mb-1">Tên đăng nhập (*)</label>
+                            <input type="text" name="Username" class="w-full border-2 border-slate-200 rounded-xl p-2.5 focus:border-blue-500 outline-none transition-all text-sm" required placeholder="tendangnhap" />
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black text-slate-500 uppercase mb-1">Mật khẩu (*)</label>
+                            <input type="password" name="Password" class="w-full border-2 border-slate-200 rounded-xl p-2.5 focus:border-blue-500 outline-none transition-all text-sm" required placeholder="••••••••" />
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-500 uppercase mb-1">Họ và Tên (*)</label>
+                        <input type="text" name="FullName" class="w-full border-2 border-slate-200 rounded-xl p-2.5 focus:border-blue-500 outline-none transition-all text-sm" required placeholder="Nguyễn Văn A" />
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[10px] font-black text-slate-500 uppercase mb-1">Số điện thoại (*)</label>
+                            <input type="text" name="PhoneNumber" class="w-full border-2 border-slate-200 rounded-xl p-2.5 focus:border-blue-500 outline-none transition-all text-sm" required placeholder="0987..." />
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black text-slate-500 uppercase mb-1">Email</label>
+                            <input type="email" name="Email" class="w-full border-2 border-slate-200 rounded-xl p-2.5 focus:border-blue-500 outline-none transition-all text-sm" placeholder="email@gmail.com" />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-500 uppercase mb-1">Địa chỉ liên hệ</label>
+                        <div class="grid grid-cols-3 gap-2 mb-2">
+                            <select id="selTinh" class="w-full border-2 border-slate-200 rounded-xl p-2 focus:border-blue-500 outline-none transition-all text-xs" required>
+                                <option value="">Tỉnh/Thành</option>
+                            </select>
+                            <select id="selHuyen" class="w-full border-2 border-slate-200 rounded-xl p-2 focus:border-blue-500 outline-none transition-all text-xs" disabled required>
+                                <option value="">Quận/Huyện</option>
+                            </select>
+                            <select id="selXa" class="w-full border-2 border-slate-200 rounded-xl p-2 focus:border-blue-500 outline-none transition-all text-xs" disabled required>
+                                <option value="">Phường/Xã</option>
+                            </select>
+                        </div>
+                        <input type="text" id="txtSoNha" class="w-full border-2 border-slate-200 rounded-xl p-2.5 focus:border-blue-500 outline-none transition-all text-sm" placeholder="Số nhà, tên đường (Tùy chọn)..." />
+                        <input type="hidden" id="DiaChiGop" name="DiaChi" />
+                    </div>
+                    
+                    <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-black py-3 rounded-xl transition-all shadow-md uppercase mt-3">
+                        Tạo Tài Khoản
+                    </button>
+                </form>
+
+                <form id="formForgotPopup" class="space-y-4 hidden text-left">
+                    <div id="forgotError" class="hidden bg-red-50 text-red-600 p-3 rounded-lg text-sm font-bold border border-red-200 text-center"></div>
+                    <div id="forgotSuccess" class="hidden bg-green-50 text-green-600 p-3 rounded-lg text-sm font-bold border border-green-200 text-center"></div>
+                    
+                    <div class="text-center mb-4">
+                        <div class="w-12 h-12 bg-orange-100 text-orange-500 rounded-full flex items-center justify-center text-xl mx-auto mb-2"><i class="fas fa-key"></i></div>
+                        <h3 class="font-black text-lg text-slate-800 uppercase">Khôi phục mật khẩu</h3>
+                        <p class="text-xs text-slate-500 mt-1">Nhập tên đăng nhập, hệ thống sẽ reset mật khẩu cho bạn.</p>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-black text-slate-500 uppercase mb-2">Tên đăng nhập</label>
+                        <input type="text" name="Username" class="w-full border-2 border-slate-200 rounded-xl p-3 focus:border-orange-500 outline-none transition-all" required placeholder="Nhập tài khoản của bạn..." />
+                    </div>
+                    <button type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-black py-3 rounded-xl transition-all shadow-md uppercase mt-2">
+                        Lấy lại mật khẩu
+                    </button>
+                    <div class="text-center mt-4 border-t border-slate-100 pt-4">
+                        <button type="button" onclick="switchAuthTab('login')" class="text-sm text-slate-500 font-bold hover:text-blue-600 transition-colors">
+                            <i class="fas fa-arrow-left mr-1"></i> Quay lại Đăng nhập
+                        </button>
+                    </div>
+                </form>
+
+                <form id="formChangePassPopup" class="space-y-4 hidden text-left">
+                    <div id="changePassError" class="hidden bg-red-50 text-red-600 p-3 rounded-lg text-sm font-bold border border-red-200 text-center"></div>
+                    <div class="text-center mb-4">
+                        <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xl mx-auto mb-2"><i class="fas fa-shield-alt"></i></div>
+                        <h3 class="font-black text-lg text-slate-800 uppercase">Đổi mật khẩu mới</h3>
+                        <p class="text-xs text-slate-500 mt-1">Vui lòng đổi mật khẩu để tiếp tục sử dụng hệ thống.</p>
+                    </div>
+                    <input type="hidden" name="TempTaiKhoanId" id="tempTkId" />
+                    <div>
+                        <label class="block text-xs font-black text-slate-500 uppercase mb-2">Mật khẩu mới</label>
+                        <input type="password" name="MatKhauMoi" id="newPass" class="w-full border-2 border-slate-200 rounded-xl p-3 focus:border-blue-500 outline-none" required />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-black text-slate-500 uppercase mb-2">Xác nhận mật khẩu</label>
+                        <input type="password" name="XacNhanMatKhauMoi" id="confirmPass" class="w-full border-2 border-slate-200 rounded-xl p-3 focus:border-blue-500 outline-none" required />
+                    </div>
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-3 rounded-xl shadow-md uppercase">Xác nhận đổi mật khẩu</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script>
+        function openAuthModal(tab = 'login') {
+            $('#authModal').removeClass('hidden').addClass('flex');
+            setTimeout(() => {
+                $('#authModalContent').removeClass('scale-95 opacity-0').addClass('scale-100 opacity-100');
+            }, 10);
+            switchAuthTab(tab);
+        }
+
+        function closeAuthModal() {
+            $('#authModalContent').removeClass('scale-100 opacity-100').addClass('scale-95 opacity-0');
+            setTimeout(() => {
+                $('#authModal').addClass('hidden').removeClass('flex');
+            }, 300);
+        }
+
+        function switchAuthTab(tab) {
+            $('#authTabsHeader').removeClass('hidden'); 
+            $('#loginError, #registerError, #forgotError, #forgotSuccess, #changePassError').addClass('hidden'); 
+            $('#formLoginPopup, #formRegisterPopup, #formForgotPopup, #formChangePassPopup').addClass('hidden');
+            
+            if (tab === 'login') {
+                $('#formLoginPopup').removeClass('hidden');
+                $('#tabLogin').removeClass('text-slate-400 border-transparent font-bold').addClass('text-blue-600 border-blue-600 font-black');
+                $('#tabRegister').removeClass('text-blue-600 border-blue-600 font-black').addClass('text-slate-400 border-transparent font-bold');
+            } else if (tab === 'register') {
+                $('#formRegisterPopup').removeClass('hidden');
+                $('#tabRegister').removeClass('text-slate-400 border-transparent font-bold').addClass('text-blue-600 border-blue-600 font-black');
+                $('#tabLogin').removeClass('text-blue-600 border-blue-600 font-black').addClass('text-slate-400 border-transparent font-bold');
+            } else if (tab === 'forgot') {
+                $('#formForgotPopup').removeClass('hidden');
+                $('#authTabsHeader').addClass('hidden');
+            } else if (tab === 'changePass') {
+                $('#formChangePassPopup').removeClass('hidden');
+                $('#authTabsHeader').addClass('hidden');
+            }
+        }
+
+        $(document).ready(function () {
+            
+            // XỬ LÝ CHỌN ĐỊA CHỈ TỪ API HÀNH CHÍNH
+            let dataHanhChinh = [];
+            $.get("https://provinces.open-api.vn/api/?depth=3", function(data) {
+                dataHanhChinh = data;
+                let htmlTinh = '<option value="">Chọn Tỉnh/Thành</option>';
+                dataHanhChinh.forEach(t => { htmlTinh += `<option value="${t.code}">${t.name}</option>`; });
+                $('#selTinh').html(htmlTinh);
+            });
+
+            $('#selTinh').change(function() {
+                let codeTinh = $(this).val();
+                $('#selHuyen').html('<option value="">Quận/Huyện</option>').prop('disabled', true);
+                $('#selXa').html('<option value="">Phường/Xã</option>').prop('disabled', true);
+                
+                if (codeTinh) {
+                    let tinhSelected = dataHanhChinh.find(t => t.code == codeTinh);
+                    let htmlHuyen = '<option value="">Chọn Quận/Huyện</option>';
+                    tinhSelected.districts.forEach(h => { htmlHuyen += `<option value="${h.code}">${h.name}</option>`; });
+                    $('#selHuyen').html(htmlHuyen).prop('disabled', false);
+                }
+                gopDiaChi(); 
+            });
+
+            $('#selHuyen').change(function() {
+                let codeHuyen = $(this).val();
+                let codeTinh = $('#selTinh').val();
+                $('#selXa').html('<option value="">Phường/Xã</option>').prop('disabled', true);
+                
+                if (codeHuyen && codeTinh) {
+                    let tinhSelected = dataHanhChinh.find(t => t.code == codeTinh);
+                    let huyenSelected = tinhSelected.districts.find(h => h.code == codeHuyen);
+                    
+                    let htmlXa = '<option value="">Chọn Phường/Xã</option>';
+                    huyenSelected.wards.forEach(x => { htmlXa += `<option value="${x.code}">${x.name}</option>`; });
+                    $('#selXa').html(htmlXa).prop('disabled', false);
+                }
+                gopDiaChi();
+            });
+
+            $('#selXa, #txtSoNha').on('change input', function() { gopDiaChi(); });
+
+            function gopDiaChi() {
+                let tenTinh = $('#selTinh').val() ? $('#selTinh option:selected').text() : "";
+                let tenHuyen = $('#selHuyen').val() ? $('#selHuyen option:selected').text() : "";
+                let tenXa = $('#selXa').val() ? $('#selXa option:selected').text() : "";
+                let soNha = $('#txtSoNha').val().trim();
+
+                let diaChiDayDu = [];
+                if (soNha) diaChiDayDu.push(soNha);
+                if (tenXa) diaChiDayDu.push(tenXa);
+                if (tenHuyen) diaChiDayDu.push(tenHuyen);
+                if (tenTinh) diaChiDayDu.push(tenTinh);
+
+                $('#DiaChiGop').val(diaChiDayDu.join(', '));
+            }
+
+            // XỬ LÝ SUBMIT AJAX ĐĂNG NHẬP
+            $('#formLoginPopup').submit(function (e) {
+                e.preventDefault();
+                let btn = $(this).find('button[type="submit"]');
+                let originalText = btn.text();
+                btn.html('<i class="fas fa-spinner fa-spin"></i> Đang xử lý...').prop('disabled', true);
+
+                $.post('/Account/LoginAjax', $(this).serialize(), function (res) {
+                    if (res.success) {
+                        if (res.mustChange) {
+                            $('#tempTkId').val(res.tkId);
+                            switchAuthTab('changePass');
+                        } else {
+                            window.location.href = res.redirectUrl; 
+                        }
+                    } else {
+                        $('#loginError').text("❌ " + res.message).removeClass('hidden');
+                        btn.html(originalText).prop('disabled', false);
+                    }
+                });
+            });
+
+            // XỬ LÝ SUBMIT AJAX ĐỔI MẬT KHẨU
+            $('#formChangePassPopup').submit(function (e) {
+                e.preventDefault();
+                if($('#newPass').val() !== $('#confirmPass').val()){
+                    alert("Xác nhận mật khẩu không khớp!"); return;
+                }
+                
+                let btn = $(this).find('button[type="submit"]');
+                let originalText = btn.text();
+                btn.html('<i class="fas fa-spinner fa-spin"></i> Đang xử lý...').prop('disabled', true);
+
+                $.post('/Account/DoiMatKhauAjax', $(this).serialize(), function (res) {
+                    if (res.success) {
+                        alert("✅ Đổi mật khẩu thành công!");
+                        window.location.href = res.redirectUrl;
+                    } else {
+                        $('#changePassError').text("❌ " + res.message).removeClass('hidden');
+                        btn.html(originalText).prop('disabled', false);
+                    }
+                });
+            });
+
+            // XỬ LÝ SUBMIT AJAX ĐĂNG KÝ
+            $('#formRegisterPopup').submit(function (e) {
+                e.preventDefault();
+                let btn = $(this).find('button[type="submit"]');
+                let originalText = btn.text();
+                btn.html('<i class="fas fa-spinner fa-spin"></i> Đang xử lý...').prop('disabled', true);
+
+                $.post('/Account/RegisterAjax', $(this).serialize(), function (res) {
+                    if (res.success) {
+                        alert("✅ Đăng ký thành công! Hệ thống đang tự động chuyển hướng...");
+                        window.location.href = res.redirectUrl;
+                    } else {
+                        $('#registerError').text("❌ " + res.message).removeClass('hidden');
+                        btn.html(originalText).prop('disabled', false);
+                    }
+                });
+            });
+
+            // XỬ LÝ SUBMIT AJAX QUÊN MẬT KHẨU
+            $('#formForgotPopup').submit(function (e) {
+                e.preventDefault();
+                let btn = $(this).find('button[type="submit"]');
+                let originalText = btn.text();
+                btn.html('<i class="fas fa-spinner fa-spin"></i> Đang xử lý...').prop('disabled', true);
+
+                $.post('/Account/QuenMatKhauAjax', $(this).serialize(), function (res) {
+                    if (res.success) {
+                        $('#forgotError').addClass('hidden');
+                        $('#forgotSuccess').text("✅ " + res.message).removeClass('hidden');
+                        btn.html('Hoàn tất').prop('disabled', false);
+                        
+                        setTimeout(() => switchAuthTab('login'), 3000);
+                    } else {
+                        $('#forgotSuccess').addClass('hidden');
+                        $('#forgotError').text("❌ " + res.message).removeClass('hidden');
+                        btn.html(originalText).prop('disabled', false);
+                    }
+                });
+            });
+        });
+    </script>
 </body>
-</html> 
+</html>
