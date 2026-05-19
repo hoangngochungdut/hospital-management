@@ -74,37 +74,43 @@
                 <h2 class="text-3xl font-bold text-slate-900 mb-4">Dịch Vụ Y Tế Nổi Bật</h2>
                 <div class="w-16 h-1 bg-blue-600 mx-auto rounded-full"></div>
             </div>
+            
             <div class="grid md:grid-cols-3 gap-8">
-                <div class="bg-white rounded-2xl p-8 shadow-sm border border-slate-100 hover:shadow-lg transition">
-                    <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-2xl mb-6"><i class="fas fa-stethoscope"></i></div>
-                    <h3 class="text-xl font-bold text-slate-900 mb-3">Khám Tổng Quát</h3>
-                    <p class="text-slate-600 text-sm leading-relaxed">Gói khám sức khỏe toàn diện giúp phát hiện sớm các nguy cơ bệnh lý, bảo vệ sức khỏe cho bạn và gia đình.</p>
-                </div>
-                <div class="bg-white rounded-2xl p-8 shadow-sm border border-slate-100 hover:shadow-lg transition">
-                    <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-2xl mb-6"><i class="fas fa-tooth"></i></div>
-                    <h3 class="text-xl font-bold text-slate-900 mb-3">Răng Hàm Mặt</h3>
-                    <p class="text-slate-600 text-sm leading-relaxed">Cung cấp các dịch vụ nha khoa thẩm mỹ, điều trị bệnh lý răng miệng và chăm sóc nụ cười chuyên sâu.</p>
-                </div>
-                <div class="bg-white rounded-2xl p-8 shadow-sm border border-slate-100 hover:shadow-lg transition">
-                    <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-2xl mb-6"><i class="fas fa-microscope"></i></div>
-                    <h3 class="text-xl font-bold text-slate-900 mb-3">Xét Nghiệm Sinh Hóa</h3>
-                    <p class="text-slate-600 text-sm leading-relaxed">Hệ thống máy móc xét nghiệm hiện đại, trả kết quả nhanh chóng, chính xác hỗ trợ tối đa cho chẩn đoán.</p>
-                </div>
-                <div class="bg-white rounded-2xl p-8 shadow-sm border border-slate-100 hover:shadow-lg transition">
-                    <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-2xl mb-6"><i class="fas fa-baby"></i></div>
-                    <h3 class="text-xl font-bold text-slate-900 mb-3">Nhi Khoa</h3>
-                    <p class="text-slate-600 text-sm leading-relaxed">Chăm sóc sức khỏe toàn diện cho trẻ sơ sinh và trẻ nhỏ với đội ngũ bác sĩ tận tâm, thấu hiểu tâm lý trẻ.</p>
-                </div>
-                <div class="bg-white rounded-2xl p-8 shadow-sm border border-slate-100 hover:shadow-lg transition">
-                    <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-2xl mb-6"><i class="fas fa-x-ray"></i></div>
-                    <h3 class="text-xl font-bold text-slate-900 mb-3">Chẩn Đoán Hình Ảnh</h3>
-                    <p class="text-slate-600 text-sm leading-relaxed">Trang bị hệ thống Siêu âm, X-Quang kỹ thuật số thế hệ mới giúp phát hiện chính xác các tổn thương.</p>
-                </div>
-                <div class="bg-white rounded-2xl p-8 shadow-sm border border-slate-100 hover:shadow-lg transition">
-                    <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-2xl mb-6"><i class="fas fa-heartbeat"></i></div>
-                    <h3 class="text-xl font-bold text-slate-900 mb-3">Tim Mạch</h3>
-                    <p class="text-slate-600 text-sm leading-relaxed">Tầm soát và điều trị các bệnh lý tim mạch, huyết áp với phác đồ chuẩn y khoa theo tiêu chuẩn quốc tế.</p>
-                </div>
+                <a href="javascript:void(0)" onclick="showServiceDetail('Khám Tổng Quát', 'Gói khám sức khỏe toàn diện giúp phát hiện sớm các nguy cơ bệnh lý, bảo vệ sức khỏe cho bạn và gia đình. Quy trình bao gồm: Đo huyết áp, siêu âm ổ bụng, điện tâm đồ và các xét nghiệm máu cơ bản.', 'fa-stethoscope')" class="block bg-white rounded-2xl p-8 shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-2 transition-all duration-300 group cursor-pointer">
+                    <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-2xl mb-6 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300"><i class="fas fa-stethoscope"></i></div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-3 group-hover:text-blue-600 transition-colors">Khám Tổng Quát</h3>
+                    <p class="text-slate-600 text-sm leading-relaxed line-clamp-2">Gói khám sức khỏe toàn diện giúp phát hiện sớm các nguy cơ bệnh lý, bảo vệ sức khỏe cho bạn và gia đình.</p>
+                </a>
+
+                <a href="javascript:void(0)" onclick="showServiceDetail('Răng Hàm Mặt', 'Cung cấp các dịch vụ nha khoa thẩm mỹ, điều trị bệnh lý răng miệng và chăm sóc nụ cười chuyên sâu. Các dịch vụ nổi bật: Nhổ răng khôn, bọc răng sứ, niềng răng Invisalign, cấy ghép Implant.', 'fa-tooth')" class="block bg-white rounded-2xl p-8 shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-2 transition-all duration-300 group cursor-pointer">
+                    <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-2xl mb-6 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300"><i class="fas fa-tooth"></i></div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-3 group-hover:text-blue-600 transition-colors">Răng Hàm Mặt</h3>
+                    <p class="text-slate-600 text-sm leading-relaxed line-clamp-2">Cung cấp các dịch vụ nha khoa thẩm mỹ, điều trị bệnh lý răng miệng và chăm sóc nụ cười chuyên sâu.</p>
+                </a>
+
+                <a href="javascript:void(0)" onclick="showServiceDetail('Xét Nghiệm Sinh Hóa', 'Hệ thống máy móc xét nghiệm hiện đại nhập khẩu từ Đức, trả kết quả nhanh chóng, chính xác. Cung cấp các xét nghiệm: Mỡ máu, đường huyết, chức năng gan thận, tầm soát ung thư.', 'fa-microscope')" class="block bg-white rounded-2xl p-8 shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-2 transition-all duration-300 group cursor-pointer">
+                    <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-2xl mb-6 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300"><i class="fas fa-microscope"></i></div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-3 group-hover:text-blue-600 transition-colors">Xét Nghiệm Sinh Hóa</h3>
+                    <p class="text-slate-600 text-sm leading-relaxed line-clamp-2">Hệ thống máy móc xét nghiệm hiện đại, trả kết quả nhanh chóng, chính xác hỗ trợ tối đa cho chẩn đoán.</p>
+                </a>
+
+                <a href="javascript:void(0)" onclick="showServiceDetail('Nhi Khoa', 'Chăm sóc sức khỏe toàn diện cho trẻ sơ sinh và trẻ nhỏ với đội ngũ bác sĩ tận tâm, thấu hiểu tâm lý trẻ. Tư vấn dinh dưỡng, tiêm chủng vaccine, điều trị các bệnh lý hô hấp và tiêu hóa.', 'fa-baby')" class="block bg-white rounded-2xl p-8 shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-2 transition-all duration-300 group cursor-pointer">
+                    <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-2xl mb-6 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300"><i class="fas fa-baby"></i></div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-3 group-hover:text-blue-600 transition-colors">Nhi Khoa</h3>
+                    <p class="text-slate-600 text-sm leading-relaxed line-clamp-2">Chăm sóc sức khỏe toàn diện cho trẻ sơ sinh và trẻ nhỏ với đội ngũ bác sĩ tận tâm, thấu hiểu tâm lý trẻ.</p>
+                </a>
+
+                <a href="javascript:void(0)" onclick="showServiceDetail('Chẩn Đoán Hình Ảnh', 'Trang bị hệ thống Siêu âm 4D/5D, X-Quang kỹ thuật số thế hệ mới giúp phát hiện chính xác các tổn thương nhỏ nhất. Không gian chụp chiếu rộng rãi, an toàn tia X theo tiêu chuẩn y tế.', 'fa-x-ray')" class="block bg-white rounded-2xl p-8 shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-2 transition-all duration-300 group cursor-pointer">
+                    <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-2xl mb-6 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300"><i class="fas fa-x-ray"></i></div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-3 group-hover:text-blue-600 transition-colors">Chẩn Đoán Hình Ảnh</h3>
+                    <p class="text-slate-600 text-sm leading-relaxed line-clamp-2">Trang bị hệ thống Siêu âm, X-Quang kỹ thuật số thế hệ mới giúp phát hiện chính xác các tổn thương.</p>
+                </a>
+
+                <a href="javascript:void(0)" onclick="showServiceDetail('Tim Mạch', 'Tầm soát và điều trị các bệnh lý tim mạch, huyết áp với phác đồ chuẩn y khoa theo tiêu chuẩn quốc tế. Cung cấp dịch vụ: Đo điện tâm đồ Holter 24h, siêu âm tim, tư vấn đột quỵ.', 'fa-heartbeat')" class="block bg-white rounded-2xl p-8 shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-2 transition-all duration-300 group cursor-pointer">
+                    <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-2xl mb-6 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300"><i class="fas fa-heartbeat"></i></div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-3 group-hover:text-blue-600 transition-colors">Tim Mạch</h3>
+                    <p class="text-slate-600 text-sm leading-relaxed line-clamp-2">Tầm soát và điều trị các bệnh lý tim mạch, huyết áp với phác đồ chuẩn y khoa theo tiêu chuẩn quốc tế.</p>
+                </a>
             </div>
         </div>
     </section>
@@ -147,6 +153,20 @@
             </div>
         </div>
     </section>
+
+    <div id="serviceModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-4 transition-all">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden transform transition-all scale-95 opacity-0 duration-300" id="serviceModalContent">
+            <button type="button" onclick="closeServiceModal()" class="absolute top-4 right-5 text-slate-400 hover:text-red-500 font-black text-2xl z-10">&times;</button>
+            <div class="p-8 text-center">
+                <div id="modalServiceIcon" class="w-20 h-20 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-4xl mx-auto mb-4"></div>
+                <h2 id="modalServiceTitle" class="text-2xl font-black text-slate-900 mb-4">Tiêu đề Dịch vụ</h2>
+                <div class="text-slate-600 leading-relaxed text-left bg-blue-50/50 p-5 rounded-2xl border border-blue-100/50 text-sm">
+                    <p id="modalServiceDesc"></p>
+                </div>
+                <button onclick="closeServiceModal()" class="mt-6 bg-slate-800 text-white px-6 py-3 rounded-xl font-bold hover:bg-slate-900 transition w-full shadow-md uppercase text-sm">Đóng cửa sổ</button>
+            </div>
+        </div>
+    </div>
 
     <div id="authModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-4 transition-all">
         <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all scale-95 opacity-0 duration-300" id="authModalContent">
@@ -287,7 +307,23 @@
 
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script>
-        // Điều khiển Modal
+        // Bật Popup Chi tiết Dịch Vụ
+        function showServiceDetail(title, desc, iconClass) {
+            $('#modalServiceTitle').text(title);
+            $('#modalServiceDesc').text(desc);
+            $('#modalServiceIcon').html(`<i class="fas ${iconClass}"></i>`);
+            
+            $('#serviceModal').removeClass('hidden').addClass('flex');
+            setTimeout(() => { $('#serviceModalContent').removeClass('scale-95 opacity-0').addClass('scale-100 opacity-100'); }, 10);
+        }
+
+        // Tắt Popup Dịch Vụ
+        function closeServiceModal() {
+            $('#serviceModalContent').removeClass('scale-100 opacity-100').addClass('scale-95 opacity-0');
+            setTimeout(() => { $('#serviceModal').addClass('hidden').removeClass('flex'); }, 300);
+        }
+
+        // Điều khiển Modal Đăng nhập / Đăng ký
         function openAuthModal(tab = 'login') {
             $('#authModal').removeClass('hidden').addClass('flex');
             setTimeout(() => { $('#authModalContent').removeClass('scale-95 opacity-0').addClass('scale-100 opacity-100'); }, 10);
@@ -404,29 +440,37 @@
                 });
             });
 
-            // 3. AJAX ĐỔI MẬT KHẨU LẦN ĐẦU (ĐỔI ID INPUT CHO ĐỠ TRÙNG)
-            $('#formChangePassPopup').submit(function (e) {
-                e.preventDefault();
-                if($('#firstNewPass').val() !== $('#firstConfirmPass').val()){ alert("Xác nhận mật khẩu không khớp!"); return; }
-                
-                let btn = $(this).find('button[type="submit"]'); let originalText = btn.text();
-                btn.html('<i class="fas fa-spinner fa-spin"></i> Đang xử lý...').prop('disabled', true);
+            // 3. AJAX ĐỔI MẬT KHẨU LẦN ĐẦU
+            // $('#formChangePassPopup').submit(function (e) { ... });
 
-                $.post('/Account/DoiMatKhauAjax', $(this).serialize(), function (res) {
-                    if (res.success) {
-                        alert("✅ Đổi mật khẩu thành công!");
-                        window.location.href = res.redirectUrl;
-                    } else {
-                        $('#changePassError').text("❌ " + res.message).removeClass('hidden');
-                        btn.html(originalText).prop('disabled', false);
-                    }
-                });
-            });
-
-            // 4. AJAX ĐĂNG KÝ
+            // 4. AJAX ĐĂNG KÝ (ĐÃ THÊM VALIDATION REGEX)
             $('#formRegisterPopup').submit(function (e) {
                 e.preventDefault();
-                let btn = $(this).find('button[type="submit"]'); let originalText = btn.text();
+                
+                // Lấy thông tin người dùng vừa nhập
+                let phone = $('input[name="PhoneNumber"]').val().trim();
+                let email = $('input[name="Email"]').val().trim();
+
+                // Biểu thức Regex (Đã xử lý dấu @@ cho C# Razor)
+                let phoneRegex = /^0[35789]\d{8}$/; // SĐT Việt Nam 10 số
+                let emailRegex = /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/; // Email cơ bản
+
+                // Kiểm tra định dạng Số điện thoại
+                if (!phoneRegex.test(phone)) {
+                    $('#registerError').text("❌ Số điện thoại không hợp lệ! (Ví dụ: 09... gồm 10 số)").removeClass('hidden');
+                    $('input[name="PhoneNumber"]').focus();
+                    return; 
+                }
+
+                // Kiểm tra định dạng Email (chỉ check nếu có nhập)
+                if (email.length > 0 && !emailRegex.test(email)) {
+                    $('#registerError').text("❌ Email không đúng định dạng! (Ví dụ: abc@gmail.com)").removeClass('hidden');
+                    $('input[name="Email"]').focus();
+                    return;
+                }
+
+                let btn = $(this).find('button[type="submit"]'); 
+                let originalText = btn.text();
                 btn.html('<i class="fas fa-spinner fa-spin"></i> Đang xử lý...').prop('disabled', true);
 
                 $.post('/Account/RegisterAjax', $(this).serialize(), function (res) {
