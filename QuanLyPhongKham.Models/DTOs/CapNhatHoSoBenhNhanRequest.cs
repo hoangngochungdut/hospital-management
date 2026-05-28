@@ -5,7 +5,7 @@ using System.Text;
 
 namespace QuanLyPhongKham.Models.DTOs
 {
-    public  class CapNhatHoSoBenhNhanRequest
+    public class CapNhatHoSoBenhNhanRequest
     {
         [Required(ErrorMessage = "Họ tên không được để trống")]
         [StringLength(100, ErrorMessage = "Họ tên tối đa 100 ký tự")]
@@ -18,14 +18,15 @@ namespace QuanLyPhongKham.Models.DTOs
         [Phone(ErrorMessage = "Số điện thoại không hợp lệ")]
         public string? SoDienThoai { get; set; }
 
-        [Required(ErrorMessage = "Email không được để trống")]
+      
         [EmailAddress(ErrorMessage = "Email không hợp lệ")]
-        public string Email { get; set; }
+        public string? Email { get; set; }
 
-        public CapNhatHoSoBenhNhanRequest()
-        {
+        //public CapNhatHoSoBenhNhanRequest()
+        //{
 
-        }
+        //}
+
         public CapNhatHoSoBenhNhanRequest(BenhNhan benhnhan)
         {
             HoTen = benhnhan.HoTen;

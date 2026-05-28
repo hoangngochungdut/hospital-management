@@ -98,73 +98,7 @@ namespace QuanLyPhongKham.Web.Controllers
             return RedirectToAction("LichKham");
         }
 
-        // ==================== TÍCH HỢP MOMO (BỆNH NHÂN) ====================
-        [HttpGet]
-        public async Task<IActionResult> ConfirmMomo(long sotien, int lichKhamId)
-        {
-            string endpoint = "https://test-payment.momo.vn/v2/gateway/api/create";
-            string partnerCode = "MOMOBKUN20180529";
-            string accessKey = "klm05TvNBzhg7h7j";
-            string secretKey = "at67qH6mk8w5Y1nAyMoYKMWACiEi2bsa";
-
-            string orderInfo = "Thanh toán phí khám bệnh #" + lichKhamId;
-            string redirectUrl = "https://localhost:7282/BenhNhanDashboard/MomoCallback"; // Đổi thành BenhNhan
-            string ipnUrl = "https://localhost:7282/BenhNhanDashboard/IPN";
-            string requestType = "captureWallet";
-
-            string orderId = DateTime.Now.Ticks.ToString();
-            string requestId = DateTime.Now.Ticks.ToString();
-            string extraData = lichKhamId.ToString(); // Đính kèm ID Lịch khám
-
-            string rawHash = $"accessKey={accessKey}&amount={sotien}&extraData={extraData}&ipnUrl={ipnUrl}&orderId={orderId}&orderInfo={orderInfo}&partnerCode={partnerCode}&redirectUrl={redirectUrl}&requestId={requestId}&requestType={requestType}";
-
-            // Bạn copy hàm CreateSignature từ file Lễ Tân sang dưới cùng của class này nhé!
-            string signature = CreateSignature(rawHash, secretKey);
-
-            var requestData = new
-            {
-                partnerCode,
-                requestId,
-                amount = sotien,
-                orderId,
-                orderInfo,
-                redirectUrl,
-                ipnUrl,
-                lang = "vi",
-                extraData,
-                requestType,
-                signature
-            };
-
-            using (var client = new HttpClient())
-            {
-                var response = await client.PostAsJsonAsync(endpoint, requestData);
-                var responseContent = await response.Content.ReadAsStringAsync();
-                using (System.Text.Json.JsonDocument doc = System.Text.Json.JsonDocument.Parse(responseContent))
-                {
-                    if (doc.RootElement.TryGetProperty("payUrl", out var payUrl))
-                        return Redirect(payUrl.GetString());
-                    return Content($"Lỗi kết nối MoMo: {responseContent}");
-                }
-            }
-        }
-
-        [HttpGet]
-        public IActionResult MomoCallback(string errorCode, string message, string extraData)
-        {
-            if (errorCode == "0" && int.TryParse(extraData, out int lichKhamId))
-            {
-                // GỌI HÀM CẬP NHẬT TIỀN BẠC (Biến DaThanhToan = true)
-                _buoiKhamService.CapNhatThanhToan(lichKhamId);
-
-                TempData["ThongBao"] = $"✅ Thanh toán MoMo thành công cho lịch khám #{lichKhamId}!";
-            }
-            else
-            {
-                TempData["ThongBao"] = "❌ Thanh toán chưa hoàn tất: " + message;
-            }
-            return RedirectToAction("XemLichKham");
-        }
+      
 
         // ==================== AJAX ====================
         [HttpGet]
@@ -281,7 +215,7 @@ namespace QuanLyPhongKham.Web.Controllers
         {
             try
             {
-                // Dùng lại hàm GetHoSo ông đã viết ở BacSiService
+                
                 var bacSi = _bacSiService.GetHoSo(id);
 
                 if (bacSi == null) return Json(new { success = false });
@@ -323,6 +257,7 @@ namespace QuanLyPhongKham.Web.Controllers
 
             return View(hoSo);
         }
+       
 
         [HttpGet]
         public IActionResult HoSo()
@@ -391,6 +326,73 @@ namespace QuanLyPhongKham.Web.Controllers
                 byte[] hash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(text));
                 return BitConverter.ToString(hash).Replace("-", "").ToLower();
             }
+        }
+        // ==================== TÍCH HỢP MOMO (BỆNH NHÂN) ====================
+        [HttpGet]
+        public async Task<IActionResult> ConfirmMomo(long sotien, int lichKhamId)
+        {
+            string endpoint = "https://test-payment.momo.vn/v2/gateway/api/create";
+            string partnerCode = "MOMOBKUN20180529";
+            string accessKey = "klm05TvNBzhg7h7j";
+            string secretKey = "at67qH6mk8w5Y1nAyMoYKMWACiEi2bsa";
+
+            string orderInfo = "Thanh toán phí khám bệnh #" + lichKhamId;
+            string redirectUrl = "https://localhost:7282/BenhNhanDashboard/MomoCallback"; 
+            string ipnUrl = "https://localhost:7282/BenhNhanDashboard/IPN";
+            string requestType = "captureWallet";
+
+            string orderId = DateTime.Now.Ticks.ToString();
+            string requestId = DateTime.Now.Ticks.ToString();
+            string extraData = lichKhamId.ToString(); // Đính kèm ID Lịch khám
+
+            string rawHash = $"accessKey={accessKey}&amount={sotien}&extraData={extraData}&ipnUrl={ipnUrl}&orderId={orderId}&orderInfo={orderInfo}&partnerCode={partnerCode}&redirectUrl={redirectUrl}&requestId={requestId}&requestType={requestType}";
+
+            // Bạn copy hàm CreateSignature từ file Lễ Tân sang dưới cùng của class này nhé!
+            string signature = CreateSignature(rawHash, secretKey);
+
+            var requestData = new
+            {
+                partnerCode,
+                requestId,
+                amount = sotien,
+                orderId,
+                orderInfo,
+                redirectUrl,
+                ipnUrl,
+                lang = "vi",
+                extraData,
+                requestType,
+                signature
+            };
+
+            using (var client = new HttpClient())
+            {
+                var response = await client.PostAsJsonAsync(endpoint, requestData);
+                var responseContent = await response.Content.ReadAsStringAsync();
+                using (System.Text.Json.JsonDocument doc = System.Text.Json.JsonDocument.Parse(responseContent))
+                {
+                    if (doc.RootElement.TryGetProperty("payUrl", out var payUrl))
+                        return Redirect(payUrl.GetString());
+                    return Content($"Lỗi kết nối MoMo: {responseContent}");
+                }
+            }
+        }
+
+        [HttpGet]
+        public IActionResult MomoCallback(string errorCode, string message, string extraData)
+        {
+            if (errorCode == "0" && int.TryParse(extraData, out int lichKhamId))
+            {
+                // GỌI HÀM CẬP NHẬT TIỀN BẠC (Biến DaThanhToan = true)
+                _buoiKhamService.CapNhatThanhToan(lichKhamId);
+
+                TempData["ThongBao"] = $"✅ Thanh toán MoMo thành công cho lịch khám #{lichKhamId}!";
+            }
+            else
+            {
+                TempData["ThongBao"] = "❌ Thanh toán chưa hoàn tất: " + message;
+            }
+            return RedirectToAction("XemLichKham");
         }
 
     }

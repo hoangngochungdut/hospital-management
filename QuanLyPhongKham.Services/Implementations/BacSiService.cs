@@ -46,17 +46,41 @@ namespace QuanLyPhongKham.Services.Implementations
         {
             try
             {
-                // Gọi đồng bộ, bacSi sẽ nhận đúng đối tượng chứ không phải Task
                 var bacSi = _bacSiRepo.GetById(nguoiDungId);
 
                 if (bacSi == null)
                     return (false, "Không tìm thấy bác sĩ");
 
-                // Giờ thì chấm HoTen thoải mái không lo lỗi
-                bacSi.HoTen = request.HoTen;
+                // Kiểm tra họ tên
+                if (string.IsNullOrWhiteSpace(request.HoTen))
+                    return (false, "Họ tên không được để trống");
+
+                // Kiểm tra giới tính
+                if (string.IsNullOrWhiteSpace(request.GioiTinh))
+                    return (false, "Giới tính không được để trống");
+
+                // Kiểm tra địa chỉ
+                if (string.IsNullOrWhiteSpace(request.DiaChi))
+                    return (false, "Địa chỉ không được để trống");
+
+                // Kiểm tra số điện thoại
+                if (string.IsNullOrWhiteSpace(request.SoDienThoai))
+                    return (false, "Số điện thoại không được để trống");
+
+                string soDienThoai = request.SoDienThoai.Trim();
+
+                if (!System.Text.RegularExpressions.Regex.IsMatch(soDienThoai, @"^\d{10}$"))
+                    return (false, "Số điện thoại phải gồm đúng 10 chữ số");
+
+                // Kiểm tra chuyên khoa
+                if (request.ChuyenKhoaId <= 0)
+                    return (false, "Vui lòng chọn chuyên khoa");
+
+                // Nếu dữ liệu hợp lệ thì mới cập nhật
+                bacSi.HoTen = request.HoTen.Trim();
                 bacSi.GioiTinh = request.GioiTinh;
-                bacSi.DiaChi = request.DiaChi;
-                bacSi.Sdt = request.SoDienThoai;
+                bacSi.DiaChi = request.DiaChi.Trim();
+                bacSi.Sdt = soDienThoai;
                 bacSi.ChuyenKhoaId = request.ChuyenKhoaId;
 
                 _bacSiRepo.Update(bacSi);

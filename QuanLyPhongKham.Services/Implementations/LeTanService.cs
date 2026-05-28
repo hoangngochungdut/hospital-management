@@ -41,15 +41,40 @@ namespace QuanLyPhongKham.Services.Implementations
             try
             {
                 var nguoiDung = _nguoiDungRepo.GetById(nguoiDungId);
+
                 if (nguoiDung == null)
                     return (false, "Không tìm thấy người dùng");
 
-                nguoiDung.HoTen = request.HoTen;
+                // Kiểm tra họ tên
+                if (string.IsNullOrWhiteSpace(request.HoTen))
+                    return (false, "Họ tên không được để trống");
+
+                // Kiểm tra giới tính
+                if (string.IsNullOrWhiteSpace(request.GioiTinh))
+                    return (false, "Giới tính không được để trống");
+
+                // Kiểm tra địa chỉ
+                if (string.IsNullOrWhiteSpace(request.DiaChi))
+                    return (false, "Địa chỉ không được để trống");
+
+                // Kiểm tra số điện thoại
+                if (string.IsNullOrWhiteSpace(request.SoDienThoai))
+                    return (false, "Số điện thoại không được để trống");
+
+                string soDienThoai = request.SoDienThoai.Trim();
+
+                // Kiểm tra số điện thoại đúng 10 số
+                if (!System.Text.RegularExpressions.Regex.IsMatch(soDienThoai, @"^\d{10}$"))
+                    return (false, "Số điện thoại phải gồm đúng 10 chữ số");
+
+                // Cập nhật dữ liệu
+                nguoiDung.HoTen = request.HoTen.Trim();
                 nguoiDung.GioiTinh = request.GioiTinh;
-                nguoiDung.DiaChi = request.DiaChi;
-                nguoiDung.Sdt = request.SoDienThoai;
+                nguoiDung.DiaChi = request.DiaChi.Trim();
+                nguoiDung.Sdt = soDienThoai;
 
                 _nguoiDungRepo.Update(nguoiDung);
+
                 return (true, "Cập nhật thành công!");
             }
             catch (Exception ex)

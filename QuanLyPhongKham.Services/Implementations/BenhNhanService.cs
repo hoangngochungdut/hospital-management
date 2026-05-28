@@ -29,10 +29,8 @@ namespace QuanLyPhongKham.Services.Implementations
             _ketQuaRepository = ketQuaRepository;
             _tieuSuRepository = tieuSuRepository;
         }
-
-        // =========================
-        // HỒ SƠ
-        // =========================
+  
+         // xem ho so benh nhan
         public XemHoSoBenhNhanResponse? GetHoSo(int nguoiDungId)
         {
             var nguoiDung = _nguoiDungRepository.GetById(nguoiDungId);
@@ -47,7 +45,7 @@ namespace QuanLyPhongKham.Services.Implementations
                 SoDienThoai = nguoiDung.Sdt
             };
         }
-
+        // cap nhat ho so benh nhan
         public (bool Success, string Message) CapNhatHoSo(int nguoiDungId, CapNhatHoSoBenhNhanRequest request)
         {
             try
@@ -56,10 +54,32 @@ namespace QuanLyPhongKham.Services.Implementations
                 if (nguoiDung == null)
                     return (false, "Không tìm thấy người dùng");
 
-                nguoiDung.HoTen = request.HoTen;
+                // Kiểm tra họ tên
+                if (string.IsNullOrWhiteSpace(request.HoTen))
+                    return (false, "Họ tên không được để trống");
+
+                // Kiểm tra giới tính
+                if (string.IsNullOrWhiteSpace(request.GioiTinh))
+                    return (false, "Giới tính không được để trống");
+
+                // Kiểm tra địa chỉ
+                if (string.IsNullOrWhiteSpace(request.DiaChi))
+                    return (false, "Địa chỉ không được để trống");
+
+                // Kiểm tra số điện thoại
+                if (string.IsNullOrWhiteSpace(request.SoDienThoai))
+                    return (false, "Số điện thoại không được để trống");
+
+                string soDienThoai = request.SoDienThoai.Trim();
+
+                if (!System.Text.RegularExpressions.Regex.IsMatch(soDienThoai, @"^\d{10}$"))
+                    return (false, "Số điện thoại phải gồm đúng 10 chữ số");
+
+                // Nếu hợp lệ thì mới cập nhật
+                nguoiDung.HoTen = request.HoTen.Trim();
                 nguoiDung.GioiTinh = request.GioiTinh;
-                nguoiDung.DiaChi = request.DiaChi;
-                nguoiDung.Sdt = request.SoDienThoai;
+                nguoiDung.DiaChi = request.DiaChi.Trim();
+                nguoiDung.Sdt = soDienThoai;
 
                 _nguoiDungRepository.Update(nguoiDung);
 
@@ -71,25 +91,11 @@ namespace QuanLyPhongKham.Services.Implementations
             }
         }
 
-        // =========================
-        // DANH SÁCH
-        // =========================
-        public async Task<IEnumerable<BenhNhan>> GetAllAsync()
-        {
-            return await _benhNhanRepository.GetAllAsync();
-        }
+        
 
-        public ICollection<BenhNhan> GetAll()
-        {
-            return _benhNhanRepository
-                .GetAllWithTaiKhoan()
-                .Where(x => x.TaiKhoan != null)
-                .ToList();
-        }
-
-        // =========================
+       
         // MẬT KHẨU
-        // =========================
+        
         public async Task<(bool Success, string Message)> DoiMatKhau(int nguoiDungId, DoiMatKhauRequest request)
         {
             try
@@ -111,6 +117,21 @@ namespace QuanLyPhongKham.Services.Implementations
             {
                 return (false, $"Lỗi: {ex.Message}");
             }
+        }
+        // =========================
+        // DANH SÁCH
+        // =========================
+        public async Task<IEnumerable<BenhNhan>> GetAllAsync()
+        {
+            return await _benhNhanRepository.GetAllAsync();
+        }
+
+        public ICollection<BenhNhan> GetAll()
+        {
+            return _benhNhanRepository
+                .GetAllWithTaiKhoan()
+                .Where(x => x.TaiKhoan != null)
+                .ToList();
         }
 
         // =========================

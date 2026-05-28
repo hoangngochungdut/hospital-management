@@ -94,7 +94,7 @@ namespace QuanLyPhongKham.Repositories.Implementations
                 .ThenBy(b => b.Gio)
                 .ToList();
         }
-        // dung cho tieu su benh nhan nua
+
         public List<BuoiKham> GetByBenhNhanId(int benhNhanId)
         {
             return _context.BuoiKhams
