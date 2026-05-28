@@ -241,38 +241,14 @@
                     <div class="text-center mb-4">
                         <div class="w-12 h-12 bg-orange-100 text-orange-500 rounded-full flex items-center justify-center text-xl mx-auto mb-2"><i class="fas fa-key"></i></div>
                         <h3 class="font-black text-lg text-slate-800 uppercase">Khôi phục mật khẩu</h3>
-                        <p class="text-xs text-slate-500 mt-1" id="forgotDesc">Nhập tên đăng nhập để nhận mã OTP qua Email.</p>
+                        <p class="text-xs text-slate-500 mt-1" id="forgotDesc">Nhập tên đăng nhập để nhận mật khẩu mới qua Email.</p>
                     </div>
 
                     <div id="step1Forgot">
                         <label class="block text-xs font-black text-slate-500 uppercase mb-2">Tên đăng nhập</label>
                         <input type="text" id="forgotUsername" name="Username" class="w-full border-2 border-slate-200 rounded-xl p-3 focus:border-orange-500 outline-none transition-all" required placeholder="Nhập tài khoản..." />
                         <button type="button" id="btnSendOtp" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-black py-3 rounded-xl transition-all shadow-md uppercase mt-4">
-                            Gửi mã OTP
-                        </button>
-                    </div>
-
-                    <div id="step2Forgot" class="hidden space-y-3">
-                        <div>
-                            <label class="block text-xs font-black text-slate-500 uppercase mb-1">Mã OTP (6 số)</label>
-                            <input type="text" id="forgotOtp" class="w-full border-2 border-slate-200 rounded-xl p-3 focus:border-orange-500 outline-none text-center tracking-[0.5em] font-black text-lg" placeholder="••••••" />
-                        </div>
-                        <button type="button" id="btnVerifyOtpOnly" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-black py-3 rounded-xl transition-all shadow-md uppercase mt-2">
-                            Xác nhận mã OTP
-                        </button>
-                    </div>
-
-                    <div id="step3Forgot" class="hidden space-y-3">
-                        <div>
-                            <label class="block text-xs font-black text-slate-500 uppercase mb-1">Mật khẩu mới</label>
-                            <input type="password" id="forgotNewPass" class="w-full border-2 border-slate-200 rounded-xl p-3 focus:border-emerald-500 outline-none" placeholder="••••••••" />
-                        </div>
-                        <div>
-                            <label class="block text-xs font-black text-slate-500 uppercase mb-1">Xác nhận mật khẩu mới</label>
-                            <input type="password" id="forgotConfirmPass" class="w-full border-2 border-slate-200 rounded-xl p-3 focus:border-emerald-500 outline-none" placeholder="••••••••" />
-                        </div>
-                        <button type="button" id="btnSaveNewPass" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-black py-3 rounded-xl transition-all shadow-md uppercase mt-2">
-                            Lưu mật khẩu mới
+                            Cấp lại mật khẩu
                         </button>
                     </div>
 
@@ -288,7 +264,7 @@
                     <div class="text-center mb-4">
                         <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xl mx-auto mb-2"><i class="fas fa-shield-alt"></i></div>
                         <h3 class="font-black text-lg text-slate-800 uppercase">Đổi mật khẩu mới</h3>
-                        <p class="text-xs text-slate-500 mt-1">Vui lòng đổi mật khẩu để tiếp tục sử dụng hệ thống.</p>
+                        <p class="text-xs text-slate-500 mt-1">Hệ thống yêu cầu đổi mật khẩu để tiếp tục.</p>
                     </div>
                     <input type="hidden" name="TempTaiKhoanId" id="tempTkId" />
                     <div>
@@ -340,11 +316,10 @@
             $('#loginError, #registerError, #forgotError, #forgotSuccess, #changePassError').addClass('hidden'); 
             $('#formLoginPopup, #formRegisterPopup, #formForgotPopup, #formChangePassPopup').addClass('hidden');
             
-            // Reset lại Form Quên MK về Bước 1
-            $('#step2Forgot, #step3Forgot').addClass('hidden'); 
+            // Reset lại Form Quên MK 
             $('#step1Forgot').removeClass('hidden');
-            $('#forgotUsername, #forgotOtp, #forgotNewPass, #forgotConfirmPass').val('');
-            $('#forgotDesc').text("Nhập tên đăng nhập để nhận mã OTP qua Email.");
+            $('#forgotUsername, #firstNewPass, #firstConfirmPass').val('');
+            $('#forgotDesc').text("Nhập tên đăng nhập để nhận mật khẩu mới qua Email.");
 
             if (tab === 'login') {
                 $('#formLoginPopup').removeClass('hidden');
@@ -418,7 +393,9 @@
                 $('#DiaChiGop').val(diaChiDayDu.join(', '));
             }
 
+            // ==========================================
             // 2. AJAX ĐĂNG NHẬP
+            // ==========================================
             $('#formLoginPopup').submit(function (e) {
                 e.preventDefault();
                 let btn = $(this).find('button[type="submit"]');
@@ -427,6 +404,7 @@
 
                 $.post('/Account/LoginAjax', $(this).serialize(), function (res) {
                     if (res.success) {
+                        // NẾU HỆ THỐNG YÊU CẦU ĐỔI PASS
                         if (res.mustChange) {
                             $('#tempTkId').val(res.tkId);
                             switchAuthTab('changePass');
@@ -440,29 +418,52 @@
                 });
             });
 
+            // ==========================================
             // 3. AJAX ĐỔI MẬT KHẨU LẦN ĐẦU
-            // $('#formChangePassPopup').submit(function (e) { ... });
+            // ==========================================
+            $('#formChangePassPopup').submit(function (e) {
+                e.preventDefault();
+                let firstNewPass = $('#firstNewPass').val();
+                let firstConfirmPass = $('#firstConfirmPass').val();
 
-            // 4. AJAX ĐĂNG KÝ (ĐÃ THÊM VALIDATION REGEX)
+                if (firstNewPass !== firstConfirmPass) {
+                    $('#changePassError').text("❌ Mật khẩu xác nhận không khớp!").removeClass('hidden');
+                    return;
+                }
+
+                let btn = $(this).find('button[type="submit"]');
+                let originalText = btn.text();
+                btn.html('<i class="fas fa-spinner fa-spin"></i> Đang xử lý...').prop('disabled', true);
+
+                $.post('/Account/DoiMatKhauAjax', $(this).serialize(), function (res) {
+                    if (res.success) {
+                        alert("✅ Đổi mật khẩu thành công!");
+                        window.location.href = res.redirectUrl;
+                    } else {
+                        $('#changePassError').text("❌ " + res.message).removeClass('hidden');
+                        btn.html(originalText).prop('disabled', false);
+                    }
+                });
+            });
+
+            // ==========================================
+            // 4. AJAX ĐĂNG KÝ
+            // ==========================================
             $('#formRegisterPopup').submit(function (e) {
                 e.preventDefault();
                 
-                // Lấy thông tin người dùng vừa nhập
                 let phone = $('input[name="PhoneNumber"]').val().trim();
                 let email = $('input[name="Email"]').val().trim();
 
-                // Biểu thức Regex (Đã xử lý dấu @@ cho C# Razor)
-                let phoneRegex = /^0[35789]\d{8}$/; // SĐT Việt Nam 10 số
-                let emailRegex = /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/; // Email cơ bản
+                let phoneRegex = /^0[35789]\d{8}$/; 
+                let emailRegex = /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/; 
 
-                // Kiểm tra định dạng Số điện thoại
                 if (!phoneRegex.test(phone)) {
                     $('#registerError').text("❌ Số điện thoại không hợp lệ! (Ví dụ: 09... gồm 10 số)").removeClass('hidden');
                     $('input[name="PhoneNumber"]').focus();
                     return; 
                 }
 
-                // Kiểm tra định dạng Email (chỉ check nếu có nhập)
                 if (email.length > 0 && !emailRegex.test(email)) {
                     $('#registerError').text("❌ Email không đúng định dạng! (Ví dụ: abc@gmail.com)").removeClass('hidden');
                     $('input[name="Email"]').focus();
@@ -485,87 +486,27 @@
             });
 
             // ==========================================
-            // 5. AJAX QUÊN MẬT KHẨU (3 BƯỚC)
+            // 5. AJAX QUÊN MẬT KHẨU (GỬI THẲNG PASS MỚI)
             // ==========================================
-
-            // BƯỚC 1: GỬI OTP
             $('#btnSendOtp').click(function () {
                 let username = $('#forgotUsername').val().trim();
                 if(!username) { $('#forgotError').text("❌ Vui lòng nhập Tên đăng nhập!").removeClass('hidden'); return; }
 
                 let btn = $(this); let originalText = btn.text();
-                btn.html('<i class="fas fa-spinner fa-spin"></i> Đang gửi...').prop('disabled', true);
+                btn.html('<i class="fas fa-spinner fa-spin"></i> Đang xử lý...').prop('disabled', true);
 
-                $.post('/Account/SendOtpAjax', { Username: username }, function (res) {
+                // Đã đổi API gọi từ SendOtpAjax thành ResetPasswordAjax
+                $.post('/Account/ResetPasswordAjax', { Username: username }, function (res) {
                     if (res.success) {
                         $('#forgotError').addClass('hidden');
                         $('#forgotSuccess').text("✅ " + res.message).removeClass('hidden');
                         
+                        // Ẩn nút nhấn để người dùng không ấn liên tục
                         $('#step1Forgot').addClass('hidden');
-                        $('#step2Forgot').removeClass('hidden');
-                        $('#forgotDesc').text("Vui lòng kiểm tra Email và nhập mã OTP vào bên dưới.");
-                    } else {
-                        $('#forgotSuccess').addClass('hidden');
-                        $('#forgotError').text("❌ " + res.message).removeClass('hidden');
-                    }
-                    btn.html(originalText).prop('disabled', false);
-                });
-            });
-
-            // BƯỚC 2: CHỈ XÁC NHẬN MÃ OTP
-            $('#btnVerifyOtpOnly').click(function () {
-                let username = $('#forgotUsername').val().trim();
-                let otp = $('#forgotOtp').val().trim();
-                if(!otp) { $('#forgotError').text("❌ Vui lòng nhập mã OTP!").removeClass('hidden'); return; }
-
-                let btn = $(this); let originalText = btn.text();
-                btn.html('<i class="fas fa-spinner fa-spin"></i> Đang kiểm tra...').prop('disabled', true);
-
-                $.post('/Account/VerifyOtpAjax', { Username: username, Otp: otp }, function (res) {
-                    if (res.success) {
-                        $('#forgotError').addClass('hidden');
-                        $('#forgotSuccess').text("✅ " + res.message).removeClass('hidden');
+                        $('#forgotDesc').text("Vui lòng kiểm tra hộp thư đến (hoặc mục thư rác).");
                         
-                        // OTP đúng thì hiện form đặt pass mới
-                        setTimeout(() => {
-                            $('#forgotSuccess').addClass('hidden');
-                            $('#step2Forgot').addClass('hidden');
-                            $('#step3Forgot').removeClass('hidden');
-                            $('#forgotDesc').text("Mã hợp lệ! Vui lòng đặt mật khẩu mới.");
-                        }, 1000);
-                    } else {
-                        $('#forgotSuccess').addClass('hidden');
-                        $('#forgotError').text("❌ " + res.message).removeClass('hidden');
-                    }
-                    btn.html(originalText).prop('disabled', false);
-                });
-            });
-
-            // BƯỚC 3: LƯU MẬT KHẨU MỚI
-            $('#btnSaveNewPass').click(function () {
-                let username = $('#forgotUsername').val().trim();
-                let otp = $('#forgotOtp').val().trim();
-                let newPass = $('#forgotNewPass').val().trim();
-                let confirmPass = $('#forgotConfirmPass').val().trim();
-
-                if(!newPass || !confirmPass) { 
-                    $('#forgotError').text("❌ Vui lòng nhập mật khẩu mới!").removeClass('hidden'); return; 
-                }
-                if(newPass !== confirmPass) {
-                    $('#forgotError').text("❌ Xác nhận mật khẩu không khớp!").removeClass('hidden'); return; 
-                }
-
-                let btn = $(this); let originalText = btn.text();
-                btn.html('<i class="fas fa-spinner fa-spin"></i> Đang lưu...').prop('disabled', true);
-
-                $.post('/Account/ResetPassWithOtpAjax', { Username: username, Otp: otp, NewPassword: newPass }, function (res) {
-                    if (res.success) {
-                        $('#forgotError').addClass('hidden');
-                        $('#forgotSuccess').text("✅ " + res.message).removeClass('hidden');
-                        
-                        setTimeout(() => {
-                            switchAuthTab('login'); 
-                        }, 2500);
+                        // Đợi 3.5 giây tự động chuyển về tab đăng nhập
+                        setTimeout(() => { switchAuthTab('login'); }, 3500);
                     } else {
                         $('#forgotSuccess').addClass('hidden');
                         $('#forgotError').text("❌ " + res.message).removeClass('hidden');
