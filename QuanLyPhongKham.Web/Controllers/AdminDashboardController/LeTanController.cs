@@ -5,7 +5,7 @@ using QuanLyPhongKham.Services.Interfaces;
 using System;
 using System.Threading.Tasks;
 
-namespace QuanLyPhongKham.Web.Controllers
+namespace QuanLyPhongKham.Web.Controllers.AdminDashboardController
 {
     public class LeTanController : Controller
     {

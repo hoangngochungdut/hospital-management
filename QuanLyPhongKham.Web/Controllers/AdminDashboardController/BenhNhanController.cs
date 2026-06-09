@@ -3,7 +3,7 @@ using QuanLyPhongKham.Models.DTOs;
 using QuanLyPhongKham.Services.Implementations;
 using QuanLyPhongKham.Services.Interfaces;
 
-namespace QuanLyPhongKham.Web.Controllers
+namespace QuanLyPhongKham.Web.Controllers.AdminDashboardController
 {
     public class BenhNhanController : Controller
     {

@@ -3,7 +3,7 @@ using QuanLyPhongKham.Models.DTOs;
 using QuanLyPhongKham.Models.Enums;
 using QuanLyPhongKham.Services.Interfaces;
 
-namespace QuanLyPhongKham.Web.Controllers
+namespace QuanLyPhongKham.Web.Controllers.AdminDashboardController
 {
     public class AdminDashboardController : Controller
     {
@@ -354,4 +354,7 @@ namespace QuanLyPhongKham.Web.Controllers
             return View(tatCaLeTan);
         }
     }
+
+
+
 }
