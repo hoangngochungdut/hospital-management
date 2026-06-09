@@ -119,6 +119,46 @@ namespace QuanLyPhongKham.Services.Implementations
 
             return await _buoiKhamRepo.AddAsync(buoiKham);
         }
+        public async Task<int> DatLichKhamTraVeIdAsync(DatLichRequest request, int currentUserId, string role)
+        {
+            if (request.Ngay < DateOnly.FromDateTime(DateTime.Now))
+                throw new Exception("Lỗi: Không thể đặt lịch cho quá khứ!");
+
+            var cacCaDaDat = await _buoiKhamRepo.GetCacCaDaDatAsync(request.Ngay, request.Gio);
+
+            if (cacCaDaDat.Any(b => b.BacSiId == request.BacSiId))
+                throw new Exception("Lỗi: Bác sĩ đã có lịch tại khung giờ này.");
+
+            if (cacCaDaDat.Any(b => b.PhongKhamId == request.PhongKhamId))
+                throw new Exception("Lỗi: Phòng khám đã kín chỗ.");
+
+            var buoiKham = new BuoiKham
+            {
+                Ngay = request.Ngay,
+                Gio = request.Gio,
+                BacSiId = request.BacSiId,
+                PhongKhamId = request.PhongKhamId,
+
+                // Bệnh nhân tự đặt thì chờ xác nhận
+                // Lễ tân đặt hộ thì xác nhận luôn
+                TrangThai = role == "BenhNhan"
+                    ? TrangThaiBuoiKham.ChuaXacNhan
+                    : TrangThaiBuoiKham.XacNhan,
+
+                BenhNhanId = role == "BenhNhan"
+                    ? currentUserId
+                    : request.BenhNhanId ?? throw new Exception("Thiếu ID bệnh nhân"),
+
+                DaThanhToan = false
+            };
+
+            bool isSuccess = await _buoiKhamRepo.AddAsync(buoiKham);
+
+            if (!isSuccess)
+                return 0;
+
+            return buoiKham.Id;
+        }
 
         public async Task<List<string>> LayCacGioKhamTrongAsync(int bacSiId, int phongKhamId, DateOnly ngayKham)
         {

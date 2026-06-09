@@ -39,7 +39,13 @@ namespace QuanLyPhongKham.Web.Controllers
 
         [HttpPost]
         public async Task<IActionResult> DatLich(
-            int BenhNhanId, DateOnly Ngay, string Gio, int BacSiId, int PhongKhamId)
+       int BenhNhanId,
+       DateOnly Ngay,
+       string Gio,
+       int BacSiId,
+       int PhongKhamId,
+       string HinhThucThanhToan,
+       long SoTien)
         {
             int? currentId = HttpContext.Session.GetInt32("UserId");
             if (currentId == null) return RedirectToAction("Login", "Account");
@@ -47,6 +53,18 @@ namespace QuanLyPhongKham.Web.Controllers
             if (!TimeOnly.TryParse(Gio, out var gioParsed))
             {
                 TempData["ThongBao"] = $"❌ Không đọc được giờ ({Gio})!";
+                return RedirectToAction("LichKham");
+            }
+
+            if (string.IsNullOrEmpty(HinhThucThanhToan))
+            {
+                TempData["ThongBao"] = "❌ Vui lòng chọn hình thức thanh toán!";
+                return RedirectToAction("LichKham");
+            }
+
+            if (SoTien <= 0)
+            {
+                TempData["ThongBao"] = "❌ Số tiền thanh toán không hợp lệ!";
                 return RedirectToAction("LichKham");
             }
 
@@ -61,35 +79,48 @@ namespace QuanLyPhongKham.Web.Controllers
 
             try
             {
-                var result = await _buoiKhamService.DatLichKhamAsync(request, currentId.Value, "LeTan");
-                if (result) TempData["ThongBao"] = "✅ Đặt lịch hộ thành công (đã xác nhận)!";
+                int lichKhamId = await _buoiKhamService.DatLichKhamTraVeIdAsync(
+                    request,
+                    currentId.Value,
+                    "LeTan"
+                );
+
+                if (lichKhamId <= 0)
+                {
+                    TempData["ThongBao"] = "❌ Đặt lịch thất bại!";
+                    return RedirectToAction("LichKham");
+                }
+
+                if (HinhThucThanhToan == "TienMat")
+                {
+                    _buoiKhamService.CapNhatThanhToan(lichKhamId);
+
+                    TempData["ThongBao"] = "✅ Đặt lịch hộ và thu tiền mặt thành công!";
+                    return RedirectToAction("QuanLyLichKham");
+                }
+
+                if (HinhThucThanhToan == "Momo")
+                {
+                    return await ConfirmMomo(SoTien, lichKhamId);
+                }
+
+                TempData["ThongBao"] = "❌ Hình thức thanh toán không hợp lệ!";
             }
             catch (Exception ex)
             {
-                TempData["ThongBao"] = ex.Message;
+                TempData["ThongBao"] = "❌ Lỗi đặt lịch: " + ex.Message;
             }
 
             return RedirectToAction("LichKham");
         }
 
+
         [HttpPost]
         public IActionResult XacNhanLich(int id)
         {
-            try
-            {
-                bool isSuccess = _buoiKhamService.XulyCaKham(id, TrangThaiBuoiKham.XacNhan, null, null);
-
-                if (isSuccess) TempData["ThongBao"] = "✅ Đã xác nhận lịch khám thành công!";
-                else TempData["ThongBao"] = "❌ Lỗi: Không tìm thấy lịch khám!";
-            }
-            catch (Exception ex)
-            {
-                TempData["ThongBao"] = "❌ Lỗi xác nhận: " + ex.Message;
-            }
-
+            TempData["ThongBao"] = "⚠️ Vui lòng thanh toán trước khi xác nhận lịch khám.";
             return RedirectToAction("QuanLyLichKham");
         }
-
         [HttpPost]
         public IActionResult HuyLichKham(int id, string lyDo)
         {
@@ -284,32 +315,47 @@ namespace QuanLyPhongKham.Web.Controllers
             }
         }
         [HttpGet]
-        public async Task<IActionResult> MomoCallback(string resultCode, string message, string extraData)
+        public IActionResult MomoCallback(string resultCode, string message, string extraData)
         {
-            // 1. Dùng resultCode thay vì errorCode
-            // MoMo trả về "0" là giao dịch thành công hoàn toàn
             if (resultCode == "0")
             {
                 if (int.TryParse(extraData, out int lichKhamId))
                 {
                     try
                     {
-                        // 2. PHẢI MỞ KHÓA DÒNG NÀY ĐỂ CẬP NHẬT DATABASE
-                        // Gọi hàm cập nhật DaThanhToan = true mà mình đã làm ở các bước trước
+                        // Bước 1: cập nhật đã thanh toán
                         _buoiKhamService.CapNhatThanhToan(lichKhamId);
 
-                        TempData["SuccessMessage"] = $"✅ Thanh toán thành công cho ca khám #{lichKhamId}!";
+                        // Bước 2: thanh toán MoMo thành công thì xác nhận lịch
+                        bool isSuccess = _buoiKhamService.XulyCaKham(
+                            lichKhamId,
+                            TrangThaiBuoiKham.XacNhan,
+                            null,
+                            null
+                        );
+
+                        if (isSuccess)
+                        {
+                            TempData["ThongBao"] = $"✅ Thanh toán MoMo thành công và đã xác nhận lịch khám #{lichKhamId}!";
+                        }
+                        else
+                        {
+                            TempData["ThongBao"] = "❌ Thanh toán thành công nhưng không tìm thấy lịch khám!";
+                        }
                     }
                     catch (Exception ex)
                     {
-                        TempData["ErrorMessage"] = "Lỗi cập nhật dữ liệu: " + ex.Message;
+                        TempData["ThongBao"] = "❌ Lỗi cập nhật dữ liệu sau thanh toán MoMo: " + ex.Message;
                     }
+                }
+                else
+                {
+                    TempData["ThongBao"] = "❌ Không đọc được mã lịch khám từ MoMo.";
                 }
             }
             else
             {
-                // Nhảy vào đây nếu khách hủy hoặc resultCode != 0
-                TempData["ErrorMessage"] = "Thanh toán thất bại hoặc đã bị hủy: " + message;
+                TempData["ThongBao"] = "❌ Thanh toán MoMo thất bại hoặc đã bị hủy: " + message;
             }
 
             return RedirectToAction("QuanLyLichKham");
@@ -319,14 +365,31 @@ namespace QuanLyPhongKham.Web.Controllers
         {
             try
             {
-                // Dùng lại chính hàm chúng ta vừa fix lỗi xong!
+                // Bước 1: cập nhật đã thanh toán
                 _buoiKhamService.CapNhatThanhToan(id);
-                TempData["ThongBao"] = "✅ Đã xác nhận thu tiền mặt thành công!";
+
+                // Bước 2: sau khi thu tiền xong mới xác nhận lịch
+                bool isSuccess = _buoiKhamService.XulyCaKham(
+                    id,
+                    TrangThaiBuoiKham.XacNhan,
+                    null,
+                    null
+                );
+
+                if (isSuccess)
+                {
+                    TempData["ThongBao"] = "✅ Đã thu tiền mặt và xác nhận lịch khám thành công!";
+                }
+                else
+                {
+                    TempData["ThongBao"] = "❌ Không tìm thấy lịch khám để xác nhận!";
+                }
             }
             catch (Exception ex)
             {
-                TempData["ThongBao"] = "❌ Lỗi: " + ex.Message;
+                TempData["ThongBao"] = "❌ Lỗi thu tiền mặt: " + ex.Message;
             }
+
             return RedirectToAction("QuanLyLichKham");
         }
     }

@@ -114,11 +114,59 @@
                     </div>
 
                     <input type="hidden" id="GioKhamValue" name="Gio" required />
+
                 </div>
+
+            </div>
+            <!-- Bước 7: Chọn hình thức thanh toán -->
+            <div class="mt-10 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                <h3 class="font-bold text-xl text-blue-700 mb-4 flex items-center">
+                    <span class="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center mr-3 text-sm">7</span>
+                    Chọn Hình Thức Thanh Toán
+                </h3>
+
+                <div class="mb-4 bg-slate-50 border border-slate-200 rounded-xl p-4">
+                    <div class="text-sm text-slate-500 font-bold">Số tiền cần thu</div>
+                    <div id="giaKhamText" class="text-2xl font-black text-green-600 mt-1">Chưa chọn phòng</div>
+                    <div id="loaiPhongText" class="text-xs text-slate-400 font-bold mt-1"></div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button type="button"
+                            class="payment-option border-2 border-slate-200 rounded-xl p-5 text-left hover:border-blue-500 hover:bg-blue-50 transition-all"
+                            data-method="TienMat">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-green-500 text-white rounded-xl flex items-center justify-center text-xl">
+                                💵
+                            </div>
+                            <div>
+                                <div class="font-black text-slate-800">Thu tiền mặt</div>
+                                <div class="text-xs text-slate-500 mt-1">Lễ tân thu trực tiếp tại quầy</div>
+                            </div>
+                        </div>
+                    </button>
+
+                    <button type="button"
+                            class="payment-option border-2 border-slate-200 rounded-xl p-5 text-left hover:border-pink-500 hover:bg-pink-50 transition-all"
+                            data-method="Momo">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-[#ae2070] text-white rounded-xl flex items-center justify-center text-xl">
+                                M
+                            </div>
+                            <div>
+                                <div class="font-black text-slate-800">Ví MoMo</div>
+                                <div class="text-xs text-slate-500 mt-1">Chuyển sang MoMo để thanh toán</div>
+                            </div>
+                        </div>
+                    </button>
+                </div>
+
+                <input type="hidden" id="HinhThucThanhToan" name="HinhThucThanhToan" required />
+                <input type="hidden" id="SoTien" name="SoTien" />
             </div>
 
             <button type="submit" id="btnSubmit" class="w-full bg-slate-200 text-slate-400 text-xl font-black py-5 rounded-2xl transition-all duration-300 opacity-50 cursor-not-allowed shadow-lg" disabled>
-                HOÀN TẤT ĐẶT LỊCH HỘ
+                HOÀN TẤT ĐẶT LỊCH & THANH TOÁN
             </button>
         </form>
     </div>
@@ -138,15 +186,50 @@
         function checkEnableSubmit() {
         let coBenhNhan = $('#BenhNhanId').val() !== '';
         let coGioKham = $('#GioKhamValue').val() !== '';
+        let coThanhToan = $('#HinhThucThanhToan').val() !== '';
 
-        if (coBenhNhan && coGioKham) {
-        $('#btnSubmit').prop('disabled', false).removeClass('bg-slate-200 text-slate-400 opacity-50 cursor-not-allowed').addClass('bg-blue-600 text-white hover:bg-blue-700 shadow-blue-200 cursor-pointer');
+        if (coBenhNhan && coGioKham && coThanhToan) {
+        $('#btnSubmit')
+        .prop('disabled', false)
+        .removeClass('bg-slate-200 text-slate-400 opacity-50 cursor-not-allowed')
+        .addClass('bg-blue-600 text-white hover:bg-blue-700 shadow-blue-200 cursor-pointer');
         } else {
-        $('#btnSubmit').prop('disabled', true).removeClass('bg-blue-600 text-white hover:bg-blue-700 shadow-blue-200 cursor-pointer').addClass('bg-slate-200 text-slate-400 opacity-50 cursor-not-allowed');
+        $('#btnSubmit')
+        .prop('disabled', true)
+        .removeClass('bg-blue-600 text-white hover:bg-blue-700 shadow-blue-200 cursor-pointer')
+        .addClass('bg-slate-200 text-slate-400 opacity-50 cursor-not-allowed');
         }
         }
 
         $('#BenhNhanId').change(function() { checkEnableSubmit(); });
+        function capNhatThongTinThanhToan() {
+        let selectedPhong = $('#PhongKhamId option:selected');
+        let gia = selectedPhong.data('gia');
+        let loai = selectedPhong.data('loai');
+
+        if (gia) {
+        $('#SoTien').val(gia);
+        $('#giaKhamText').text(Number(gia).toLocaleString('vi-VN') + 'đ');
+        $('#loaiPhongText').text('Loại phòng: ' + loai);
+        } else {
+        $('#SoTien').val('');
+        $('#giaKhamText').text('Chưa chọn phòng');
+        $('#loaiPhongText').text('');
+        }
+        }
+
+        $(document).on('click', '.payment-option', function () {
+        $('.payment-option')
+        .removeClass('border-blue-600 bg-blue-50 ring-2 ring-blue-200')
+        .addClass('border-slate-200');
+
+        $(this)
+        .removeClass('border-slate-200')
+        .addClass('border-blue-600 bg-blue-50 ring-2 ring-blue-200');
+
+        $('#HinhThucThanhToan').val($(this).data('method'));
+        checkEnableSubmit();
+        });
 
         // KÍCH HOẠT LỊCH
         datePicker = flatpickr("#NgayKham", {
@@ -192,8 +275,13 @@
         let listPhong = [...new Map(danhSachLich.map(item => [item.phongId, item])).values()];
         let pHtml = '<option value="">-- Chọn Phòng --</option>';
         listPhong.forEach(p => {
-        let labelLoai = (p.loaiPhong && p.loaiPhong.toUpperCase() === "VIP") ? "⭐ VIP" : "Thường";
-        pHtml += `<option value="${p.phongId}">${p.phongTen} (${labelLoai})</option>`;
+        let isVip = p.loaiPhong && p.loaiPhong.toUpperCase().includes("VIP");
+        let labelLoai = isVip ? "⭐ VIP" : "Thường";
+        let giaKham = isVip ? 500000 : 200000;
+
+        pHtml += `<option value="${p.phongId}" data-loai="${labelLoai}" data-gia="${giaKham}">
+        ${p.phongTen} (${labelLoai}) - ${giaKham.toLocaleString('vi-VN')}đ
+        </option>`;
         });
         $('#PhongKhamId').html(pHtml).prop('disabled', false).removeClass('bg-slate-50 text-slate-400 cursor-not-allowed').addClass('bg-white text-slate-900 border-blue-200');
 
@@ -210,6 +298,14 @@
         $('#BacSiId, #PhongKhamId').change(function() {
         capNhatLich();
         loadGioKham();
+        capNhatThongTinThanhToan();
+
+        $('#HinhThucThanhToan').val('');
+        $('.payment-option')
+        .removeClass('border-blue-600 bg-blue-50 ring-2 ring-blue-200')
+        .addClass('border-slate-200');
+
+        checkEnableSubmit();
         });
 
         function capNhatLich() {
