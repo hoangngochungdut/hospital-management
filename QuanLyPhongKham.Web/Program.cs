@@ -22,22 +22,17 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         builder.Configuration.GetConnectionString("DefaultConnection"),
         b => b.MigrationsAssembly("QuanLyPhongKham.Data")
     ));
-//Console.WriteLine("CONNECTION = " + conn);
 
 builder.Services.AddControllersWithViews()
     .AddJsonOptions(options =>
     {
-        // Dòng này giúp bỏ qua các vòng lặp dữ liệu, ae pull về dùng API sẽ không bị lỗi
         options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
         options.JsonSerializerOptions.WriteIndented = true;
     });
 
-// =======================================================
-// BƯỚC 1: THÊM DỊCH VỤ SESSION VÀO BUILDER 
-// =======================================================
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(30); // Giữ đăng nhập trong 30 phút
+    options.IdleTimeout = TimeSpan.FromMinutes(30); 
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
@@ -71,7 +66,6 @@ builder.Services.AddScoped<IEmailSender, EmailSender>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -82,11 +76,6 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseRouting();
 
-
-
-// =======================================================
-// BƯỚC 2: KHÍCH HOẠT SESSION (Vị trí bắt buộc phải ở đây)
-// =======================================================
 app.UseSession();
 
 app.UseAuthorization();
@@ -102,7 +91,6 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var context = services.GetRequiredService<AppDbContext>();
-        // Lệnh này sẽ tự động kiểm tra thư mục Migrations và chạy cập nhật vào cơ sở dữ liệu
         context.Database.Migrate();
     }
     catch (Exception ex)

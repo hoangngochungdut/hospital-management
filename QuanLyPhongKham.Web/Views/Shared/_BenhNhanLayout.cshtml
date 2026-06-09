@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Http
+<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
@@ -18,15 +19,11 @@
     @{
         var currentController = ViewContext.RouteData.Values["Controller"]?.ToString();
         var currentAction = ViewContext.RouteData.Values["Action"]?.ToString();
-
-        // Định dạng khi Nút đang được chọn
         var activeClass = "bg-blue-50 text-blue-600 font-bold border-r-4 border-blue-600 shadow-sm";
-        // Định dạng khi Nút chưa được chọn
         var inactiveClass = "text-slate-500 hover:bg-slate-50 hover:text-slate-700 font-medium";
     }
 
     <div class="flex min-h-screen">
-        
         <aside class="w-64 bg-white border-r border-slate-200 hidden lg:flex flex-col sticky top-0 h-screen shadow-sm">
             <div class="p-8">
                 <div class="flex items-center space-x-3">
@@ -38,32 +35,25 @@
             </div>
 
             <nav class="flex-1 px-4 space-y-1 overflow-y-auto">
-                
                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-4 mb-2">Tài khoản</p>
-                
-                <a href="@Url.Action("ThongTinCaNhan", "BenhNhanDashboard")"
-                       class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all @(currentController == "BenhNhanDashboard" && currentAction == "ThongTinCaNhan" ? activeClass : inactiveClass)">
+                <a href="@Url.Action("ThongTinCaNhan", "BenhNhanDashboard")" class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all @(currentController == "BenhNhanDashboard" && currentAction == "ThongTinCaNhan" ? activeClass : inactiveClass)">
                     <i class="fas fa-id-card w-5"></i>
                     <span>Thông Tin Cá Nhân</span>
                 </a>
                 
                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-4 mt-6 mb-2">Chính</p>
                 
-                <a href="@Url.Action("XemLichKham", "BenhNhanDashboard")"
-                       class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all @(currentController == "BenhNhanDashboard" && currentAction == "XemLichKham" ? activeClass : inactiveClass)">
+                <a href="@Url.Action("XemLichKham", "BenhNhanDashboard")" class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all @(currentController == "BenhNhanDashboard" && currentAction == "XemLichKham" ? activeClass : inactiveClass)">
                     <i class="fas fa-calendar-alt w-5"></i>
                     <span>Xem lịch khám</span>
                 </a>
                 
-                <a href="@Url.Action("LichKham", "BenhNhanDashboard")"
-                       class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all @(currentController == "BenhNhanDashboard" && currentAction == "LichKham" ? activeClass : inactiveClass)">
+                <a href="@Url.Action("LichKham", "BenhNhanDashboard")" class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all @(currentController == "BenhNhanDashboard" && currentAction == "LichKham" ? activeClass : inactiveClass)">
                     <i class="fas fa-calendar-plus w-5"></i>
                     <span>Đặt lịch khám</span>
                 </a>
                 
-                <!-- 🔥 TÔI ĐÃ SỬA DÒNG NÀY: Thêm điều kiện để nút Xem Bác Sĩ hiện màu xanh -->
-                <a href="@Url.Action("XemBacSi", "BenhNhanDashboard")"
-                       class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all @(currentController == "BenhNhanDashboard" && currentAction == "XemBacSi" ? activeClass : inactiveClass)">
+                <a href="@Url.Action("XemBacSi", "BenhNhanDashboard")" class="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all @(currentController == "BenhNhanDashboard" && currentAction == "XemBacSi" ? activeClass : inactiveClass)">
                     <i class="fas fa-user-md w-5"></i>
                     <span>Xem bác sĩ</span>
                 </a>
@@ -78,25 +68,18 @@
         </aside>
 
         <main class="flex-1 flex flex-col relative">
-            
             <header class="w-full px-8 py-6 flex justify-end items-center bg-transparent">
                 <div class="flex items-center space-x-4 cursor-pointer hover:opacity-80 transition group">
                     <div class="text-right">
-                        <h2 class="text-sm font-bold text-slate-800 leading-none">Giao diện cho Bệnh Nhân</h2>
-                        <!-- 🔥 TÔI ĐÃ TIỆN TAY GẮN LẠI CODE HIỆN TÊN BỆNH NHÂN LÊN GÓC PHẢI MÀN HÌNH -->
-                        <p class="text-[10px] text-blue-600 font-bold uppercase mt-1.5 tracking-wider">
-                            @if (User.Identity != null && User.Identity.IsAuthenticated)
-                            {
-                                var tenBenhNhan = User.Claims.FirstOrDefault(c => c.Type == "FullName" || c.Type == System.Security.Claims.ClaimTypes.Name)?.Value
-                                                  ?? User.Identity.Name
-                                                  ?? "BỆNH NHÂN";
-                                @tenBenhNhan
-                            }
-                            else
-                            {
-                                <text>BỆNH NHÂN</text>
-                            }
-                        </p>
+                        @if (Context.Session.GetString("UserFullName") != null)
+                        {
+                            <h2 class="text-sm font-bold text-slate-800 leading-none">Xin chào, @Context.Session.GetString("UserFullName")</h2>
+                        }
+                        else
+                        {
+                            <h2 class="text-sm font-bold text-slate-800 leading-none">Giao diện cho Bệnh Nhân</h2>
+                        }
+                        <p class="text-[10px] text-blue-600 font-bold uppercase mt-1.5 tracking-wider">Bệnh Nhân</p>
                     </div>
                 </div>
             </header>
@@ -104,9 +87,7 @@
             <div id="main-app-content" class="flex-1 w-full h-full p-8">
                 @RenderBody()
             </div>
-
         </main>
-        
     </div>
 
     <script>
