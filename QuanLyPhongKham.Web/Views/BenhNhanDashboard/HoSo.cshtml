@@ -91,14 +91,13 @@
                            class="w-full border border-slate-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition" />
 
 
-                    <p id="errSoDienThoai" class="hidden text-red-500 text-sm mt-1">
-                        Vui lòng nhập số điện thoại
-                    </p>
+                   
 
                     <p id="errSoDienThoai" class="hidden text-red-500 text-sm mt-1">
                         Vui lòng nhập số điện thoại
                     </p>
-
+                    </div>
+                    
                 <div>
                         <label class="block text-slate-700 font-bold mb-1.5">
                             Địa chỉ <span class="text-red-500">*</span>
@@ -114,19 +113,8 @@
             </div>
 
 
-                    <div>
-                        <label class="block text-slate-700 font-bold mb-1.5">
-                            Địa chỉ <span class="text-red-500">*</span>
-                        </label>
-
-                        <textarea id="DiaChi" name="DiaChi" rows="3" placeholder="Nhập địa chỉ chi tiết"
-                                  class="w-full border border-slate-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition resize-none">@Model?.DiaChi</textarea>
-                        <p id="errDiaChi" class="hidden text-red-500 text-sm mt-1">
-                            Vui lòng nhập địa chỉ
-                        </p>
-
-                    </div>
-                </div>
+                   
+                
 
                 <div class="mt-8 pt-6 border-t border-slate-200">
                     <h3 class="text-amber-600 font-bold mb-4 flex items-center text-lg">
@@ -156,10 +144,7 @@
                 </div>
 
 
-                <div class="mt-8 pt-6 border-t border-slate-200 flex flex-wrap gap-3 justify-end">
-                    <a href="javascript:history.back()" class="px-5 py-2.5 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition font-medium flex items-center">
-                        <i class="fas fa-arrow-left mr-2"></i> Quay lại
-                    </a>
+                   
 
 
             <div class="mt-8 pt-6 border-t border-slate-200 flex flex-wrap gap-3 justify-end">
@@ -185,9 +170,75 @@
             </form>
 
             </div>
-            
-        </form>            @section Scripts {
-                <script>
+            </div>
+                  
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById("mainForm").addEventListener("submit", function (e) {
+            const button = e.submitter;
+
+            if (!button || button.id !== "btnLuuThongTin") {
+                return;
+            }
+
+            let isValid = true;
+
+            const hoTen = document.getElementById("HoTen");
+            const gioiTinh = document.getElementById("GioiTinh");
+            const soDienThoai = document.getElementById("SoDienThoai");
+            const diaChi = document.getElementById("DiaChi");
+
+            const errHoTen = document.getElementById("errHoTen");
+            const errGioiTinh = document.getElementById("errGioiTinh");
+            const errSoDienThoai = document.getElementById("errSoDienThoai");
+            const errDiaChi = document.getElementById("errDiaChi");
+
+            errHoTen.classList.add("hidden");
+            errGioiTinh.classList.add("hidden");
+            errSoDienThoai.classList.add("hidden");
+            errDiaChi.classList.add("hidden");
+
+            hoTen.classList.remove("border-red-500");
+            gioiTinh.classList.remove("border-red-500");
+            soDienThoai.classList.remove("border-red-500");
+            diaChi.classList.remove("border-red-500");
+
+            if (hoTen.value.trim() === "") {
+                errHoTen.classList.remove("hidden");
+                hoTen.classList.add("border-red-500");
+                isValid = false;
+            }
+
+            if (gioiTinh.value.trim() === "") {
+                errGioiTinh.classList.remove("hidden");
+                gioiTinh.classList.add("border-red-500");
+                isValid = false;
+            }
+
+            if (soDienThoai.value.trim() === "") {
+                errSoDienThoai.classList.remove("hidden");
+                soDienThoai.classList.add("border-red-500");
+                isValid = false;
+            }
+
+            if (diaChi.value.trim() === "") {
+                errDiaChi.classList.remove("hidden");
+                diaChi.classList.add("border-red-500");
+                isValid = false;
+            }
+
+            if (!isValid) {
+                e.preventDefault();
+            }
+        });
+    </script>
+}
+@* @section Scripts {
+           
+   <script>
                             document.getElementById("mainForm").addEventListener("submit", function (e) {
                                 const button = e.submitter;
 
@@ -243,11 +294,6 @@
                                 }
                             });
                 </script>
-            }
+            } *@
 
-        </div>
-    </div>
-
-    </div>
-</div>
-
+    
