@@ -25,13 +25,12 @@
 <div class="bg-slate-50 min-h-screen py-8 px-6">
     <div class="max-w-7xl mx-auto">
 
-        <!-- ================= HEADER & TOOLBAR ================= -->
         <div class="flex justify-between items-center mb-6">
             <div>
                 <h2 class="text-3xl font-black text-slate-800 tracking-tight flex items-center gap-3">
                     <i class="fas fa-border-all text-blue-600"></i> Lịch trực theo tuần
                 </h2>
-                <p class="text-slate-500 mt-1">Xem dạng lưới — 1 ngày nhiều phòng, nhiều chuyên khoa</p>
+                <p class="text-slate-500 mt-1">Xem dạng lưới — Hỗ trợ sao chép tuần cũ và phân công nhanh theo Tuần/Tháng</p>
             </div>
             
             <div class="flex gap-3">
@@ -47,21 +46,24 @@
                 <button type="button" onclick="taiMauExcel()" class="bg-white border border-slate-300 text-slate-700 px-4 py-2.5 rounded-xl font-bold hover:bg-slate-50 shadow-sm transition-all text-sm flex items-center gap-2">
                     <i class="fas fa-download text-slate-500"></i> Tải mẫu
                 </button>
+                
+                <button type="button" onclick="saoChepLichTuanTruoc()" class="bg-orange-500 text-white px-4 py-2.5 rounded-xl font-bold hover:bg-orange-600 shadow-md transition-all text-sm flex items-center gap-2">
+                    <i class="fas fa-copy"></i> Sao chép tuần trước
+                </button>
+
                 <button type="button" onclick="$('#addLichModal').removeClass('hidden').addClass('flex')" class="bg-blue-600 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-blue-700 shadow-md transition-all text-sm flex items-center gap-2">
-                    <i class="fas fa-plus"></i> Thêm lịch
+                    <i class="fas fa-plus"></i> Thêm lịch nhanh
                 </button>
             </div>
         </div>
 
         @if (TempData["ThongBao"] != null)
         {
-            <div class="mb-4 p-4 rounded-xl bg-blue-50 text-blue-700 font-bold border border-blue-200">@TempData["ThongBao"]</div>
+            <div class="mb-4 p-4 rounded-xl bg-blue-50 text-blue-700 font-bold border border-blue-200">@Html.Raw(TempData["ThongBao"])</div>
         }
 
-        <!-- ================= MAIN CONTAINER BẢNG MA TRẬN ================= -->
         <div class="bg-white rounded-3xl shadow-lg border border-slate-200 overflow-hidden">
             
-            <!-- Điều hướng tuần & Tab -->
             <div class="border-b border-slate-200 p-4">
                 <div class="flex justify-between items-center mb-6">
                     <button id="btnPrevWeek" class="w-10 h-10 rounded-full border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-100 transition-colors">
@@ -81,7 +83,6 @@
                 <div class="flex flex-wrap gap-2 mt-4" id="filterChips"></div>
             </div>
 
-            <!-- Thẻ thống kê -->
             <div class="grid grid-cols-4 divide-x divide-slate-100 border-b border-slate-200 bg-slate-50">
                 <div class="p-5">
                     <p class="text-xs font-bold text-slate-500 mb-1">Lịch tuần này</p>
@@ -101,7 +102,6 @@
                 </div>
             </div>
 
-            <!-- Bảng Matrix -->
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse min-w-[1000px]" id="matrixTable">
                     <thead>
@@ -117,18 +117,16 @@
     </div>
 </div>
 
-<!-- ================= CÁC MODAL (POPUP) ================= -->
-<!-- 1. Modal Thêm Lịch Thủ Công -->
 <div id="addLichModal" class="hidden fixed inset-0 bg-slate-900/60 z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
     <div class="bg-white w-full max-w-md rounded-[24px] shadow-2xl overflow-hidden transform transition-all">
         <div class="bg-blue-600 p-5 flex justify-between items-center text-white">
-            <h3 class="font-black text-lg uppercase tracking-wider">Tạo phân công mới</h3>
+            <h3 class="font-black text-lg uppercase tracking-wider">Tạo phân công nhanh</h3>
             <button onclick="$('#addLichModal').addClass('hidden').removeClass('flex')" class="text-white/70 hover:text-white text-2xl font-bold">&times;</button>
         </div>
-        <form asp-action="LuuPhanCong" method="post" class="p-6 space-y-5">
+        <form asp-action="LuuPhanCong" method="post" class="p-6 space-y-4">
             <div>
-                <label class="block text-xs font-bold text-slate-500 uppercase mb-2">1. Chọn Chuyên Khoa</label>
-                <select id="selectKhoa" class="w-full border-2 border-slate-200 rounded-xl p-3 outline-none focus:border-blue-500 font-bold text-slate-700">
+                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">1. Chọn Chuyên Khoa</label>
+                <select id="selectKhoa" class="w-full border-2 border-slate-200 rounded-xl p-2.5 outline-none focus:border-blue-500 font-bold text-slate-700 text-sm">
                     <option value="">-- Vui lòng chọn khoa --</option>
                     @if (ViewBag.DsChuyenKhoa != null)
                     {
@@ -140,27 +138,37 @@
                 </select>
             </div>
             <div>
-                <label class="block text-xs font-bold text-slate-500 uppercase mb-2">2. Chọn Bác Sĩ</label>
-                <select name="BacSiId" id="selectBacSi" class="w-full border-2 border-slate-200 rounded-xl p-3 outline-none focus:border-blue-500 bg-slate-50" required disabled>
+                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">2. Chọn Bác Sĩ</label>
+                <select name="BacSiId" id="selectBacSi" class="w-full border-2 border-slate-200 rounded-xl p-2.5 outline-none focus:border-blue-500 bg-slate-50 text-sm" required disabled>
                     <option value="">-- Chọn khoa trước --</option>
                 </select>
             </div>
             <div>
-                <label class="block text-xs font-bold text-slate-500 uppercase mb-2">3. Chọn Phòng Khám</label>
-                <select name="PhongKhamId" id="selectPhong" class="w-full border-2 border-slate-200 rounded-xl p-3 outline-none focus:border-blue-500 bg-slate-50" required disabled>
+                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">3. Chọn Phòng Khám</label>
+                <select name="PhongKhamId" id="selectPhong" class="w-full border-2 border-slate-200 rounded-xl p-2.5 outline-none focus:border-blue-500 bg-slate-50 text-sm" required disabled>
                     <option value="">-- Chọn khoa trước --</option>
                 </select>
             </div>
+
             <div>
-                <label class="block text-xs font-bold text-slate-500 uppercase mb-2">4. Chọn ngày trên lịch (Có thể chọn nhiều ngày)</label>
+                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">4. Chọn quy mô thời gian</label>
+                <select id="selectLoaiThoiGian" class="w-full border-2 border-blue-400 rounded-xl p-2.5 outline-none focus:border-blue-600 font-black text-blue-700 text-sm bg-blue-50/50">
+                    <option value="ngay">Chọn các ngày lẻ tùy ý</option>
+                    <option value="tuan">Xếp trọn gói nguyên 1 Tuần (7 ngày liên tiếp)</option>
+                    <option value="thang">Xếp trọn gói nguyên 1 Tháng (Cả tháng)</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase mb-1" id="lblDatePicker">5. Chọn ngày trên lịch</label>
                 <div class="relative">
                     <input type="text" id="multiDatePicker" name="DanhSachNgay" placeholder="Bấm vào đây để chọn ngày..."
-                           class="w-full border-2 border-slate-200 rounded-xl p-3 pr-10 outline-none focus:border-blue-500 font-bold bg-white cursor-pointer"
+                           class="w-full border-2 border-slate-200 rounded-xl p-2.5 pr-10 outline-none focus:border-blue-500 font-bold bg-white cursor-pointer text-sm"
                            required readonly />
-                    <i class="fas fa-calendar-alt absolute right-4 top-4 text-slate-400"></i>
+                    <i class="fas fa-calendar-alt absolute right-4 top-3.5 text-slate-400"></i>
                 </div>
             </div>
-            <div class="pt-4 flex justify-end gap-3">
+            <div class="pt-2 flex justify-end gap-3">
                 <button type="button" onclick="$('#addLichModal').addClass('hidden').removeClass('flex')" class="px-5 py-2.5 bg-slate-100 text-slate-600 font-bold rounded-xl text-xs uppercase">Hủy</button>
                 <button type="submit" class="px-5 py-2.5 bg-blue-600 text-white font-bold rounded-xl text-xs uppercase shadow-md hover:bg-blue-700">Lưu phân công</button>
             </div>
@@ -168,7 +176,6 @@
     </div>
 </div>
 
-<!-- 2. Modal Hướng Dẫn Nhập Excel -->
 <div id="guideModal" class="hidden fixed inset-0 bg-slate-900/60 z-[110] flex items-center justify-center p-4 backdrop-blur-sm">
     <div class="bg-white w-full max-w-2xl rounded-[24px] shadow-2xl overflow-hidden transform transition-all">
         <div class="bg-blue-600 p-5 flex justify-between items-center text-white">
@@ -221,7 +228,6 @@
     </div>
 </div>
 
-<!-- 3. Modal Xem Trước Khi Nhập Excel -->
 <div id="excelPreviewModal" class="hidden fixed inset-0 bg-slate-900/60 z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
     <div class="bg-white w-full max-w-4xl rounded-[24px] shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
         <div class="bg-green-600 p-5 flex justify-between items-center text-white">
@@ -252,7 +258,6 @@
     </div>
 </div>
 
-<!-- ================= JAVASCRIPT XỬ LÝ ================= -->
 @section Scripts {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -262,6 +267,11 @@
     <script>
         const allData = @Html.Raw(jsonData);
         
+        // Khử lỗi chip Phòng 101 thừa bị phân mảnh trên UI
+        allData.forEach(x => {
+        if (x.PhongTen === "101") { x.PhongTen = "101 - Thường"; }
+        });
+        
         let currentDate = new Date();
         let currentTab = 'phong';
         let currentFilter = 'all';
@@ -269,10 +279,11 @@
 
         let dictBacSi = {};
         let dictPhong = {};
-        let dictPhongBySoPhong = {}; // TỪ ĐIỂN NGƯỢC: Dò Số Phòng -> ID Phòng
+        let dictPhongBySoPhong = {};
+        let pickerInstance = null; // Quản lý vòng đời flatpickr để hủy/tạo lại chế độ chọn nhanh
 
         $(document).ready(function () {
-        // Tải dữ liệu từ C# (Nếu lỗi nó sẽ báo để ông biết)
+        // Tải dữ liệu danh mục từ API C#
         $.get('/AdminDashboard/GetTuDienBacSiPhong', function(res) {
         if(res.bacSis) {
         res.bacSis.forEach(b => dictBacSi[b.id || b.Id] = { ten: b.ten || b.Ten || b.hoTen || b.HoTen, khoa: b.khoa || b.Khoa });
@@ -281,21 +292,21 @@
         res.phongs.forEach(p => {
         let id = p.id || p.Id;
         let sp = (p.soPhong || p.SoPhong).toString().trim();
+        if (sp === "101") { sp = "101 - Thường"; }
         dictPhong[id] = sp;
-        dictPhongBySoPhong[sp] = id; // Lưu thêm để dịch ngược: "101" -> id
+        dictPhongBySoPhong[sp] = id;
+        dictPhongBySoPhong[sp.split(' - ')[0].trim()] = id; // Hỗ trợ tra ngược số phòng gốc
         });
         }
-        }).fail(function() {
-        alert("⚠️ CHÚ Ý: Chưa lấy được danh sách Bác sĩ từ Server! Ông nhớ kiểm tra lại BƯỚC 1 nhé.");
+        initMatrix(); // Có dữ liệu rồi mới render bảng
         });
 
-        initMatrix();
-        flatpickr("#multiDatePicker", {
-        mode: "multiple",
-        dateFormat: "d/m/Y",
-        conjunction: ", ",
-        locale: "vn",
-        minDate: "today",
+        // Khởi chạy flatpickr chế độ ngày lẻ mặc định
+        initDatePickerMode('ngay');
+
+        // BẮT SỰ KIỆN ĐỔI CHẾ ĐỘ THỜI GIAN THEO TUẦN / THEO THÁNG
+        $('#selectLoaiThoiGian').change(function() {
+        initDatePickerMode($(this).val());
         });
 
         $('.tab-btn').click(function () {
@@ -308,8 +319,7 @@
 
         $('#btnPrevWeek').click(() => { currentDate.setDate(currentDate.getDate() - 7); initMatrix(); });
         $('#btnNextWeek').click(() => { currentDate.setDate(currentDate.getDate() + 7); initMatrix(); });
-            
-        // Render select dropdown thủ công
+                
         $('#selectKhoa').change(function() {
         let id = $(this).val();
         if(!id) {
@@ -329,6 +339,94 @@
         });
         });
         });
+
+        // 🔥 HÀM BIẾN ĐỔI CHẾ ĐỘ CHỌN LỊCH THỜI GIAN ĐỂ BUNG NGÀY TỰ ĐỘNG
+        function initDatePickerMode(mode) {
+        if (pickerInstance) {
+        pickerInstance.destroy();
+        }
+        $('#multiDatePicker').val('');
+
+        if (mode === 'ngay') {
+        $('#lblDatePicker').text('5. Chọn các ngày lẻ (Có thể tích chọn nhiều ngày cùng lúc)');
+        pickerInstance = flatpickr("#multiDatePicker", {
+        mode: "multiple",
+        dateFormat: "d/m/Y",
+        conjunction: ", ",
+        locale: "vn",
+        minDate: "today",
+        });
+        }
+        else if (mode === 'tuan') {
+        $('#lblDatePicker').text('5. Chọn 1 ngày bất kỳ (Hệ thống tự động tính toán bung trọn vẹn 7 ngày của tuần đó)');
+        pickerInstance = flatpickr("#multiDatePicker", {
+        mode: "single",
+        dateFormat: "d/m/Y",
+        locale: "vn",
+        minDate: "today",
+        onChange: function(selectedDates, dateStr) {
+        if (dateStr) {
+        setTimeout(() => {
+        let parts = dateStr.split('/');
+        let date = new Date(parts[2], parts[1] - 1, parts[0]);
+        let day = date.getDay();
+        let distance = day === 0 ? -6 : 1 - day; // Tìm về ngày thứ Hai của tuần
+        let monday = new Date(date.setDate(date.getDate() + distance));
+                                
+        let weekDates = [];
+        for (let i = 0; i < 7; i++) {
+        let d = new Date(monday);
+        d.setDate(monday.getDate() + i);
+        weekDates.push(formatDateVN_Full(d));
+        }
+        $('#multiDatePicker').val(weekDates.join(', '));
+        }, 50);
+        }
+        }
+        });
+        }
+        else if (mode === 'thang') {
+        $('#lblDatePicker').text('5. Chọn 1 ngày bất kỳ (Hệ thống tự động bung toàn bộ các ngày trong tháng đó)');
+        pickerInstance = flatpickr("#multiDatePicker", {
+        mode: "single",
+        dateFormat: "d/m/Y",
+        locale: "vn",
+        minDate: "today",
+        onChange: function(selectedDates, dateStr) {
+        if (dateStr) {
+        setTimeout(() => {
+        let parts = dateStr.split('/');
+        let year = parseInt(parts[2]);
+        let month = parseInt(parts[1]) - 1;
+                                
+        let date = new Date(year, month, 1);
+        let monthDates = [];
+        while (date.getMonth() === month) {
+        monthDates.push(formatDateVN_Full(new Date(date)));
+        date.setDate(date.getDate() + 1);
+        }
+        $('#multiDatePicker').val(monthDates.join(', '));
+        }, 50);
+        }
+        }
+        });
+        }
+        }
+
+        // 🔥 HÀM GỌI AJAX SAO CHÉP LỊCH TUẦN TRƯỚC
+        window.saoChepLichTuanTruoc = function() {
+        let ngayThuHaiHienTai = formatDateISO(daysOfWeek[0]);
+        if (confirm(`Bạn có chắc chắn muốn nhân bản toàn bộ lịch trực của tuần trước sang tuần này (Bắt đầu từ ngày ${formatDateVN(daysOfWeek[0])}) không?`)) {
+        $.post('/AdminDashboard/SaoChepLichTuanTruocAjax', { ngayThuHaiHienTai: ngayThuHaiHienTai }, function(res) {
+        alert(res.message);
+        if (res.success) {
+        location.reload();
+        }
+        }).fail(function() {
+        alert("❌ Lỗi kết nối đến máy chủ khi thực hiện nhân bản lịch!");
+        });
+        }
+        }
 
         function initMatrix() {
         daysOfWeek = [];
@@ -415,7 +513,7 @@
         let rowsToRender = currentFilter === 'all' ? rowHeaders : [currentFilter];
 
         if (rowsToRender.length === 0) {
-        tbodyHtml = `<tr><td colspan="8" class="text-center py-20 text-slate-400 italic">Chưa có dữ liệu</td></tr>`;
+        tbodyHtml = `<tr><td colspan="8" class="text-center py-20 text-slate-400 italic">Chưa có dữ liệu lịch trực tuần này</td></tr>`;
         } else {
         rowsToRender.forEach(rowVal => {
         let displayName = currentTab === 'phong' ? "Phòng " + rowVal : "BS. " + rowVal;
@@ -458,19 +556,18 @@
         }
 
         ws_data.push([]);
-        // Đã đổi Hướng dẫn thành nhập SỐ PHÒNG
         ws_data.push(["HƯỚNG DẪN: Nhập SỐ PHÒNG (Ví dụ: 101, 102...) vào các ô trống tương ứng để phân công trực."]);
 
         let ws = XLSX.utils.aoa_to_sheet(ws_data);
         ws['!cols'] = [{ wch: 30 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }];
         let wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "LichTruc");
-            
+                
         let fileName = `MauLichTruc_${formatDateVN(daysOfWeek[0]).replace(/\//g,'')}_${formatDateVN(daysOfWeek[6]).replace(/\//g,'')}.xlsx`;
         XLSX.writeFile(wb, fileName);
         }
 
-        // ================= ĐỌC EXCEL (HỖ TRỢ NHẬP SỐ PHÒNG: 101, 102) =================
+        // ================= ĐỌC EXCEL =================
         let excelDataList = [];
         $('#fileExcel').change(function(e) {
         let file = e.target.files[0];
@@ -485,24 +582,23 @@
         excelDataList = [];
         if(rawData.length > 1) {
         let headers = rawData[0];
-                    
+                        
         for(let i = 1; i < rawData.length; i++) {
         let row = rawData[i];
         if(!row || row.length === 0) continue;
 
         let rawBacSi = row[0];
         if(!rawBacSi || rawBacSi.toString().includes('HƯỚNG DẪN')) continue;
-                        
+                                
         let bacSiId = parseInt(rawBacSi.toString().split('-')[0].trim());
         if(isNaN(bacSiId)) continue;
 
         for(let j = 1; j < headers.length; j++) {
         let ngayStr = headers[j];
-        let rawPhong = row[j]; // Cái này là số "101", "102"
-                                            
+        let rawPhong = row[j];
+                                                                        
         if(rawPhong) {
         let soPhongNhapVao = rawPhong.toString().trim();
-        // Dùng từ điển ngược để tìm xem phòng 101 thì PhongId là bao nhiêu
         let phongIdTrongDb = dictPhongBySoPhong[soPhongNhapVao];
 
         if(phongIdTrongDb && ngayStr && ngayStr.includes('/')) {
@@ -512,7 +608,6 @@
         PhongKhamId: phongIdTrongDb
         });
         } else if (!phongIdTrongDb && ngayStr && ngayStr.includes('/')) {
-        // Cảnh báo nhẹ trong F12 nếu họ nhập sai tên phòng
         console.warn(`Không tìm thấy phòng số: ${soPhongNhapVao} trong hệ thống.`);
         }
         }
@@ -534,12 +629,11 @@
         <td class="p-4"><div class="font-black text-slate-700 text-sm tracking-wider">${item.Ngay}</div></td>
         <td class="p-4"><div class="font-bold text-blue-700 text-base">${hienThiTenBs}</div><div class="text-[10px] font-black text-slate-400 uppercase mt-1">Khoa: ${hienThiKhoa}</div></td>
         <td class="p-4 text-center"><span class="bg-white text-slate-600 px-3 py-1.5 rounded-lg text-xs font-black border border-slate-200 shadow-sm block w-fit mx-auto">${hienThiPhong}</span></td>
-        </tr>
-        `;
+        </tr>`;
         });
 
         if (excelDataList.length === 0) {
-        alert("❌ Lỗi: Không đọc được dữ liệu. Vui lòng đảm bảo bạn nhập đúng số phòng (Ví dụ: 101, 102) vào lịch.");
+        alert("❌ Lỗi: Không đọc được dữ liệu. Vui lòng đảm bảo bạn nhập đúng số phòng vào lịch.");
         } else {
         $('#excelPreviewBody').html(tbodyHtml);
         $('#excelPreviewModal').removeClass('hidden').addClass('flex');

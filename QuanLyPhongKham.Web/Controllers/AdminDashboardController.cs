@@ -105,32 +105,51 @@ namespace QuanLyPhongKham.Web.Controllers
             try
             {
                 if (string.IsNullOrEmpty(DanhSachNgay))
-                    throw new Exception("Vui lòng chọn ngày!");
-
+                    throw new Exception("Vui lòng chọn ngày trên lịch!");
                 var listDateObj = DanhSachNgay
                     .Split(',')
-                    .Select(str => DateOnly.Parse(str.Trim()))
+                    .Select(str => DateOnly.ParseExact(str.Trim(), "dd/MM/yyyy", System.Globalization.CultureInfo.InvariantCulture))
                     .ToList();
 
                 var bacSi = _bacSiService.GetById(BacSiId);
                 var phongs = await _phongKhamService.GetAllAsync();
                 var phong = phongs.FirstOrDefault(p => p.Id == PhongKhamId);
 
-                var ketQua = await _lichTrucService
-                    .PhanCongNhieuNgayAsync(BacSiId, PhongKhamId, listDateObj);
+                List<string> successDates = new List<string>();
+                List<string> conflictDates = new List<string>();
 
-                if (ketQua)
+                foreach (var date in listDateObj)
                 {
-                    var ngayHienThi = string.Join(", ",
-                        listDateObj.Select(d => d.ToString("dd/MM")));
+                    try
+                    {
+                        bool isSuccess = await _lichTrucService.PhanCongBacSiAsync(BacSiId, PhongKhamId, date);
+                        if (isSuccess)
+                        {
+                            successDates.Add(date.ToString("dd/MM"));
+                        }
+                        else
+                        {
+                            conflictDates.Add(date.ToString("dd/MM"));
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        conflictDates.Add(date.ToString("dd/MM"));
+                    }
+                }
 
-                    TempData["ThongBao"] =
-                        $"✅ Đã phân công BS. {bacSi?.HoTen} trực tại Phòng {phong?.SoPhong} các ngày: {ngayHienThi}";
+                if (successDates.Any())
+                {
+                    string message = $"✅ Đã phân công BS. {bacSi?.HoTen} tại Phòng {phong?.SoPhong} các ngày: {string.Join(", ", successDates)}.";
+                    if (conflictDates.Any())
+                    {
+                        message += $" <br/>⚠️ Bỏ qua các ngày bị trùng lịch: {string.Join(", ", conflictDates)}.";
+                    }
+                    TempData["ThongBao"] = message;
                 }
                 else
                 {
-                    TempData["ThongBao"] =
-                        "⚠️ Trùng lịch! Bác sĩ hoặc Phòng đã có lịch.";
+                    TempData["ThongBao"] = $"❌ Phân công thất bại! Tất cả các ngày đã chọn đều bị trùng lịch: {string.Join(", ", conflictDates)}.";
                 }
             }
             catch (Exception ex)
@@ -139,6 +158,41 @@ namespace QuanLyPhongKham.Web.Controllers
             }
 
             return RedirectToAction("LichTruc");
+        }
+        [HttpPost]
+        public async Task<IActionResult> SaoChepLichTuanTruocAjax(string ngayThuHaiHienTai)
+        {
+            try
+            {
+                if (!DateOnly.TryParse(ngayThuHaiHienTai, out DateOnly thuHaiHienTai))
+                    return Json(new { success = false, message = "Ngày không hợp lệ!" });
+
+                DateOnly thuHaiTuanTruoc = thuHaiHienTai.AddDays(-7);
+
+                var tatCaLich = await _lichTrucService.LayTatCaLichTrucAsync();
+
+                var lichTuanTruoc = tatCaLich.Where(x => x.Ngay >= thuHaiTuanTruoc && x.Ngay < thuHaiHienTai).ToList();
+
+                if (!lichTuanTruoc.Any())
+                {
+                    return Json(new { success = false, message = "Không tìm thấy dữ liệu lịch trực của tuần trước để thực hiện sao chép!" });
+                }
+
+                int countSuccess = 0;
+                foreach (var item in lichTuanTruoc)
+                {
+                    DateOnly ngayTuanNay = item.Ngay.AddDays(7); 
+
+                    bool checkLuu = await _lichTrucService.PhanCongBacSiAsync(item.BacSiId, item.PhongKhamId, ngayTuanNay);
+                    if (checkLuu) countSuccess++;
+                }
+
+                return Json(new { success = true, message = $"🚀 Hoàn tất! Đã sao chép nhanh {countSuccess} ca trực từ tuần trước sang tuần này thành công." });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Lỗi hệ thống: " + ex.Message });
+            }
         }
 
         [HttpPost]
