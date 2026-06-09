@@ -90,9 +90,29 @@
                     <input id="SoDienThoai" type="tel" name="SoDienThoai" value="@Model?.SoDienThoai" placeholder="0123456789"
                            class="w-full border border-slate-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition" />
 
+
                     <p id="errSoDienThoai" class="hidden text-red-500 text-sm mt-1">
                         Vui lòng nhập số điện thoại
                     </p>
+
+                    <p id="errSoDienThoai" class="hidden text-red-500 text-sm mt-1">
+                        Vui lòng nhập số điện thoại
+                    </p>
+
+                <div>
+                        <label class="block text-slate-700 font-bold mb-1.5">
+                            Địa chỉ <span class="text-red-500">*</span>
+                        </label>
+
+                        <textarea id="DiaChi" name="DiaChi" rows="3" placeholder="Nhập địa chỉ chi tiết"
+                              class="w-full border border-slate-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-100 focus:border-blue-500 outline-none transition resize-none">@Model?.DiaChi</textarea>
+                        <p id="errDiaChi" class="hidden text-red-500 text-sm mt-1">
+                            Vui lòng nhập địa chỉ
+                        </p>
+
+                </div>
+            </div>
+
 
                     <div>
                         <label class="block text-slate-700 font-bold mb-1.5">
@@ -135,10 +155,18 @@
                     </div>
                 </div>
 
+
                 <div class="mt-8 pt-6 border-t border-slate-200 flex flex-wrap gap-3 justify-end">
                     <a href="javascript:history.back()" class="px-5 py-2.5 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition font-medium flex items-center">
                         <i class="fas fa-arrow-left mr-2"></i> Quay lại
                     </a>
+
+
+            <div class="mt-8 pt-6 border-t border-slate-200 flex flex-wrap gap-3 justify-end">
+                    <a href="javascript:history.back()" class="px-5 py-2.5 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition font-medium flex items-center">
+                    <i class="fas fa-arrow-left mr-2"></i> Quay lại
+                </a>
+                
 
                     <button id="btnLuuThongTin" type="submit"
                             formaction="@Url.Action("CapNhatHoSo", "BenhNhanDashboard")"
@@ -151,10 +179,14 @@
                             class="px-5 py-2.5 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition font-medium flex items-center shadow-sm">
                         <i class="fas fa-key mr-2"></i> Đổi mật khẩu
                     </button>
+
                 </div>
 
             </form>
-            @section Scripts {
+
+            </div>
+            
+        </form>            @section Scripts {
                 <script>
                             document.getElementById("mainForm").addEventListener("submit", function (e) {
                                 const button = e.submitter;
@@ -212,5 +244,10 @@
                             });
                 </script>
             }
+
         </div>
     </div>
+
+    </div>
+</div>
+

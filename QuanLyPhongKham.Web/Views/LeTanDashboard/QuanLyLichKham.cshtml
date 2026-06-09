@@ -136,46 +136,33 @@
                                     <td class="p-4 text-right flex justify-end gap-2 items-center">
                                         @if (item.TrangThai == TrangThaiBuoiKham.ChuaXacNhan)
                                         {
-                                            <form asp-action="XacNhanLich" method="post" class="inline">
-                                                <input type="hidden" name="id" value="@item.Id" />
-                                                <button type="submit" class="bg-blue-600 text-white px-3 py-2 rounded-lg font-bold text-xs uppercase shadow-md hover:bg-blue-700 transition-all">
-                                                    Xác nhận lịch
-                                                </button>
-                                            </form>
-                                            <button type="button" onclick="openHuyModal(@item.Id)" class="text-red-500 text-[10px] uppercase underline ml-2">Hủy</button>
-                                        }
-                                        else if (item.TrangThai == TrangThaiBuoiKham.XacNhan && !item.DaThanhToan)
-                                        {
-                                            // Khai báo biến C# bên trong khối else if
                                             bool isVip = item.PhongKham?.LoaiPhong?.ToUpper().Contains("VIP") ?? false;
                                             int giaKham = isVip ? 500000 : 200000;
                                             string tenLoai = isVip ? "VIP" : "Thường";
 
-                                            <div class="flex gap-2">
-                                                <form asp-action="XacNhanThuTien" method="post" class="inline">
-                                                    <input type="hidden" name="id" value="@item.Id" />
-                                                    <button type="submit" onclick="return confirm('Xác nhận thu @giaKham.ToString("N0")đ (Phòng @tenLoai) tiền mặt?');"
-                                                            class="bg-green-600 text-white hover:bg-green-700 px-3 py-2 rounded-lg font-bold text-[10px] uppercase shadow-md transition-all">
-                                                        💵 Thu @(giaKham / 1000)K
-                                                    </button>
-                                                </form>
+                                            <button type="button"
+                                                    onclick="openThanhToanModal(@item.Id, @giaKham, '@tenLoai')"
+                                                    class="bg-blue-600 text-white px-3 py-2 rounded-lg font-bold text-xs uppercase shadow-md hover:bg-blue-700 transition-all">
+                                                Xác nhận lịch
+                                            </button>
 
-                                                <button type="button" onclick="triggerMomoPayment(@giaKham, @item.Id)"
-                                                        class="bg-[#ae2070] text-white px-3 py-2 rounded-lg font-black text-[10px] uppercase shadow-md flex items-center hover:bg-[#821752] transition-all">
-                                                    <img src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png" class="w-4 h-4 mr-1.5" /> MoMo
-                                                </button>
-                                            </div>
+                                            <button type="button"
+                                                    onclick="openHuyModal(@item.Id)"
+                                                    class="text-red-500 text-[10px] uppercase underline ml-2">
+                                                Hủy
+                                            </button>
                                         }
+                                       
                                         else if (item.TrangThai == TrangThaiBuoiKham.XacNhan && item.DaThanhToan)
                                         {
                                             <span class="text-green-600 text-[11px] font-bold italic bg-green-50 px-2 py-1 rounded border border-green-200">
                                                 ✅ Đã sẵn sàng khám
                                             </span>
                                         }
-                                        else
+                                        @* else
                                         {
                                             <span class="text-slate-300 text-[11px] font-bold italic">Lịch đã xử lý</span>
-                                        }
+                                        } *@
                                     </td>
                                 </tr>
                             }
@@ -224,21 +211,106 @@
         </form>
     </div>
 </div>
+<!-- MODAL THANH TOÁN TRƯỚC KHI XÁC NHẬN -->
+<div id="ThanhToanModal" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center backdrop-blur-sm">
+    <div class="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl transform scale-95 transition-transform duration-300">
 
+        <h3 class="text-xl font-black text-blue-700 mb-2">
+            Thanh toán lịch khám
+        </h3>
+
+        <p class="text-sm text-slate-500 mb-4">
+            Vui lòng chọn phương thức thanh toán. Sau khi thanh toán thành công, lịch khám sẽ được xác nhận.
+        </p>
+
+        <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 mb-5">
+            <div class="text-sm text-slate-500 font-bold">Số tiền cần thu</div>
+            <div id="modalGiaKham" class="text-3xl font-black text-green-600 mt-1">
+                0đ
+            </div>
+            <div id="modalLoaiPhong" class="text-xs text-slate-400 mt-1 font-bold"></div>
+        </div>
+
+        <div class="grid grid-cols-1 gap-3">
+
+            <!-- THANH TOÁN TIỀN MẶT -->
+            <form asp-action="XacNhanThuTien" method="post">
+                <input type="hidden" id="tienMatLichId" name="id" />
+
+                <button type="submit"
+                        class="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-xl font-black uppercase shadow-md transition-all">
+                    💵 Thu tiền mặt
+                </button>
+            </form>
+
+            <!-- THANH TOÁN MOMO -->
+            <form asp-action="ConfirmMomo" method="post">
+                <input type="hidden" id="momoLichId" name="lichKhamId" />
+                <input type="hidden" id="momoSoTien" name="sotien" />
+
+                <button type="submit"
+                        class="w-full bg-[#ae2070] hover:bg-[#821752] text-white px-4 py-3 rounded-xl font-black uppercase shadow-md transition-all flex items-center justify-center gap-2">
+                    <img src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png" class="w-5 h-5" />
+                    Thanh toán MoMo
+                </button>
+            </form>
+
+        </div>
+
+        <div class="flex justify-end mt-5">
+            <button type="button"
+                    onclick="closeThanhToanModal()"
+                    class="px-5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-xl transition-all text-sm uppercase">
+                Đóng
+            </button>
+        </div>
+    </div>
+</div>
 @section Scripts {
     <script>
-        // === LOGIC MỞ ĐÓNG MODAL ===
+        // === LOGIC MỞ ĐÓNG MODAL HỦY LỊCH ===
         function openHuyModal(id) {
             $('#huyLichId').val(id);
             $('#HuyModal').removeClass('hidden');
-            setTimeout(() => { $('#HuyModal > div').removeClass('scale-95').addClass('scale-100'); }, 10);
+
+            setTimeout(() => {
+                $('#HuyModal > div').removeClass('scale-95').addClass('scale-100');
+            }, 10);
         }
 
         function closeHuyModal() {
             $('#HuyModal > div').removeClass('scale-100').addClass('scale-95');
+
             setTimeout(() => {
                 $('#HuyModal').addClass('hidden');
                 $('#huyLichId').val('');
+            }, 200);
+        }
+
+        // === LOGIC MỞ ĐÓNG MODAL THANH TOÁN ===
+               function openThanhToanModal(id, giaKham, loaiPhong) {
+            $('#tienMatLichId').val(id);
+
+            $('#momoLichId').val(id);
+            $('#momoSoTien').val(giaKham);
+
+            $('#modalGiaKham').text(giaKham.toLocaleString('vi-VN') + 'đ');
+            $('#modalLoaiPhong').text('Phòng ' + loaiPhong);
+
+            $('#ThanhToanModal').removeClass('hidden');
+
+            setTimeout(() => {
+                $('#ThanhToanModal > div').removeClass('scale-95').addClass('scale-100');
+            }, 10);
+        }
+
+        function closeThanhToanModal() {
+            $('#ThanhToanModal > div').removeClass('scale-100').addClass('scale-95');
+
+            setTimeout(() => {
+                $('#ThanhToanModal').addClass('hidden');
+                $('#tienMatLichId').val('');
+                $('#momoLichId').val('');
             }, 200);
         }
 
@@ -248,7 +320,7 @@
                 let valBN = $('#filterBenhNhan').val().toLowerCase();
                 let valBS = $('#filterBacSi').val().toLowerCase();
                 let valKhoa = $('#filterKhoa').val().toLowerCase();
-                
+
                 let visibleCount = 0;
 
                 $('.filter-row').each(function () {
@@ -278,3 +350,4 @@
         });
     </script>
 }
+

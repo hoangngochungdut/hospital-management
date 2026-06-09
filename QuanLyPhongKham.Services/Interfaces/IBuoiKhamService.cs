@@ -13,6 +13,7 @@ namespace QuanLyPhongKham.Services.Interfaces
             int? chuyenKhoaId = null,
             string? tenBacSi = null
         );
+        Task<int> DatLichKhamTraVeIdAsync(DatLichRequest request, int currentUserId, string role);
 
         List<BuoiKham> GetByBacSiId(int bacSiId);
         List<BuoiKham> GetByBenhNhanId(int benhNhanId);
@@ -43,6 +44,17 @@ namespace QuanLyPhongKham.Services.Interfaces
             int benhNhanId,
             DateOnly ngay,
             TimeOnly gioDat);
+
+
+        // ==================== TRẠNG THÁI & DỜI LỊCH ====================
+
+        //bool CapNhatTrangThai(
+        //    int id,
+        //    TrangThaiBuoiKham trangThaiMoi,
+        //    string? ghiChu = null
+        //);
+       
+
         bool XulyCaKham(int id, TrangThaiBuoiKham trangThaiMoi, string? ghiChu = null, string? ketQuaKhamBenh = null);
         bool DoiLichKham(
             int id,
@@ -68,5 +80,6 @@ namespace QuanLyPhongKham.Services.Interfaces
             string lyDo);
         bool XoaLichKham(int id);
         void CapNhatThanhToan(int lichKhamId);
+
     }
 }
